@@ -16,7 +16,7 @@ export const LoginPage = () => {
           <span className={classes.dodTitle}>Department of Defense</span><br/>
           <span className={classes.appTitle}>
             Coronavirus (COVID-19)<br/>
-            Reporting
+            Reports
           </span>
         </div>
       </header>
