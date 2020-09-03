@@ -2,9 +2,14 @@
   "name": "covid19-reports",
   "version": "0.1.0",
   "private": true,
+  "engines": {
+    "node": ">=10",
+    "npm": ">=6"
+  },
   "dependencies": {
     "@material-ui/core": "^4.11.0",
     "@material-ui/icons": "^4.9.1",
+    "@material-ui/lab": "^4.0.0-alpha.56",
     "@material-ui/styles": "^4.10.0",
     "@rescripts/cli": "0.0.14",
     "@rescripts/rescript-use-babel-config": "0.0.10",
@@ -26,7 +31,8 @@
     "react-router-dom": "^5.2.0",
     "react-scripts": "3.4.3",
     "redux": "^4.0.5",
-    "redux-devtools-extension": "^2.13.8"
+    "redux-devtools-extension": "^2.13.8",
+    "redux-thunk": "^2.3.0"
   },
   "devDependencies": {
     "@testing-library/jest-dom": "^4.2.4",

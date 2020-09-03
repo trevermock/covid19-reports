@@ -1,21 +1,42 @@
-import { Action } from '../actions/action';
-import { UserActions } from '../actions/userActions';
+import { User } from '../actions/userActions';
+
+export enum HomeView {
+  Basic = 'basic',
+  Leadership = 'leadership',
+  Medical = 'medical'
+}
 
 export interface UserState {
-  count: number // REDUX TEST
+  isLoggedIn: boolean
+  role?: string
+  homeView: HomeView
 }
 
 export const userInitialState: UserState = {
-  count: 0, // REDUX TEST
+  isLoggedIn: false,
+  role: undefined,
+  homeView: HomeView.Basic,
 };
 
-export function userReducer(state = userInitialState, action: Action) {
+// TODO: Get action working properly.
+
+export function userReducer(state = userInitialState, action: any) {
   switch (action.type) {
-    case UserActions.IncrementCount.type:
-      // REDUX TEST
+    case User.Actions.Login.type: {
+      const payload = (action as User.Actions.Login).payload;
       return {
         ...state,
-        count: state.count + 1,
+        isLoggedIn: true,
+        role: payload.role,
+        homeView: payload.homeView,
+      };
+    }
+    case User.Actions.Logout.type:
+      return {
+        ...state,
+        isLoggedIn: false,
+        role: undefined,
+        homeView: HomeView.Basic,
       };
     default:
       return state;

@@ -1,6 +1,7 @@
 import clsx from 'clsx';
-import React from 'react';
-import { Switch, Route, Redirect, Link, useLocation } from 'react-router-dom';
+import React, { useEffect, useRef } from 'react';
+import { useDispatch, useSelector } from 'react-redux';
+import { Switch, Route, Redirect, useHistory, useLocation } from 'react-router-dom';
 import {
   AppBar, Button, Divider, Drawer, IconButton, List, ListItem, ListItemIcon, ListItemText, Toolbar, Typography
 } from '@material-ui/core';
@@ -10,23 +11,47 @@ import ListAltIcon from '@material-ui/icons/ListAlt';
 import MenuIcon from '@material-ui/icons/Menu';
 import PeopleIcon from '@material-ui/icons/People';
 
+import { User } from '../actions/userActions';
+import { UserState } from '../reducers/userReducer';
+import { AppState } from '../store';
 import { HomePage } from './pages/HomePage/HomePage';
 import { LoginPage } from './pages/LoginPage/LoginPage';
 import useStyles from './App.styles';
 
 export const App = () => {
+  const user = useSelector<AppState, UserState>(state => state.user);
+  const prevUser = usePrevious<UserState>(user);
+  const dispatch = useDispatch();
   const classes = useStyles();
+  const history = useHistory();
   const location = useLocation();
   const [drawerOpen, setDrawerOpen] = React.useState(false);
 
-  const toggleDrawerOpen = () => {
+  function toggleDrawerOpen() {
     setDrawerOpen(!drawerOpen);
-  };
+  }
 
-  const loggedIn = () => {
-    // HACK: Just pretend we're not logged in if we're on the login page for now.
-    return location.pathname !== '/login';
-  };
+  function handleLogoutClick() {
+    dispatch(User.logout());
+  }
+
+  function isAppBarVisible() {
+    return (user.isLoggedIn && location.pathname !== '/login');
+  }
+
+  function usePrevious<T>(value: T) {
+    const ref = useRef<T>();
+    useEffect(() => {
+      ref.current = value;
+    });
+    return ref.current;
+  }
+
+  useEffect(() => {
+    if (user.isLoggedIn !== prevUser?.isLoggedIn) {
+      history.push('/login');
+    }
+  });
 
   return (
     <>
@@ -34,7 +59,7 @@ export const App = () => {
         position="fixed"
         className={clsx(classes.appBar, {
           [classes.appBarShift]: drawerOpen,
-          [classes.hide]: !loggedIn(),
+          [classes.hide]: !isAppBarVisible(),
         })}
       >
         <Toolbar>
@@ -50,9 +75,13 @@ export const App = () => {
           <Typography className={classes.title} variant="h6" noWrap>
             DDS Covid Reporting
           </Typography>
-          <Link to="/login">
-            <Button style={{ color: 'white' }}>Logout</Button>
-          </Link>
+          <Button
+            type="button"
+            style={{ color: 'white' }}
+            onClick={handleLogoutClick}
+          >
+            Logout
+          </Button>
         </Toolbar>
       </AppBar>
 
@@ -61,7 +90,7 @@ export const App = () => {
         className={clsx(classes.drawer, {
           [classes.drawerOpen]: drawerOpen,
           [classes.drawerClose]: !drawerOpen,
-          [classes.hide]: !loggedIn(),
+          [classes.hide]: !isAppBarVisible(),
         })}
         classes={{
           paper: clsx({
@@ -98,7 +127,7 @@ export const App = () => {
 
       <div
         className={clsx(classes.toolbar, {
-          [classes.hide]: !loggedIn(),
+          [classes.hide]: !isAppBarVisible(),
         })}
       />
 

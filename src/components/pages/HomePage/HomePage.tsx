@@ -1,68 +1,35 @@
-import React, {useState} from 'react';
-import { useDispatch, useSelector } from 'react-redux';
-import { Chart } from 'react-charts';
-import { Button, Card, CardContent, Container } from '@material-ui/core';
+import React from 'react';
+import { useSelector } from 'react-redux';
+import { Container } from '@material-ui/core';
 
-import { User } from '../../../actions/userActions';
-import { chartsDataMock } from '../../../mocks/chartsDataMock';
-import { UserState } from '../../../reducers/userReducer';
+import { UserState, HomeView } from '../../../reducers/userReducer';
 import { AppState } from '../../../store';
 import useStyles from './HomePage.styles';
+import { HomePageBasic } from './HomePageBasic';
+import { HomePageLeadership } from './HomePageLeadership';
+import { HomePageMedical } from './HomePageMedical';
 
 export const HomePage = () => {
   const user = useSelector<AppState, UserState>(state => state.user);
-  const dispatch = useDispatch();
   const classes = useStyles();
-  const [role, setRole] = useState("");
 
-  function handleAddClick() {
-    // REDUX TEST
-    dispatch(User.incrementCount());
-  }
-
-  async function getUserRole() {
-    await fetch('api/user/role').then(response => response.json()).then(data => setRole(data.message));
+  function getContentComponent() {
+    switch (user.homeView) {
+      case HomeView.Basic:
+        return <HomePageBasic/>;
+      case HomeView.Leadership:
+        return <HomePageLeadership/>;
+      case HomeView.Medical:
+        return <HomePageMedical/>;
+      default:
+        return <div/>;
+    }
   }
 
   return (
     <main className={classes.root}>
       <Container maxWidth="md">
-        <h1>Home</h1>
-        <div style={{ display: 'flex' }}>
-          <Card className={classes.card}>
-            <CardContent className={classes.cardContent}>
-              <div style={{ flex: '1' }}>
-                <Chart
-                  data={chartsDataMock.lineChart.data}
-                  axes={chartsDataMock.lineChart.axes}
-                />
-              </div>
-            </CardContent>
-          </Card>
-
-          <Card className={classes.card}>
-            <CardContent className={classes.cardContent}>
-              <div style={{ flex: '1' }}>
-                <Chart
-                  data={chartsDataMock.areaChart.data}
-                  axes={chartsDataMock.areaChart.axes}
-                  series={chartsDataMock.areaChart.series}
-                />
-              </div>
-            </CardContent>
-          </Card>
-        </div>
-
-        {/* REDUX TEST */}
-        <h1>Count = {user.count}</h1>
-        <Button variant="contained" color="primary" size="large" onClick={handleAddClick}>
-          Add 1
-        </Button>
-
-        <h1>{role}</h1>
-        <Button variant="contained" color="primary" size="large" onClick={getUserRole}>
-          Get User Role
-        </Button>
+        {getContentComponent()}
       </Container>
     </main>
   )

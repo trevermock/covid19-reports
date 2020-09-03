@@ -1,12 +1,29 @@
-import React from 'react';
-import { Link } from 'react-router-dom';
-import { Container, Button, TextField, FormControl } from '@material-ui/core';
+import React, { useEffect } from 'react';
+import { useDispatch, useSelector } from 'react-redux';
+import { Container, Button, FormControl } from '@material-ui/core';
+import { useHistory } from 'react-router-dom';
 
+import { User } from '../../../actions/userActions';
+import { UserState } from '../../../reducers/userReducer';
+import { AppState } from '../../../store';
 import useStyles from './LoginPage.styles';
 import logo from '../../../media/dod-logo.png';
 
 export const LoginPage = () => {
+  const user = useSelector<AppState, UserState>(state => state.user);
+  const dispatch = useDispatch();
   const classes = useStyles();
+  const history = useHistory();
+
+  function handleLoginClick() {
+    dispatch(User.login());
+  }
+
+  useEffect(() => {
+    if (user.isLoggedIn) {
+      history.push('/home');
+    }
+  });
 
   return (
     <main className={classes.root}>
@@ -26,19 +43,15 @@ export const LoginPage = () => {
 
         <form>
           <FormControl>
-            <TextField className={classes.textField} name="username" placeholder="Username..." />
-          </FormControl>
-          <br/>
-          <FormControl>
-            <TextField className={classes.textField} name="password" type="password" placeholder="Password..." />
-          </FormControl>
-          <br/>
-          <FormControl>
-            <Link to="/home">
-              <Button type="submit" variant="contained" color="primary" style={{marginTop: '40px'}}>
-                Login
-              </Button>
-            </Link>
+            <Button
+              type="button"
+              variant="contained"
+              color="primary"
+              style={{marginTop: '40px'}}
+              onClick={handleLoginClick}
+            >
+              Login
+            </Button>
           </FormControl>
         </form>
       </Container>
