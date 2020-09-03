@@ -9,6 +9,9 @@
 # production
 /build
 
+# certs
+/server/certs
+
 # misc
 .DS_Store
 .env.local

@@ -8,14 +8,15 @@ import cookieParser from 'cookie-parser';
 import bodyParser from 'body-parser';
 // import expressSession from 'express-session';
 import morgan from 'morgan';
+import path from 'path';
 import apiRoutes from './api';
 
 const opts = {
-  key: fs.readFileSync('certs/server.key'),
-  cert: fs.readFileSync( 'certs/server.crt'),
+  key: fs.readFileSync(path.join(__dirname, 'certs/server.key')),
+  cert: fs.readFileSync(path.join(__dirname, '/certs/server.crt')),
   requestCert: true,
   rejectUnauthorized: true,
-  ca: [ fs.readFileSync('certs/ca.crt') ]
+  ca: [ fs.readFileSync(path.join(__dirname, '/certs/ca.crt')) ]
 };
 
 const app = express();
@@ -23,9 +24,10 @@ const app = express();
 //
 // Middlware
 //
-app.use(cookieParser())
+app.use(cookieParser());
 app.use(bodyParser.urlencoded({ extended: false }));
 app.use(bodyParser.json());
+app.use(express.static(path.join(__dirname, 'public')));
 // app.use(expressSession({
 //   resave: false,
 //   saveUninitialized: false,
@@ -54,23 +56,21 @@ if (process.env.NODE_ENV !== 'test') {
 //
 app.use('/api', apiRoutes);
 
-app.use('/', express.static('../build'))
-
-app.get('/$', (req: express.Request, res: express.Response) => {
-  res.json({
-    message: 'Covid19 Reports backend is running....',
-  });
+app.get('/*', (req: express.Request, res: express.Response) => {
+  res.sendFile(path.join(__dirname, 'public', 'index.html'));
 });
 
 // Not found
-app.all('*', (req: express.Request, res: express.Response) => {
-  res.status(404).send({
-    error: {
-      message: 'Not found.',
-      type: 'NotFound',
-    },
-  });
-});
+// app.all('*', (req: express.Request, res: express.Response) => {
+//   res.status(404).send({
+//     error: {
+//       message: 'Not found.',
+//       type: 'NotFound',
+//     },
+//   });
+// });
+
+// app.use('*', express.static('public'));
 
 // Error handler
 app.use((err: any, req: express.Request, res: express.Response, next: express.NextFunction) => {

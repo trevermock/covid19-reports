@@ -50,11 +50,11 @@
     "typescript": "^3.7.5"
   },
   "scripts": {
-    "start": "rescripts start",
-    "build": "rescripts build",
-    "test": "rescripts test",
+    "start": "node ./build/app.js",
+    "build": "./build.sh",
+    "test": "./test.sh",
     "dev:client": "rescripts start",
-    "dev:server": "cd server && nodemon",
+    "dev:server": "cd server && NODE_ENV=development nodemon",
     "dev": "concurrently --kill-others-on-fail \"npm run dev:server\" \"npm run dev:client\""
   },
   "eslintConfig": {
