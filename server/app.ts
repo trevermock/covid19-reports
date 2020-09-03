@@ -1,4 +1,6 @@
 import express from 'express';
+import https from 'https';
+import fs from 'fs';
 import 'express-async-errors';
 import process from 'process';
 import passport from 'passport';
@@ -7,6 +9,14 @@ import bodyParser from 'body-parser';
 // import expressSession from 'express-session';
 import morgan from 'morgan';
 import apiRoutes from './api';
+
+const opts = {
+  key: fs.readFileSync('certs/server.key'),
+  cert: fs.readFileSync( 'certs/server.crt'),
+  requestCert: true,
+  rejectUnauthorized: true,
+  ca: [ fs.readFileSync('certs/ca.crt') ]
+};
 
 const app = express();
 
@@ -43,6 +53,8 @@ if (process.env.NODE_ENV !== 'test') {
 // Routes
 //
 app.use('/api', apiRoutes);
+
+app.use('/', express.static('../build'))
 
 app.get('/$', (req: express.Request, res: express.Response) => {
   res.json({
@@ -82,9 +94,9 @@ app.use((err: any, req: express.Request, res: express.Response, next: express.Ne
 // Start the server
 //
 const PORT = process.env.PORT || 4000;
-app.listen(PORT, () => {
+https.createServer(opts, app).listen(PORT, () => {
   if (process.env.NODE_ENV !== 'test') {
-    console.log(`🚀 Server ready at http://localhost:${PORT}`);
+    console.log(`🚀 Server ready at https://localhost:${PORT}`);
   }
 });
 

@@ -1,4 +1,4 @@
-import React from 'react';
+import React, {useState} from 'react';
 import { useDispatch, useSelector } from 'react-redux';
 import { Chart } from 'react-charts';
 import { Button, Card, CardContent, Container } from '@material-ui/core';
@@ -13,10 +13,15 @@ export const HomePage = () => {
   const user = useSelector<AppState, UserState>(state => state.user);
   const dispatch = useDispatch();
   const classes = useStyles();
+  const [role, setRole] = useState("");
 
   function handleAddClick() {
     // REDUX TEST
     dispatch(User.incrementCount());
+  }
+
+  async function getUserRole() {
+    await fetch('api/user/role').then(response => response.json()).then(data => setRole(data.message));
   }
 
   return (
@@ -52,6 +57,11 @@ export const HomePage = () => {
         <h1>Count = {user.count}</h1>
         <Button variant="contained" color="primary" size="large" onClick={handleAddClick}>
           Add 1
+        </Button>
+
+        <h1>{role}</h1>
+        <Button variant="contained" color="primary" size="large" onClick={getUserRole}>
+          Get User Role
         </Button>
       </Container>
     </main>
