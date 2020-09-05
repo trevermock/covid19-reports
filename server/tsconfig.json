@@ -18,7 +18,9 @@
     "isolatedModules": true,
     "noEmit": false,
     "jsx": "react",
+    "emitDecoratorMetadata": true,
     "experimentalDecorators": true,
+    "strictPropertyInitialization": false,
     "outDir": "./build"
   },
   "include": [

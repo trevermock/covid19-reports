@@ -10,20 +10,25 @@ import bodyParser from 'body-parser';
 import morgan from 'morgan';
 import path from 'path';
 import apiRoutes from './api';
+import database from './sqldb';
+import {requireUserAuth} from "./auth";
+import {errorHandler} from "./util/error";
 
-const opts = {
-  key: fs.readFileSync(path.join(__dirname, 'certs/server.key')),
-  cert: fs.readFileSync(path.join(__dirname, '/certs/server.crt')),
-  requestCert: true,
-  rejectUnauthorized: true,
-  ca: [ fs.readFileSync(path.join(__dirname, '/certs/ca.crt')) ]
-};
+database.then(() => {
+  console.log('Database ready');
+});
+
+if (process.env.NODE_ENV === 'development') {
+  require('dotenv').config();
+}
 
 const app = express();
 
 //
 // Middlware
 //
+
+app.use(requireUserAuth);
 app.use(cookieParser());
 app.use(bodyParser.urlencoded({ extended: false }));
 app.use(bodyParser.json());
@@ -54,6 +59,10 @@ if (process.env.NODE_ENV !== 'test') {
 //
 // Routes
 //
+app.get('/heartbeat', (req: express.Request, res: express.Response) => {
+  res.status(204).send();
+});
+
 app.use('/api', apiRoutes);
 
 app.get('/*', (req: express.Request, res: express.Response) => {
@@ -73,26 +82,21 @@ app.get('/*', (req: express.Request, res: express.Response) => {
 // app.use('*', express.static('public'));
 
 // Error handler
-app.use((err: any, req: express.Request, res: express.Response, next: express.NextFunction) => {
-  console.error(err.stack);
-
-  if (!res.headersSent) {
-    const statusCode = err.statusCode || 500;
-    res.status(statusCode).send({
-      error: {
-        message: err.message,
-        stack: err.stack,
-        type: err.type || 'InternalServerError',
-      },
-    });
-  }
-
-  next();
-})
+app.use(errorHandler);
 
 //
 // Start the server
 //
+const opts = {
+  key: fs.readFileSync(path.join(__dirname, 'certs/server.key')),
+  cert: fs.readFileSync(path.join(__dirname, '/certs/server.crt')),
+  requestCert: true,
+  rejectUnauthorized: true,
+  ca: [ fs.readFileSync(path.join(__dirname, '/certs/ca.crt')) ]
+};
+if (process.env.NODE_ENV === 'development') {
+  opts.rejectUnauthorized = false;
+}
 const PORT = process.env.PORT || 4000;
 https.createServer(opts, app).listen(PORT, () => {
   if (process.env.NODE_ENV !== 'test') {

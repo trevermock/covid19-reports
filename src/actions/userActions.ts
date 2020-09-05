@@ -7,7 +7,7 @@ export namespace User {
       static type = 'USER_LOGIN';
       type = Login.type;
       constructor(public payload: {
-        role: string
+        role: string,
         homeView: HomeView
       }) {}
     }
@@ -20,34 +20,45 @@ export namespace User {
 
   export const login = () => async (dispatch: Dispatch<Actions.Login>) => {
     // Get role.
-    const response = await fetch('api/user/role');
+    const response = await fetch('api/user/current');
     const data = await response.json() as {
-      message: string
+      EDIPI: string,
+      FirstName: string,
+      LastName: string,
+      enabled: boolean,
+      rootAdmin: boolean,
+      roles: [{
+        id: number,
+        name: string,
+        description: string,
+        canManageUsers: boolean,
+        canManageRoster: boolean,
+        canManageRoles: boolean,
+        canViewRoster: boolean,
+        org: {
+          id: number,
+          name: string,
+          description: string
+        }
+      }]
     };
-    const role = data.message;
 
-    // HACK: Assign view based on role for now.
+    // HACK: Assign view based on role permissions for now.
     let homeView: HomeView;
-    switch (role) {
-      case 'Registered User: Basic User':
-        homeView = HomeView.Basic;
-        break;
-      case 'Registered User: Organizational Admin User':
-        homeView = HomeView.Medical;
-        break;
-      case 'Registered User: Root Admin User':
-        homeView = HomeView.Leadership;
-        break;
-      case 'Not authorized.':
-        alert('Not authorized.');
-        return;
-      default:
-        throw new Error(`Unrecognized role "${role}"`);
+    if (data.rootAdmin) {
+      homeView = HomeView.Leadership;
+    } else if (data.roles.length > 0 && data.roles[0].canManageRoster) {
+      homeView = HomeView.Medical;
+    } else if (data.roles.length > 0) {
+      homeView = HomeView.Basic;
+    } else {
+      alert('Not authorized.');
+      return;
     }
 
     dispatch({
       ...new Actions.Login({
-        role,
+        role: data.EDIPI,
         homeView,
       })
     });
