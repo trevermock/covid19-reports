@@ -12,5 +12,5 @@ export default createConnection({
   database: process.env.SQL_DATABASE || 'dds',
   entities: [User, Role, Org],
   synchronize: true,
-  logging: true
+  logging: false
 });

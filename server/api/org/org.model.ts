@@ -16,4 +16,9 @@ export class Org extends BaseEntity {
   })
   description: string;
 
+  @Column({
+    default: ""
+  })
+  index_prefix: string;
+
 }

@@ -24,6 +24,11 @@ export class Role extends BaseEntity {
   org: Org;
 
   @Column({
+    default: ""
+  })
+  index_prefix: string;
+
+  @Column({
     default: false
   })
   canManageUsers: boolean;
