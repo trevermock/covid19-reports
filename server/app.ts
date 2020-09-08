@@ -84,15 +84,25 @@ app.get('/*', (req: express.Request, res: express.Response) => {
 // Error handler
 app.use(errorHandler);
 
+let serverKeyPath = process.env.SERVER_KEY || path.join(__dirname, 'certs/server.key');
+let serverCertPath = process.env.SERVER_CERT || path.join(__dirname, 'certs/server.crt');
+
+let certificateAuthorities: string[] = [];
+if (process.env.CERTIFICATE_AUTHORITIES) {
+  certificateAuthorities = process.env.CERTIFICATE_AUTHORITIES.split(',');
+} else {
+  certificateAuthorities.push(path.join(__dirname, 'certs/ca.crt'));
+}
+
 //
 // Start the server
 //
 const opts = {
-  key: fs.readFileSync(path.join(__dirname, 'certs/server.key')),
-  cert: fs.readFileSync(path.join(__dirname, '/certs/server.crt')),
+  key: fs.readFileSync(serverKeyPath),
+  cert: fs.readFileSync(serverCertPath),
   requestCert: true,
   rejectUnauthorized: true,
-  ca: [ fs.readFileSync(path.join(__dirname, '/certs/ca.crt')) ]
+  ca: certificateAuthorities.map((ca) => fs.readFileSync(ca))
 };
 if (process.env.NODE_ENV === 'development') {
   opts.rejectUnauthorized = false;
