@@ -105,17 +105,17 @@ export namespace RoleController {
   }
 
   function getRolePermissionsFromBody(body: any, role: Role) {
-    if (body.hasOwnProperty('canManageUsers')) {
-      role.canManageUsers = body.canManageUsers;
+    if (body.hasOwnProperty('can_manage_users')) {
+      role.can_manage_users = body.can_manage_users;
     }
-    if (body.hasOwnProperty('canManageRoles')) {
-      role.canManageRoles = body.canManageRoles;
+    if (body.hasOwnProperty('can_manage_roles')) {
+      role.can_manage_roles = body.can_manage_roles;
     }
-    if (body.hasOwnProperty('canManageRoster')) {
-      role.canManageRoster = body.canManageRoster;
+    if (body.hasOwnProperty('can_manage_roster')) {
+      role.can_manage_roster = body.can_manage_roster;
     }
-    if (body.hasOwnProperty('canViewRoster')) {
-      role.canViewRoster = body.canViewRoster;
+    if (body.hasOwnProperty('can_view_roster')) {
+      role.can_view_roster = body.can_view_roster;
     }
   }
 }

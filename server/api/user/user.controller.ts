@@ -16,7 +16,7 @@ export namespace UserController {
     if (!req.body.hasOwnProperty('role')) {
       throw new BadRequestError('A role id must be supplied when adding a user.');
     }
-    if (!req.body.hasOwnProperty('EDIPI')) {
+    if (!req.body.hasOwnProperty('edipi')) {
       throw new BadRequestError('An EDIPI must be supplied when adding a user.');
     }
 
@@ -34,7 +34,7 @@ export namespace UserController {
     let user = await User.findOne({
       relations: ['roles'],
       where: {
-        EDIPI: req.body.EDIPI
+        edipi: req.body.edipi
       },
       join: {
         alias: 'user',
@@ -47,7 +47,7 @@ export namespace UserController {
 
     if (!user) {
       user = new User();
-      user.EDIPI = req.body.EDIPI;
+      user.edipi = req.body.edipi;
       newUser = true;
     }
 
@@ -62,12 +62,12 @@ export namespace UserController {
 
     user.roles.push(role);
 
-    if (req.body.hasOwnProperty('FirstName')) {
-      user.FirstName = req.body.FirstName;
+    if (req.body.hasOwnProperty('first_name')) {
+      user.first_name = req.body.first_name;
     }
 
-    if (req.body.hasOwnProperty('LastName')) {
-      user.LastName = req.body.LastName;
+    if (req.body.hasOwnProperty('last_name')) {
+      user.last_name = req.body.last_name;
     }
 
     const updatedUser = await user.save();
@@ -111,7 +111,7 @@ export namespace UserController {
     const userEDIPI = req.params['userEDIPI'];
     const user = await User.findOne({
       where: {
-        EDIPI: userEDIPI,
+        edipi: userEDIPI,
         org: parseInt(orgId)
       }
     });

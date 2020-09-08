@@ -11,25 +11,25 @@ router.get(
 
 router.post(
   '/:orgId',
-  requireRolePermission((role) => role.canManageUsers),
+  requireRolePermission((role) => role.can_manage_users),
   UserController.addUser
 );
 
 router.get(
   '/:orgId',
-  requireRolePermission((role) => role.canManageUsers),
+  requireRolePermission((role) => role.can_manage_users),
   UserController.getOrgUsers
 )
 
 router.delete(
   '/:orgId/:userEDIPI',
-  requireRolePermission((role) => role.canManageUsers),
+  requireRolePermission((role) => role.can_manage_users),
   UserController.deleteUser
 );
 
 router.put(
   '/:orgId/:userEDIPI',
-  requireRolePermission((role) => role.canManageUsers),
+  requireRolePermission((role) => role.can_manage_users),
   UserController.updateUser
 );
 

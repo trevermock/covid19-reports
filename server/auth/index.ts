@@ -19,7 +19,7 @@ export async function requireUserAuth(req: any, res: express.Response, next: Nex
   const user = await User.findOne({
     relations: ['roles'],
     where: {
-      EDIPI: id
+      edipi: id
     },
     join: {
       alias: 'user',
@@ -39,7 +39,7 @@ export async function requireUserAuth(req: any, res: express.Response, next: Nex
 
 export async function requireRootAdmin(req: any, res: express.Response, next: NextFunction) {
   const user:User = req['DDSUser'];
-  if (user.rootAdmin) {
+  if (user.root_admin) {
     return next();
   }
   throw new ForbiddenError('User does not have sufficient privileges to perform this action.');
@@ -51,7 +51,7 @@ export function requireRolePermission(action: (role: Role) => boolean) {
     const user:User = req['DDSUser'];
     if (org && user) {
       const orgRole = user.roles.find((role) => role.org.id == org);
-      if (user.rootAdmin || (orgRole && action(orgRole))) {
+      if (user.root_admin || (orgRole && action(orgRole))) {
         return next();
       }
     }

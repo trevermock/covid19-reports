@@ -31,21 +31,21 @@ export class Role extends BaseEntity {
   @Column({
     default: false
   })
-  canManageUsers: boolean;
+  can_manage_users: boolean;
 
   @Column({
     default: false
   })
-  canManageRoster: boolean;
+  can_manage_roster: boolean;
 
   @Column({
     default: false
   })
-  canManageRoles: boolean;
+  can_manage_roles: boolean;
 
   @Column({
     default: false
   })
-  canViewRoster: boolean;
+  can_view_roster: boolean;
 
 }

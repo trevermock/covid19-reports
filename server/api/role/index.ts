@@ -6,31 +6,31 @@ const router = express.Router();
 
 router.get(
   '/:orgId',
-  requireRolePermission((role) => role.canManageRoles),
+  requireRolePermission((role) => role.can_manage_roles),
   RoleController.getOrgRoles,
 );
 
 router.post(
   '/:orgId',
-  requireRolePermission((role) => role.canManageRoles),
+  requireRolePermission((role) => role.can_manage_roles),
   RoleController.addRole
 );
 
 router.get(
   '/:orgId/:roleId',
-  requireRolePermission((role) => role.canManageRoles),
+  requireRolePermission((role) => role.can_manage_roles),
   RoleController.getRole,
 );
 
 router.delete(
   '/:orgId/:roleId',
-  requireRolePermission((role) => role.canManageRoles),
+  requireRolePermission((role) => role.can_manage_roles),
   RoleController.deleteRole,
 );
 
 router.put(
   '/:orgId/:roleId',
-  requireRolePermission((role) => role.canManageRoles),
+  requireRolePermission((role) => role.can_manage_roles),
   RoleController.updateRole
 );
 

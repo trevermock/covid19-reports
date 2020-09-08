@@ -7,14 +7,14 @@ export class User extends BaseEntity {
   @PrimaryColumn({
     length: 10
   })
-  EDIPI: string;
+  edipi: string;
 
   @ManyToMany(type => Role)
   @JoinTable({
     name: 'user_roles',
     joinColumn: {
       name: 'user',
-      referencedColumnName: 'EDIPI'
+      referencedColumnName: 'edipi'
     },
     inverseJoinColumn: {
       name: 'role',
@@ -26,12 +26,12 @@ export class User extends BaseEntity {
   @Column({
     nullable: true
   })
-  FirstName: string;
+  first_name: string;
 
   @Column({
     nullable: true
   })
-  LastName: string;
+  last_name: string;
 
   @Column({
     default: true
@@ -41,6 +41,6 @@ export class User extends BaseEntity {
   @Column({
     default: false
   })
-  rootAdmin: boolean;
+  root_admin: boolean;
 
 }
