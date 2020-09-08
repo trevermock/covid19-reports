@@ -2,6 +2,7 @@ import {createConnection} from 'typeorm';
 import {User} from "../api/user/user.model";
 import {Role} from "../api/role/role.model";
 import {Org} from "../api/org/org.model";
+import {Roster} from "../api/roster/roster.model";
 
 export default createConnection({
   type: 'postgres',
@@ -10,7 +11,7 @@ export default createConnection({
   username: process.env.SQL_USER || 'postgres',
   password: process.env.SQL_PASSWORD || 'postgres',
   database: process.env.SQL_DATABASE || 'dds',
-  entities: [User, Role, Org],
+  entities: [User, Role, Org, Roster],
   synchronize: true,
   logging: false
 });
