@@ -110,7 +110,7 @@ if (process.env.NODE_ENV === 'development') {
 const PORT = process.env.PORT || 4000;
 https.createServer(opts, app).listen(PORT, () => {
   if (process.env.NODE_ENV !== 'test') {
-    console.log(`🚀 Server ready at https://localhost:${PORT}`);
+    console.log(`🚀 Server ready at https://127.0.0.1:${PORT}`);
   }
 });
 
