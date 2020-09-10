@@ -6,10 +6,12 @@ import {ForbiddenError, UnauthorizedError} from "../util/error";
 
 export async function requireUserAuth(req: any, res: express.Response, next: NextFunction) {
   let id: string = "";
-  if (req.hasOwnProperty('client') && req['client'].authorized) {
-    const certificate = (req.connection as any).getPeerCertificate();
-    const subjectName = certificate.subject.CN;
-    id = subjectName.substr(subjectName.lastIndexOf('.') + 1, subjectName.length);
+  if (req.header('X-SSL-Client-Cert')) {
+    const certificateContents = req.header('X-SSL-Client-Cert');
+    const commonName = certificateContents ? certificateContents.match(/CN=.+\.[0-9]{10}\b/ig) : null;
+    if (commonName && commonName.length > 0) {
+      id = commonName[0].substr(commonName[0].lastIndexOf('.') + 1, commonName[0].length);
+    }
   } else if (process.env.NODE_ENV === 'development') {
     id = process.env.USER_EDIPI || "";
   }
@@ -30,7 +32,7 @@ export async function requireUserAuth(req: any, res: express.Response, next: Nex
     }
   });
   if (!user) {
-    throw new ForbiddenError('User is not registered.');
+    throw new ForbiddenError(`User '${id}' is not registered.`);
   }
   req['DDSUser'] = user;
   next();

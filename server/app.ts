@@ -1,6 +1,4 @@
 import express from 'express';
-import https from 'https';
-import fs from 'fs';
 import 'express-async-errors';
 import process from 'process';
 import passport from 'passport';
@@ -69,48 +67,16 @@ app.get('/*', (req: express.Request, res: express.Response) => {
   res.sendFile(path.join(__dirname, 'public', 'index.html'));
 });
 
-// Not found
-// app.all('*', (req: express.Request, res: express.Response) => {
-//   res.status(404).send({
-//     error: {
-//       message: 'Not found.',
-//       type: 'NotFound',
-//     },
-//   });
-// });
-
-// app.use('*', express.static('public'));
-
 // Error handler
 app.use(errorHandler);
-
-let serverKeyPath = process.env.SERVER_KEY || path.join(__dirname, 'certs/server.key');
-let serverCertPath = process.env.SERVER_CERT || path.join(__dirname, 'certs/server.crt');
-
-let certificateAuthorities: string[] = [];
-if (process.env.CERTIFICATE_AUTHORITIES) {
-  certificateAuthorities = process.env.CERTIFICATE_AUTHORITIES.split(',');
-} else {
-  certificateAuthorities.push(path.join(__dirname, 'certs/ca.crt'));
-}
 
 //
 // Start the server
 //
-const opts = {
-  key: fs.readFileSync(serverKeyPath),
-  cert: fs.readFileSync(serverCertPath),
-  requestCert: true,
-  rejectUnauthorized: true,
-  ca: certificateAuthorities.map((ca) => fs.readFileSync(ca))
-};
-if (process.env.NODE_ENV === 'development') {
-  opts.rejectUnauthorized = false;
-}
 const PORT = process.env.PORT || 4000;
-https.createServer(opts, app).listen(PORT, () => {
+app.listen(PORT, () => {
   if (process.env.NODE_ENV !== 'test') {
-    console.log(`🚀 Server ready at https://127.0.0.1:${PORT}`);
+    console.log(`🚀 Server ready at http://127.0.0.1:${PORT}`);
   }
 });
 
