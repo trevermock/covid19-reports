@@ -82,7 +82,10 @@ export function errorHandler(error: any, req: any, res: express.Response, next: 
       errors = [{
         message: message || 'An unknown error occurred!',
         type: type || 'InternalServerError',
+        // TODO REMOVE THIS SOURCE ERROR ONCE THINGS ARE STABLE
+        sourceError: error
       }];
+      console.log(error);
     }
   }
 
