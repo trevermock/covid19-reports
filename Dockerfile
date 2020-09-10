@@ -19,8 +19,7 @@ RUN npm install
 COPY . /usr/src/covid19-reports
 
 RUN chmod +x /usr/src/covid19-reports/build_prod.sh \
-  && npm run build \
-  && cp -r certs build
+  && npm run build
 
 FROM node:10 as runtime
 WORKDIR /covid19-reports
