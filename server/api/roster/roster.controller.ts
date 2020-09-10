@@ -20,27 +20,34 @@ export namespace RosterController {
     let limit = req.query.hasOwnProperty('limit') ? parseInt(req.query['limit']) : 100;
     let page = req.query.hasOwnProperty('page') ? parseInt(req.query['page']) : 0;
 
-    // We'll get 1 extra so that we know if there is another page
     const roster = await Roster.find({
       skip: page * limit,
-      take: limit + 1,
+      take: limit,
+      where: {
+        org: parseInt(orgId)
+      }
+    });
+
+    res.json(roster);
+    res.send();
+  }
+
+  export async function getRosterCount(req: any, res: express.Response) {
+    const orgId = req.params['orgId'];
+
+    const count = await Roster.count({
       where: {
         org: parseInt(orgId)
       }
     });
 
     let result = {
-      roster: roster,
-      has_more_data: false
-    }
-    if (roster.length > limit) {
-      // Remove the 1 extra
-      result.roster.pop();
-      result.has_more_data = true;
+      count
     }
     res.json(result);
     res.send();
   }
+
 
   export async function uploadRosterEntries(req: any, res: express.Response) {
     const orgId = req.params['orgId'];

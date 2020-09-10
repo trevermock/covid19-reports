@@ -1,7 +1,7 @@
-import nJwt from 'njwt';
+//import nJwt from 'njwt';
 import { User } from '../../api/user/user.model';
 import config from '../../config/environment';
-
+const nJwt = require('njwt');
 // Builds ReadOnlyRest JWT token.
 export function buildJWT(user: User) {
   const claims = {

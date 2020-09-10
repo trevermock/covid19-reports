@@ -31,6 +31,12 @@ router.get(
   RosterController.getRoster,
 );
 
+router.get(
+  '/:orgId/count',
+  requireRolePermission((role) => role.can_manage_roster),
+  RosterController.getRosterCount,
+);
+
 router.post(
   '/:orgId',
   requireRolePermission((role) => role.can_manage_roster),

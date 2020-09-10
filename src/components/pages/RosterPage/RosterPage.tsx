@@ -1,11 +1,109 @@
 import {
-  Button, Container, Paper, Table, TableBody, TableCell, TableContainer, TableHead, TableRow
+  Button,
+  Container,
+  Paper,
+  Table,
+  TableBody,
+  TableCell,
+  TableContainer,
+  TablePagination,
+  TableHead,
+  TableRow,
+  IconButton,
+  TableFooter
 } from '@material-ui/core';
-import React, { ChangeEvent } from 'react';
-import { useDispatch } from 'react-redux';
+import FirstPageIcon from '@material-ui/icons/FirstPage';
+import KeyboardArrowLeft from '@material-ui/icons/KeyboardArrowLeft';
+import KeyboardArrowRight from '@material-ui/icons/KeyboardArrowRight';
+import LastPageIcon from '@material-ui/icons/LastPage';
+import React, {ChangeEvent, useEffect, useState} from 'react';
+import {useDispatch, useSelector} from 'react-redux';
 import { Roster } from '../../../actions/rosterActions';
 
 import useStyles from './RosterPage.styles';
+import {UserState} from "../../../reducers/userReducer";
+import {AppState} from "../../../store";
+
+interface RosterEntry {
+  edipi: string,
+  rate_rank: string,
+  first_name: string,
+  last_name: string,
+  unit: string,
+  billet_workcenter: string,
+  contract_number: string,
+  pilot: boolean,
+  aircrew: boolean,
+  cdi: boolean,
+  cdqar: boolean,
+  dscacrew: boolean,
+  advanced_party: boolean,
+  pui: boolean,
+  covid19_test_return_date: Date,
+  rom: string,
+  rom_release: string
+}
+
+interface CountResponse {
+  count: number
+}
+
+interface TablePaginationActionsProps {
+  count: number;
+  page: number;
+  rowsPerPage: number;
+  onChangePage: (event: React.MouseEvent<HTMLButtonElement>, newPage: number) => void;
+}
+
+function TablePaginationActions(props: TablePaginationActionsProps) {
+  const classes = useStyles();
+  const { count, page, rowsPerPage, onChangePage } = props;
+
+  const handleFirstPageButtonClick = (event: React.MouseEvent<HTMLButtonElement>) => {
+    onChangePage(event, 0);
+  };
+
+  const handleBackButtonClick = (event: React.MouseEvent<HTMLButtonElement>) => {
+    onChangePage(event, page - 1);
+  };
+
+  const handleNextButtonClick = (event: React.MouseEvent<HTMLButtonElement>) => {
+    onChangePage(event, page + 1);
+  };
+
+  const handleLastPageButtonClick = (event: React.MouseEvent<HTMLButtonElement>) => {
+    onChangePage(event, Math.max(0, Math.ceil(count / rowsPerPage) - 1));
+  };
+
+  return (
+    <div className={classes.root}>
+      <IconButton
+        onClick={handleFirstPageButtonClick}
+        disabled={page === 0}
+        aria-label="first page"
+      >
+        <FirstPageIcon />
+      </IconButton>
+      <IconButton onClick={handleBackButtonClick} disabled={page === 0} aria-label="previous page">
+        <KeyboardArrowLeft />
+      </IconButton>
+      <IconButton
+        onClick={handleNextButtonClick}
+        disabled={page >= Math.ceil(count / rowsPerPage) - 1}
+        aria-label="next page"
+      >
+        <KeyboardArrowRight />
+      </IconButton>
+      <IconButton
+        onClick={handleLastPageButtonClick}
+        disabled={page >= Math.ceil(count / rowsPerPage) - 1}
+        aria-label="last page"
+      >
+        <LastPageIcon />
+      </IconButton>
+    </div>
+  );
+}
 
 export const RosterPage = () => {
   const classes = useStyles();
@@ -13,18 +111,12 @@ export const RosterPage = () => {
   const dispatch = useDispatch();
   const fileInputRef = React.createRef<HTMLInputElement>();
 
-  function createData(name: number, calories: string, fat: string, carbs: string, protein: string) {
-    return { name, calories, fat, carbs, protein };
-  }
+  const [rows, setRows] = useState<RosterEntry[]>([]);
+  const [page, setPage] = useState(0);
+  const [rosterSize, setRosterSize] = useState(0);
+  const [rowsPerPage, setRowsPerPage] = React.useState(10);
 
-  const rows = [
-    createData(1, '1', 'First1', 'Last1', 'HSC-22'),
-    createData(2, '2', 'First2', 'Last2', 'HSC-22'),
-    createData(3, '3', 'First3', 'Last3', 'HSC-22'),
-    createData(4, '4', 'First4', 'Last4', 'HSC-22'),
-    createData(5, '5', 'First5', 'Last5', 'HSC-22'),
-  ];
-
+  const orgId = useSelector<AppState, UserState>(state => state.user).roles[0].org.id;
 
   function handleFileInputChange(e: ChangeEvent<HTMLInputElement>) {
     if (!e.target.files || e.target.files[0] == null) {
@@ -33,6 +125,32 @@ export const RosterPage = () => {
 
     dispatch(Roster.upload(e.target.files[0]));
   }
+
+  const handleChangePage = async (event: React.MouseEvent<HTMLButtonElement> | null, newPage: number) => {
+    const response = await fetch(`api/roster/${orgId}?limit=${rowsPerPage}&page=${newPage}`);
+    const rosterResponse = (await response.json()) as RosterEntry[];
+    setPage(newPage);
+    setRows(rosterResponse);
+  };
+
+  const handleChangeRowsPerPage = async (
+    event: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>,
+  ) => {
+    const newRowsPerPage = parseInt(event.target.value, 10);
+    const response = await fetch(`api/roster/${orgId}?limit=${newRowsPerPage}&page=0`);
+    const rosterResponse = (await response.json()) as RosterEntry[];
+    setPage(0);
+    setRows(rosterResponse);
+    setRowsPerPage(newRowsPerPage);
+  };
+
+  useEffect(() => {
+    fetch(`api/roster/${orgId}/count`).then(async response => {
+      const countResponse = (await response.json()) as CountResponse;
+      setRosterSize(countResponse.count);
+      await handleChangePage(null, 0);
+    });
+  }, []);
 
   return (
     <main className={classes.root}>
@@ -77,6 +195,7 @@ export const RosterPage = () => {
             variant="contained"
             color="primary"
             size="large"
+            href={`api/roster/${orgId}/template`}
           >
             Download CSV Template
           </Button>
@@ -95,17 +214,35 @@ export const RosterPage = () => {
             </TableHead>
             <TableBody>
               {rows.map((row) => (
-                <TableRow key={row.name}>
+                <TableRow key={row.edipi}>
                   <TableCell component="th" scope="row">
-                    {row.name}
+                    {row.edipi}
                   </TableCell>
-                  <TableCell>{row.calories}</TableCell>
-                  <TableCell>{row.fat}</TableCell>
-                  <TableCell>{row.carbs}</TableCell>
-                  <TableCell>{row.protein}</TableCell>
+                  <TableCell>{row.rate_rank}</TableCell>
+                  <TableCell>{row.first_name}</TableCell>
+                  <TableCell>{row.last_name}</TableCell>
+                  <TableCell>{row.unit}</TableCell>
                 </TableRow>
               ))}
             </TableBody>
+            <TableFooter>
+              <TableRow>
+                <TablePagination
+                  rowsPerPageOptions={[10, 25, 50]}
+                  colSpan={5}
+                  count={rosterSize}
+                  rowsPerPage={rowsPerPage}
+                  page={page}
+                  SelectProps={{
+                    inputProps: { 'aria-label': 'rows per page' },
+                    native: true,
+                  }}
+                  onChangePage={handleChangePage}
+                  onChangeRowsPerPage={handleChangeRowsPerPage}
+                  ActionsComponent={TablePaginationActions}
+                />
+              </TableRow>
+            </TableFooter>
           </Table>
         </TableContainer>
       </Container>

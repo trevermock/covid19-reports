@@ -27,7 +27,7 @@ interface UserRole {
 
 export interface UserState {
   isLoggedIn: boolean
-  roles?: UserRole[]
+  roles: UserRole[]
   homeView: HomeView
 }
 
