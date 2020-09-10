@@ -1,3 +1,4 @@
+import bodyParser from 'body-parser';
 import express from 'express';
 import {RoleController} from './role.controller';
 import {requireRolePermission} from "../../auth";
@@ -12,6 +13,7 @@ router.get(
 
 router.post(
   '/:orgId',
+  bodyParser.json(),
   requireRolePermission((role) => role.can_manage_roles),
   RoleController.addRole
 );
@@ -30,6 +32,7 @@ router.delete(
 
 router.put(
   '/:orgId/:roleId',
+  bodyParser.json(),
   requireRolePermission((role) => role.can_manage_roles),
   RoleController.updateRole
 );

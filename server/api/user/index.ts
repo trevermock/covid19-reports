@@ -1,4 +1,5 @@
 import express from 'express';
+import bodyParser from 'body-parser';
 import { UserController } from './user.controller';
 import {requireRolePermission} from "../../auth";
 
@@ -11,6 +12,7 @@ router.get(
 
 router.post(
   '/:orgId',
+  bodyParser.json(),
   requireRolePermission((role) => role.can_manage_users),
   UserController.addUser
 );
@@ -29,6 +31,7 @@ router.delete(
 
 router.put(
   '/:orgId/:userEDIPI',
+  bodyParser.json(),
   requireRolePermission((role) => role.can_manage_users),
   UserController.updateUser
 );

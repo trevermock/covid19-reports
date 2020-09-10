@@ -14,6 +14,7 @@
     "@rescripts/cli": "0.0.14",
     "@rescripts/rescript-use-babel-config": "0.0.10",
     "@types/dotenv": "^8.2.0",
+    "@types/http-proxy-middleware": "^0.19.3",
     "axios": "^0.20.0",
     "body-parser": "^1.19.0",
     "clsx": "^1.1.1",
@@ -22,7 +23,9 @@
     "express": "^4.17.1",
     "express-async-errors": "^3.1.1",
     "express-session": "^1.17.1",
+    "http-proxy-middleware": "^0.20.0",
     "morgan": "^1.10.0",
+    "njwt": "^1.0.0",
     "passport": "^0.4.1",
     "pg": "^8.3.3",
     "process": "^0.11.10",
@@ -61,7 +64,6 @@
     "typescript": "^3.7.5"
   },
   "scripts": {
-
     "start": "./run_prod.sh",
     "dev": "./run_dev.sh",
     "build": "./build_prod.sh",

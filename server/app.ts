@@ -3,14 +3,16 @@ import 'express-async-errors';
 import process from 'process';
 import passport from 'passport';
 import cookieParser from 'cookie-parser';
-import bodyParser from 'body-parser';
 // import expressSession from 'express-session';
 import morgan from 'morgan';
 import path from 'path';
 import apiRoutes from './api';
+import kibanaProxy from './kibana';
+import kibanaDashboard from './kibana/dashboard';
 import database from './sqldb';
-import {requireUserAuth} from "./auth";
-import {errorHandler} from "./util/error";
+import config from './config/environment';
+import { requireUserAuth } from "./auth";
+import { errorHandler } from "./util/error";
 
 database.then(() => {
   console.log('Database ready');
@@ -28,8 +30,6 @@ const app = express();
 
 app.use(requireUserAuth);
 app.use(cookieParser());
-app.use(bodyParser.urlencoded({ extended: false }));
-app.use(bodyParser.json());
 app.use(express.static(path.join(__dirname, 'public')));
 // app.use(expressSession({
 //   resave: false,
@@ -62,6 +62,8 @@ app.get('/heartbeat', (req: express.Request, res: express.Response) => {
 });
 
 app.use('/api', apiRoutes);
+app.use('/dashboard', kibanaDashboard)
+app.use(config.kibana.appPath, kibanaProxy);
 
 app.get('/*', (req: express.Request, res: express.Response) => {
   res.sendFile(path.join(__dirname, 'public', 'index.html'));

@@ -1,3 +1,4 @@
+import { Button } from '@material-ui/core';
 import React from 'react';
 import { Alert, AlertTitle } from '@material-ui/lab';
 
@@ -5,6 +6,12 @@ export const HomePageMedical = () => {
   return (
     <div>
       <h1>Medical</h1>
+
+      <a href="/dashboard">
+        <Button variant="contained" color="primary">
+          Kibana
+        </Button>
+      </a>
 
       <Alert severity="error" style={{marginBottom: '20px'}}>
         <AlertTitle>Error</AlertTitle>

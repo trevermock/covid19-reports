@@ -1,3 +1,4 @@
+import bodyParser from 'body-parser';
 import express from 'express';
 import {OrgController} from './org.controller';
 import {requireRootAdmin} from "../../auth";
@@ -18,12 +19,14 @@ router.delete(
 
 router.put(
   '/:orgId',
+  bodyParser.json(),
   requireRootAdmin,
   OrgController.updateOrg
 );
 
 router.post(
   '/',
+  bodyParser.json(),
   requireRootAdmin,
   OrgController.addOrg
 );

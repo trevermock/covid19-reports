@@ -1,7 +1,7 @@
 import clsx from 'clsx';
 import React, { useEffect, useRef } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
-import { Switch, Route, Redirect, useHistory, useLocation } from 'react-router-dom';
+import { Switch, Route, Redirect, useHistory, useLocation, Link } from 'react-router-dom';
 import {
   AppBar, Button, Divider, Drawer, IconButton, List, ListItem, ListItemIcon, ListItemText, Toolbar, Typography
 } from '@material-ui/core';
@@ -17,6 +17,7 @@ import { AppState } from '../store';
 import { HomePage } from './pages/HomePage/HomePage';
 import { LoginPage } from './pages/LoginPage/LoginPage';
 import useStyles from './App.styles';
+import { RosterPage } from './pages/RosterPage/RosterPage';
 
 export const App = () => {
   const user = useSelector<AppState, UserState>(state => state.user);
@@ -103,10 +104,13 @@ export const App = () => {
         </div>
         <Divider/>
         <List>
-          <ListItem button key="Home">
-            <ListItemIcon><HomeIcon/></ListItemIcon>
-            <ListItemText primary="Home"/>
-          </ListItem>
+          <Link to="/home">
+            <ListItem button key="Home">
+              <ListItemIcon><HomeIcon/></ListItemIcon>
+              <ListItemText primary="Home"/>
+            </ListItem>
+          </Link>
+
           <ListItem button key="Kibana">
             <ListItemIcon><BarChartIcon/></ListItemIcon>
             <ListItemText primary="Kibana"/>
@@ -118,10 +122,13 @@ export const App = () => {
             <ListItemIcon><PeopleIcon/></ListItemIcon>
             <ListItemText primary="Users"/>
           </ListItem>
-          <ListItem button key="Rosters">
-            <ListItemIcon><ListAltIcon/></ListItemIcon>
-            <ListItemText primary="Rosters"/>
-          </ListItem>
+
+          <Link to="/roster">
+            <ListItem button key="Roster">
+              <ListItemIcon><ListAltIcon/></ListItemIcon>
+              <ListItemText primary="Roster"/>
+            </ListItem>
+          </Link>
         </List>
       </Drawer>
 
@@ -138,7 +145,10 @@ export const App = () => {
         <Route path="/home">
           <HomePage/>
         </Route>
-        <Redirect from="/" exact to="/login"/>
+        <Route path="/roster">
+          <RosterPage/>
+        </Route>
+        {/*<Redirect from="/" exact to="/login"/>*/}
       </Switch>
     </>
   )

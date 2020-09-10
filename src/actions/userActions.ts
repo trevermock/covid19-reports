@@ -1,5 +1,28 @@
 import { Dispatch } from 'redux';
-import { HomeView } from '../reducers/userReducer';
+
+interface UserData {
+  edipi: string,
+  first_name: string,
+  last_name: string,
+  enabled: boolean,
+  root_admin: boolean,
+  roles: [{
+    id: number,
+    name: string,
+    description: string,
+    index_prefix: string,
+    can_manage_users: boolean,
+    can_manager_roster: boolean,
+    can_manage_roles: boolean,
+    can_view_roster: boolean,
+    org: {
+      id: number,
+      name: string,
+      description: string,
+      index_prefix: string
+    }
+  }]
+}
 
 export namespace User {
   export namespace Actions {
@@ -7,8 +30,7 @@ export namespace User {
       static type = 'USER_LOGIN';
       type = Login.type;
       constructor(public payload: {
-        role: string,
-        homeView: HomeView
+        userData: UserData
       }) {}
     }
 
@@ -19,48 +41,13 @@ export namespace User {
   }
 
   export const login = () => async (dispatch: Dispatch<Actions.Login>) => {
-    // Get role.
     const response = await fetch('api/user/current');
-    const data = await response.json() as {
-      EDIPI: string,
-      FirstName: string,
-      LastName: string,
-      enabled: boolean,
-      rootAdmin: boolean,
-      roles: [{
-        id: number,
-        name: string,
-        description: string,
-        canManageUsers: boolean,
-        canManageRoster: boolean,
-        canManageRoles: boolean,
-        canViewRoster: boolean,
-        org: {
-          id: number,
-          name: string,
-          description: string
-        }
-      }]
-    };
+    const userData = await response.json() as UserData;
 
-    // HACK: Assign view based on role permissions for now.
-    let homeView: HomeView;
-    if (data.rootAdmin) {
-      homeView = HomeView.Leadership;
-    } else if (data.roles.length > 0 && data.roles[0].canManageRoster) {
-      homeView = HomeView.Medical;
-    } else if (data.roles.length > 0) {
-      homeView = HomeView.Basic;
-    } else {
-      alert('Not authorized.');
-      return;
-    }
+    console.log('userData', userData);
 
     dispatch({
-      ...new Actions.Login({
-        role: data.EDIPI,
-        homeView,
-      })
+      ...new Actions.Login({ userData })
     });
   }
 

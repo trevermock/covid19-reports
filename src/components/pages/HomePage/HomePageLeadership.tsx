@@ -1,6 +1,6 @@
 import React from 'react';
 import { Chart } from 'react-charts';
-import { Card, CardContent } from '@material-ui/core';
+import { Button, Card, CardContent } from '@material-ui/core';
 
 import { chartsDataMock } from '../../../mocks/chartsDataMock';
 import useStyles from './HomePage.styles';
@@ -11,6 +11,12 @@ export const HomePageLeadership = () => {
   return (
     <div>
       <h1>Leadership</h1>
+
+      <a href="/dashboard">
+        <Button variant="contained" color="primary">
+          Kibana
+        </Button>
+      </a>
 
       <div style={{ display: 'flex' }}>
         <Card className={classes.card}>
