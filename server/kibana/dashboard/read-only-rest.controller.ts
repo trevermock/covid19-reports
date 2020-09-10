@@ -1,27 +1,14 @@
 import nJwt from 'njwt';
+import { User } from '../../api/user/user.model';
 import config from '../../config/environment';
 
 // Builds ReadOnlyRest JWT token.
-export function buildJWT({ user, workspace, userWorkspace }: any) {
-  // if(_.isNil(workspace)) throw new Error('workspace not set');
-
-  // TODO: Make this stuff dynamic using session user data.
-  // firecares_id is acting as tenant unti renamed in ROR settings
-  let firecares_id = 'org1_unit1';//`${workspace.FireDepartment.firecares_id}_${workspace.slug}`;
-  let roles;
-
-  // if(!user.isGlobal) {
-  //   if (_.isNil(userWorkspace)) throw new Error('userWorkspace not set');
-  //   roles = `kibana_${userWorkspace.permission}`;
-  // } else {
-    roles = 'kibana_admin';
-  // }
-
+export function buildJWT(user: User) {
   const claims = {
-    sub: 'user1',//user.username,
+    sub: user.edipi,
     iss: 'https://statusengine.mysymptoms.mil',
-    roles,
-    firecares_id,
+    roles: user.getKibanaRoles(),
+    firecares_id: user.getKibanaIndex(), // TODO: firecares_id is acting as tenant until renamed in ROR settings
   };
 
   const jwt = nJwt.create(claims, config.ror.secret);
@@ -30,18 +17,19 @@ export function buildJWT({ user, workspace, userWorkspace }: any) {
   return jwt.compact();
 }
 
-// redirects user to kibana login page.  By attaching the rorJWT this will affectively login in the user seamlessly, and store rorCookie in the browser
+// Redirects user to Kibana login page. By attaching the rorJWT this will affectively login in the user seamlessly,
+// and store rorCookie in the browser.
 export function login(req: any, res: any) {
-  const rorJwt = buildJWT({
-    //req.user,
-    // workspace: req.workspace,
-    // userWorkspace: req.userWorkspace,
-  });
+  if (req.DDSUser == null) {
+    throw new Error('req.DDSUser is not set');
+  }
+
+  const rorJwt = buildJWT(req.DDSUser);
   return res.redirect(`${config.kibana.appPath}/login?jwt=${rorJwt}`);
 }
 
-// logouts a kibana session by clearing the rorCookie
+// Logs out of a Kibana session by clearing the rorCookie.
 export function logout(req: any, res: any, next: any) {
-  res.clearCookie("rorCookie");
+  res.clearCookie('rorCookie');
   next();
 }

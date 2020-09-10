@@ -9,7 +9,7 @@ export const HomePageMedical = () => {
 
       <a href="/dashboard">
         <Button variant="contained" color="primary">
-          Kibana
+          View Dashboard
         </Button>
       </a>
 

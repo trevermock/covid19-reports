@@ -14,7 +14,7 @@ export const HomePageLeadership = () => {
 
       <a href="/dashboard">
         <Button variant="contained" color="primary">
-          Kibana
+          View Dashboard
         </Button>
       </a>
 

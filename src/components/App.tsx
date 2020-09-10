@@ -111,10 +111,12 @@ export const App = () => {
             </ListItem>
           </Link>
 
-          <ListItem button key="Kibana">
-            <ListItemIcon><BarChartIcon/></ListItemIcon>
-            <ListItemText primary="Kibana"/>
-          </ListItem>
+          <a href="/dashboard">
+            <ListItem button key="Dashboard">
+              <ListItemIcon><BarChartIcon/></ListItemIcon>
+              <ListItemText primary="Dashboard"/>
+            </ListItem>
+          </a>
         </List>
         <Divider/>
         <List>

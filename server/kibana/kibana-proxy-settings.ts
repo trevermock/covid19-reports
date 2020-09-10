@@ -1,3 +1,4 @@
+import { User } from '../api/user/user.model';
 import config from '../config/environment';
 // import { Options } from 'http-proxy-middleware';
 
@@ -13,8 +14,8 @@ export const kibanaProxySettings = {
 
   // add custom headers to request
   onProxyReq: (proxyReq: any, req: any) => {
-    // const es_indicies = req.user.FireDepartment.get().es_indices;
-    proxyReq.setHeader('x-se-fire-department-all', '*');
+    const user: User = req.DDSUser;
+    proxyReq.setHeader('x-se-fire-department-all', user.getKibanaIndex());
   },
 
   router: (req: any) => {
