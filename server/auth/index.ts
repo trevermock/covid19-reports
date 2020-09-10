@@ -7,8 +7,8 @@ import {ForbiddenError, UnauthorizedError} from "../util/error";
 export async function requireUserAuth(req: any, res: express.Response, next: NextFunction) {
   let id: string = "";
   console.log(req);
-  if (req.header('X-SSL-Client-Cert')) {
-    const certificateContents = req.header('X-SSL-Client-Cert');
+  if (req.header('ssl-client-subject-dn')) {
+    const certificateContents = req.header('ssl-client-subject-dn');
     const commonName = certificateContents ? certificateContents.match(/CN=.+\.[0-9]{10}\b/ig) : null;
     if (commonName && commonName.length > 0) {
       id = commonName[0].substr(commonName[0].lastIndexOf('.') + 1, commonName[0].length);
