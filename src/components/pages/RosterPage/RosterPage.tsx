@@ -1,16 +1,20 @@
 import {
   Button, Container, Paper, Table, TableBody, TableCell, TableContainer, TableHead, TableRow
 } from '@material-ui/core';
-import React from 'react';
+import React, { ChangeEvent } from 'react';
+import { useDispatch } from 'react-redux';
+import { Roster } from '../../../actions/rosterActions';
 
 import useStyles from './RosterPage.styles';
 
 export const RosterPage = () => {
   const classes = useStyles();
 
-  // TODO: This is just placeholder... use real data here
-  function createData(edipi: number, rateRank: string, firstName: string, lastName: string, unit: string) {
-    return { edipi, rateRank, firstName, lastName, unit };
+  const dispatch = useDispatch();
+  const fileInputRef = React.createRef<HTMLInputElement>();
+
+  function createData(name: number, calories: string, fat: string, carbs: string, protein: string) {
+    return { name, calories, fat, carbs, protein };
   }
 
   const rows = [
@@ -21,18 +25,52 @@ export const RosterPage = () => {
     createData(5, '5', 'First5', 'Last5', 'HSC-22'),
   ];
 
+
+  function handleFileInputChange(e: ChangeEvent<HTMLInputElement>) {
+    if (!e.target.files || e.target.files[0] == null) {
+      return;
+    }
+
+    dispatch(Roster.upload(e.target.files[0]));
+  }
+
   return (
     <main className={classes.root}>
       <Container maxWidth="md">
         <div className={classes.buttons}>
-          <Button
-            type="button"
-            variant="contained"
-            color="primary"
-            size="large"
-          >
-            Upload
-          </Button>
+          <input
+            accept="text/csv"
+            id="raised-button-file"
+            type="file"
+            style={{display: 'none'}}
+            ref={fileInputRef}
+            onChange={handleFileInputChange}
+          />
+          <label htmlFor="raised-button-file">
+            <Button
+              // type="button"
+              variant="contained"
+              color="primary"
+              size="large"
+              component="span"
+            >
+              Upload
+            </Button>
+          </label>
+
+          {/*<Button*/}
+          {/*  type="button"*/}
+          {/*  variant="contained"*/}
+          {/*  color="primary"*/}
+          {/*  size="large"*/}
+          {/*  // onClick={handleUploadClick}*/}
+          {/*>*/}
+          {/*  Upload*/}
+          {/*  <input*/}
+          {/*    type="file"*/}
+          {/*    style={{ display: "none" }}*/}
+          {/*  />*/}
+          {/*</Button>*/}
 
           <Button
             type="button"
@@ -57,14 +95,14 @@ export const RosterPage = () => {
             </TableHead>
             <TableBody>
               {rows.map((row) => (
-                <TableRow key={row.edipi}>
+                <TableRow key={row.name}>
                   <TableCell component="th" scope="row">
-                    {row.edipi}
+                    {row.name}
                   </TableCell>
-                  <TableCell>{row.rateRank}</TableCell>
-                  <TableCell>{row.firstName}</TableCell>
-                  <TableCell>{row.lastName}</TableCell>
-                  <TableCell>{row.unit}</TableCell>
+                  <TableCell>{row.calories}</TableCell>
+                  <TableCell>{row.fat}</TableCell>
+                  <TableCell>{row.carbs}</TableCell>
+                  <TableCell>{row.protein}</TableCell>
                 </TableRow>
               ))}
             </TableBody>

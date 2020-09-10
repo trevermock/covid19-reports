@@ -1,7 +1,21 @@
 import express from 'express';
 import multer from 'multer';
-import {RosterController} from './roster.controller';
-import {requireRolePermission} from "../../auth";
+import path from 'path';
+import { RosterController } from './roster.controller';
+import { requireRolePermission } from "../../auth";
+
+const rosterUpload = multer({
+  storage: multer.diskStorage({
+    destination: (req: any, file: any, cb: any) => {
+      console.log('destination');
+      cb(null, path.join(__dirname, 'uploads'));
+    },
+    filename: (req: any, file: any, cb: any) => {
+      console.log('filename');
+      cb(null, `${file.fieldname}-${Date.now()}-${file.originalname}`);
+    },
+  }),
+});
 
 const router = express.Router();
 
@@ -17,27 +31,10 @@ router.post(
   RosterController.addRosterEntry
 );
 
-const storage = multer.diskStorage({
-  destination(
-    req: express.Request,
-    file:Express.Multer.File,
-    callback: (error: (Error | null), filename: string) => void) {
-    callback(null, __dirname + '/rosterUploads/');
-  },
-  filename(
-    req: express.Request,
-    file: Express.Multer.File,
-    callback: (error: (Error | null), filename: string) => void) {
-    callback(null, file.fieldname + '-' + Date.now() + '-' + file.originalname)
-  }
-});
-
-const upload = multer({storage: storage});
-
 router.post(
   '/:orgId/bulk',
   requireRolePermission((role) => role.can_manage_roster),
-  upload.single('roster_csv'),
+  rosterUpload.single('roster_csv'),
   RosterController.uploadRosterEntries
 )
 

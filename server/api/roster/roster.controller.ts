@@ -1,8 +1,10 @@
 import express from 'express';
-import {Roster} from "./roster.model";
-import {Org} from "../org/org.model";
-import {NotFoundError} from "../../util/error";
-import {getOptionalParam, getRequiredParam} from "../../util/util";
+import csv from 'csvtojson';
+import * as path from 'path';
+import { Roster } from "./roster.model";
+import { Org } from "../org/org.model";
+import { NotFoundError } from "../../util/error";
+import { getOptionalParam, getRequiredParam } from "../../util/util";
 
 export namespace RosterController {
 
@@ -35,7 +37,12 @@ export namespace RosterController {
   }
 
   export async function uploadRosterEntries(req: any, res: express.Response) {
+    console.log('filename', req.file.filename);
+    // const roster = await csv().fromFile(path.join(__dirname, './uploads/mockData.csv'));
 
+    res.json({
+      message: 'upload complete'
+    });
   }
 
   export async function addRosterEntry(req: any, res: express.Response) {

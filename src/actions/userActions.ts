@@ -1,5 +1,6 @@
 import { Dispatch } from 'redux';
 
+
 interface UserData {
   edipi: string,
   first_name: string,
@@ -23,6 +24,7 @@ interface UserData {
     }
   }]
 }
+
 
 export namespace User {
   export namespace Actions {

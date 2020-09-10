@@ -110,13 +110,13 @@ export const App = () => {
               <ListItemText primary="Home"/>
             </ListItem>
           </Link>
-
           <a href="/dashboard">
             <ListItem button key="Dashboard">
               <ListItemIcon><BarChartIcon/></ListItemIcon>
               <ListItemText primary="Dashboard"/>
             </ListItem>
           </a>
+
         </List>
         <Divider/>
         <List>
@@ -150,7 +150,8 @@ export const App = () => {
         <Route path="/roster">
           <RosterPage/>
         </Route>
-        {/*<Redirect from="/" exact to="/login"/>*/}
+
+        <Redirect from="/" exact to="/login"/>
       </Switch>
     </>
   )

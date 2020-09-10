@@ -69,6 +69,16 @@ app.get('/*', (req: express.Request, res: express.Response) => {
   res.sendFile(path.join(__dirname, 'public', 'index.html'));
 });
 
+// Not found
+app.all('*', (req: express.Request, res: express.Response) => {
+  res.status(404).send({
+    error: {
+      message: 'Not found.',
+      type: 'NotFound',
+    },
+  });
+});
+
 // Error handler
 app.use(errorHandler);
 
