@@ -7,4 +7,3 @@ mv ./build/static ./build/public/static
 
 tsc --project ./server
 mv ./server/build/* ./build
-cp -r ./server/certs ./build/certs

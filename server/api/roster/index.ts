@@ -20,6 +20,12 @@ const rosterUpload = multer({
 const router = express.Router();
 
 router.get(
+  '/:orgId/template',
+  requireRolePermission((role) => role.can_manage_roster),
+  RosterController.getRosterTemplate,
+);
+
+router.get(
   '/:orgId',
   requireRolePermission((role) => role.can_manage_roster),
   RosterController.getRoster,

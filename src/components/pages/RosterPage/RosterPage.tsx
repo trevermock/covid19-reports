@@ -54,7 +54,7 @@ export const RosterPage = () => {
               size="large"
               component="span"
             >
-              Upload
+              Upload CSV
             </Button>
           </label>
 
@@ -78,7 +78,7 @@ export const RosterPage = () => {
             color="primary"
             size="large"
           >
-            Download
+            Download CSV Template
           </Button>
         </div>
 
