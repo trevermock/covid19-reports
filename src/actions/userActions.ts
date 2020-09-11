@@ -13,7 +13,7 @@ interface UserData {
     description: string,
     index_prefix: string,
     can_manage_users: boolean,
-    can_manager_roster: boolean,
+    can_manage_roster: boolean,
     can_manage_roles: boolean,
     can_view_roster: boolean,
     org: {

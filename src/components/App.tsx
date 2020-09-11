@@ -1,7 +1,7 @@
 import clsx from 'clsx';
-import React, { useEffect, useRef } from 'react';
+import React, { useEffect } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
-import { Switch, Route, Redirect, useHistory, useLocation, Link } from 'react-router-dom';
+import { Switch, Route, Redirect, Link } from 'react-router-dom';
 import {
   AppBar, Button, Divider, Drawer, IconButton, List, ListItem, ListItemIcon, ListItemText, Toolbar, Typography
 } from '@material-ui/core';
@@ -15,17 +15,15 @@ import { User } from '../actions/userActions';
 import { UserState } from '../reducers/userReducer';
 import { AppState } from '../store';
 import { HomePage } from './pages/HomePage/HomePage';
-import { LoginPage } from './pages/LoginPage/LoginPage';
 import useStyles from './App.styles';
 import { RosterPage } from './pages/RosterPage/RosterPage';
+import {NotFoundPage} from "./pages/NotFoundPage/NotFoundPage";
+import {UsersPage} from "./pages/UsersPage/UsersPage";
 
 export const App = () => {
   const user = useSelector<AppState, UserState>(state => state.user);
-  const prevUser = usePrevious<UserState>(user);
   const dispatch = useDispatch();
   const classes = useStyles();
-  const history = useHistory();
-  const location = useLocation();
   const [drawerOpen, setDrawerOpen] = React.useState(false);
 
   function toggleDrawerOpen() {
@@ -36,31 +34,20 @@ export const App = () => {
     dispatch(User.logout());
   }
 
-  function isAppBarVisible() {
-    return (user.isLoggedIn && location.pathname !== '/login');
-  }
-
-  function usePrevious<T>(value: T) {
-    const ref = useRef<T>();
-    useEffect(() => {
-      ref.current = value;
-    });
-    return ref.current;
-  }
-
   useEffect(() => {
-    if (user.isLoggedIn !== prevUser?.isLoggedIn) {
-      history.push('/login');
-    }
-  });
+    dispatch(User.login());
+  },[]);
+
+  if (!user.isLoggedIn) {
+    return (<></>);
+  }
 
   return (
     <>
       <AppBar
         position="fixed"
         className={clsx(classes.appBar, {
-          [classes.appBarShift]: drawerOpen,
-          [classes.hide]: !isAppBarVisible(),
+          [classes.appBarShift]: drawerOpen
         })}
       >
         <Toolbar>
@@ -76,13 +63,6 @@ export const App = () => {
           <Typography className={classes.title} variant="h6" noWrap>
             DDS Covid Reporting
           </Typography>
-          <Button
-            type="button"
-            style={{ color: 'white' }}
-            onClick={handleLogoutClick}
-          >
-            Logout
-          </Button>
         </Toolbar>
       </AppBar>
 
@@ -90,8 +70,7 @@ export const App = () => {
         variant="permanent"
         className={clsx(classes.drawer, {
           [classes.drawerOpen]: drawerOpen,
-          [classes.drawerClose]: !drawerOpen,
-          [classes.hide]: !isAppBarVisible(),
+          [classes.drawerClose]: !drawerOpen
         })}
         classes={{
           paper: clsx({
@@ -120,38 +99,45 @@ export const App = () => {
         </List>
         <Divider/>
         <List>
-          <ListItem button key="Users">
-            <ListItemIcon><PeopleIcon/></ListItemIcon>
-            <ListItemText primary="Users"/>
-          </ListItem>
+          {user.roles[0].canManageUsers &&
+            <Link to="/users">
+              <ListItem button key="Users">
+                <ListItemIcon><PeopleIcon/></ListItemIcon>
+                <ListItemText primary="Users"/>
+              </ListItem>
+            </Link>
+          }
 
-          <Link to="/roster">
-            <ListItem button key="Roster">
-              <ListItemIcon><ListAltIcon/></ListItemIcon>
-              <ListItemText primary="Roster"/>
-            </ListItem>
-          </Link>
+          {user.roles[0].canManageRoster &&
+            <Link to="/roster">
+              <ListItem button key="Roster">
+                <ListItemIcon><ListAltIcon/></ListItemIcon>
+                <ListItemText primary="Roster"/>
+              </ListItem>
+            </Link>
+          }
         </List>
       </Drawer>
 
       <div
         className={clsx(classes.toolbar, {
-          [classes.hide]: !isAppBarVisible(),
         })}
       />
 
       <Switch>
-        <Route path="/login">
-          <LoginPage/>
-        </Route>
         <Route path="/home">
           <HomePage/>
         </Route>
         <Route path="/roster">
           <RosterPage/>
         </Route>
-
-        <Redirect from="/" exact to="/login"/>
+        <Route path="/users">
+          <UsersPage/>
+        </Route>
+        <Redirect from="/" exact to="/home"/>
+        <Route path="/*">
+          <NotFoundPage/>
+        </Route>
       </Switch>
     </>
   )

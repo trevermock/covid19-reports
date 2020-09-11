@@ -10,7 +10,7 @@ export namespace Roster {
     }
   }
 
-  export const upload = (file: File) => async (dispatch: Dispatch<Actions.Upload>, getState: () => AppState) => {
+  export const upload = (file: File, onComplete: () => void) => async (dispatch: Dispatch<Actions.Upload>, getState: () => AppState) => {
     console.log('uploading file...');
     console.log('file', file);
 
@@ -26,6 +26,8 @@ export namespace Roster {
         'Content-Type': 'multipart/form-data'
       }
     });
+
+    onComplete();
 
     console.log('upload complete!');
 

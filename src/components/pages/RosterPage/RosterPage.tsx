@@ -118,13 +118,23 @@ export const RosterPage = () => {
 
   const orgId = useSelector<AppState, UserState>(state => state.user).roles[0].org.id;
 
+  function initializeTable() {
+    fetch(`api/roster/${orgId}/count`).then(async response => {
+      const countResponse = (await response.json()) as CountResponse;
+      setRosterSize(countResponse.count);
+      await handleChangePage(null, 0);
+    });
+  };
+
   function handleFileInputChange(e: ChangeEvent<HTMLInputElement>) {
     if (!e.target.files || e.target.files[0] == null) {
       return;
     }
 
-    dispatch(Roster.upload(e.target.files[0]));
-  }
+    dispatch(Roster.upload(e.target.files[0], async () => {
+      initializeTable();
+    }));
+  };
 
   const handleChangePage = async (event: React.MouseEvent<HTMLButtonElement> | null, newPage: number) => {
     const response = await fetch(`api/roster/${orgId}?limit=${rowsPerPage}&page=${newPage}`);
@@ -144,13 +154,7 @@ export const RosterPage = () => {
     setRowsPerPage(newRowsPerPage);
   };
 
-  useEffect(() => {
-    fetch(`api/roster/${orgId}/count`).then(async response => {
-      const countResponse = (await response.json()) as CountResponse;
-      setRosterSize(countResponse.count);
-      await handleChangePage(null, 0);
-    });
-  }, []);
+  useEffect(initializeTable, []);
 
   return (
     <main className={classes.root}>

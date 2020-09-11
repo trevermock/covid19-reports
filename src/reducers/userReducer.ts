@@ -50,7 +50,7 @@ export function userReducer(state = userInitialState, action: any): UserState {
         description: role.description,
         indexPrefix: role.index_prefix,
         canManageUsers: role.can_manage_users,
-        canManageRoster: role.can_manager_roster,
+        canManageRoster: role.can_manage_roster,
         canManageRoles: role.can_manage_roles,
         canViewRoster: role.can_view_roster,
         org: {
@@ -65,7 +65,7 @@ export function userReducer(state = userInitialState, action: any): UserState {
       let homeView: HomeView;
       if (userData.root_admin) {
         homeView = HomeView.Leadership;
-      } else if (userData.roles.length > 0 && userData.roles[0].can_manager_roster) {
+      } else if (userData.roles.length > 0 && userData.roles[0].can_manage_roster) {
         homeView = HomeView.Medical;
       } else {
         homeView = HomeView.Basic;

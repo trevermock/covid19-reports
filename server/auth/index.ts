@@ -18,7 +18,7 @@ export async function requireUserAuth(req: any, res: express.Response, next: Nex
     id = process.env.USER_EDIPI || "";
   }
   if (!id) {
-    throw new UnauthorizedError('Client not authorized.');
+    throw new UnauthorizedError('Client not authorized.', true);
   }
   const user = await User.findOne({
     relations: ['roles'],
@@ -34,7 +34,7 @@ export async function requireUserAuth(req: any, res: express.Response, next: Nex
     }
   });
   if (!user) {
-    throw new ForbiddenError(`User '${id}' is not registered.`);
+    throw new ForbiddenError(`User '${id}' is not registered.`, true);
   }
   req['DDSUser'] = user;
   next();
