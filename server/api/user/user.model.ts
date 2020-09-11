@@ -45,7 +45,7 @@ export class User extends BaseEntity {
 
   getKibanaIndex() {
     if (this.root_admin) {
-      return '*';
+      return 'org1_unit1';
     }
 
     // HACK: We should figure out which role based on which org they're trying to view.
