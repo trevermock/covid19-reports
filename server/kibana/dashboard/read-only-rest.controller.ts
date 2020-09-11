@@ -6,13 +6,13 @@ const nJwt = require('njwt');
 // Builds ReadOnlyRest JWT token.
 export function buildJWT(user: User) {
   console.log('ror buildJWT()');
-  console.log('ror user.getKibanaIndex()', user.getKibanaIndex());
+  // console.log('ror user.getKibanaIndex()', user.getKibanaIndex());
 
   const claims = {
     sub: user.edipi,
     iss: 'https://statusengine.mysymptoms.mil',
     roles: user.getKibanaRoles(),
-    firecares_id: user.getKibanaIndex(), // TODO: firecares_id is acting as tenant until renamed in ROR settings
+    firecares_id: user.edipi, // TODO: firecares_id is acting as tenant until renamed in ROR settings
   };
 
   console.log('ror claims', claims);
