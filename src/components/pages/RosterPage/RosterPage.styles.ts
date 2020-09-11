@@ -16,5 +16,10 @@ export default makeStyles((theme: Theme) =>
         marginRight: theme.spacing(3),
       }
     },
+    tableFooter: {
+      flexShrink: 0,
+      padding: '10px 20px',
+      marginLeft: theme.spacing(3),
+    }
   }),
 );

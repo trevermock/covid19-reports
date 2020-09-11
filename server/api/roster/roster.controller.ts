@@ -25,6 +25,9 @@ export namespace RosterController {
       take: limit,
       where: {
         org: parseInt(orgId)
+      },
+      order: {
+        edipi: 'ASC'
       }
     });
 

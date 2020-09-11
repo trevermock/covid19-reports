@@ -10,7 +10,7 @@ import {
   TableHead,
   TableRow,
   IconButton,
-  TableFooter
+  TableFooter, DialogActions, Dialog, DialogTitle, DialogContent, DialogContentText
 } from '@material-ui/core';
 import FirstPageIcon from '@material-ui/icons/FirstPage';
 import KeyboardArrowLeft from '@material-ui/icons/KeyboardArrowLeft';
@@ -76,7 +76,7 @@ function TablePaginationActions(props: TablePaginationActionsProps) {
   };
 
   return (
-    <div className={classes.root}>
+    <div className={classes.tableFooter}>
       <IconButton
         onClick={handleFirstPageButtonClick}
         disabled={page === 0}
@@ -114,7 +114,8 @@ export const RosterPage = () => {
   const [rows, setRows] = useState<RosterEntry[]>([]);
   const [page, setPage] = useState(0);
   const [rosterSize, setRosterSize] = useState(0);
-  const [rowsPerPage, setRowsPerPage] = React.useState(10);
+  const [rowsPerPage, setRowsPerPage] = useState(10);
+  const [alert, setAlert] = useState({open: false, message: '', title: ''});
 
   const orgId = useSelector<AppState, UserState>(state => state.user).roles[0].org.id;
 
@@ -131,8 +132,13 @@ export const RosterPage = () => {
       return;
     }
 
-    dispatch(Roster.upload(e.target.files[0], async () => {
-      initializeTable();
+    dispatch(Roster.upload(e.target.files[0], async (count) => {
+      if (count < 0) {
+        setAlert({open: true, message:`An error occurred while uploading roster. Please verify the roster data.`, title: `Upload Error`});
+      } else {
+        setAlert({open: true, message:`Successfully uploaded ${count} roster entries.`, title: 'Upload Successful'});
+        initializeTable();
+      }
     }));
   };
 
@@ -152,6 +158,10 @@ export const RosterPage = () => {
     setPage(0);
     setRows(rosterResponse);
     setRowsPerPage(newRowsPerPage);
+  };
+
+  const handleAlertClose = () => {
+    setAlert({open: false, message: '', title: ''});
   };
 
   useEffect(initializeTable, []);
@@ -233,8 +243,8 @@ export const RosterPage = () => {
               <TableRow>
                 <TablePagination
                   rowsPerPageOptions={[10, 25, 50]}
-                  colSpan={5}
                   count={rosterSize}
+                  colSpan={5}
                   rowsPerPage={rowsPerPage}
                   page={page}
                   SelectProps={{
@@ -250,6 +260,24 @@ export const RosterPage = () => {
           </Table>
         </TableContainer>
       </Container>
+      <Dialog
+        open={alert.open}
+        onClose={handleAlertClose}
+        aria-labelledby="alert-dialog-title"
+        aria-describedby="alert-dialog-description"
+      >
+        <DialogTitle id="alert-dialog-title">{alert.title}</DialogTitle>
+        <DialogContent>
+          <DialogContentText id="alert-dialog-description">
+            {alert.message}
+          </DialogContentText>
+        </DialogContent>
+        <DialogActions>
+          <Button onClick={handleAlertClose} color="primary" autoFocus>
+            OK
+          </Button>
+        </DialogActions>
+      </Dialog>
     </main>
   )
 }

@@ -10,7 +10,7 @@ export namespace Roster {
     }
   }
 
-  export const upload = (file: File, onComplete: () => void) => async (dispatch: Dispatch<Actions.Upload>, getState: () => AppState) => {
+  export const upload = (file: File, onComplete: (count: number) => void) => async (dispatch: Dispatch<Actions.Upload>, getState: () => AppState) => {
     console.log('uploading file...');
     console.log('file', file);
 
@@ -21,13 +21,18 @@ export namespace Roster {
     // formData.append("image", imagefile.files[0]);
     formData.append('roster_csv', file);
     // TODO: Don't hardcode role.
-    await axios.post(`api/roster/${appState.user.roles[0].org.id}/bulk`, formData, {
-      headers: {
-        'Content-Type': 'multipart/form-data'
-      }
-    });
+    try {
+      const response = await axios.post(`api/roster/${appState.user.roles[0].org.id}/bulk`, formData, {
+        headers: {
+          'Content-Type': 'multipart/form-data'
+        }
+      });
 
-    onComplete();
+      onComplete(response.data.count);
+    } catch {
+      onComplete(-1);
+    }
+
 
     console.log('upload complete!');
 
