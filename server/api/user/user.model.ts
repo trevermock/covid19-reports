@@ -53,6 +53,11 @@ export class User extends BaseEntity {
     return `${role.org.index_prefix}-${role.index_prefix}`;
   }
 
+  getKibanaUserClaim() {
+    const role = this.roles[0];
+    return `${role.org.index_prefix}-${role.index_prefix}`;
+  }
+
   getKibanaRoles() {
     // HACK: This should be based on their permissions somehow.
     return 'kibana_admin';
