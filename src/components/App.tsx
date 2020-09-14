@@ -19,6 +19,8 @@ import useStyles from './App.styles';
 import { RosterPage } from './pages/RosterPage/RosterPage';
 import { NotFoundPage } from "./pages/NotFoundPage/NotFoundPage";
 import { UsersPage } from "./pages/UsersPage/UsersPage";
+import logoIcon from '../media/images/logo-icon.png';
+import logoText from '../media/images/logo-text.png';
 
 export const App = () => {
   const user = useSelector<AppState, UserState>(state => state.user);
@@ -56,9 +58,6 @@ export const App = () => {
           >
             <MenuIcon/>
           </IconButton>
-          <Typography className={classes.title} variant="h6" noWrap>
-            DDS Covid Reporting
-          </Typography>
         </Toolbar>
       </AppBar>
 
@@ -76,6 +75,8 @@ export const App = () => {
         }}
       >
         <div className={classes.toolbar}>
+          <img src={logoIcon} height="34" alt="Status Engine Logo Icon" />
+          <img src={logoText} height="20" style={{marginLeft: '10px'}} alt="Status Engine Logo Text" />
         </div>
         <Divider/>
         <List>
@@ -91,7 +92,6 @@ export const App = () => {
               <ListItemText primary="Dashboard"/>
             </ListItem>
           </a>
-
         </List>
         <Divider/>
         <List>
@@ -115,9 +115,7 @@ export const App = () => {
         </List>
       </Drawer>
 
-      <div
-        className={classes.toolbar}
-      />
+      <div className={classes.toolbar}/>
 
       <div
         className={clsx(classes.content, {
