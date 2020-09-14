@@ -119,21 +119,28 @@ export const App = () => {
         className={classes.toolbar}
       />
 
-      <Switch>
-        <Route path="/home">
-          <HomePage/>
-        </Route>
-        <Route path="/roster">
-          <RosterPage/>
-        </Route>
-        <Route path="/users">
-          <UsersPage/>
-        </Route>
-        <Redirect from="/" exact to="/home"/>
-        <Route path="/*">
-          <NotFoundPage/>
-        </Route>
-      </Switch>
+      <div
+        className={clsx(classes.content, {
+          [classes.contentDrawerClosed]: (user.isLoggedIn && !drawerOpen),
+          [classes.contentDrawerOpened]: (user.isLoggedIn && drawerOpen),
+        })}
+      >
+        <Switch>
+          <Route path="/home">
+            <HomePage/>
+          </Route>
+          <Route path="/roster">
+            <RosterPage/>
+          </Route>
+          <Route path="/users">
+            <UsersPage/>
+          </Route>
+          <Redirect from="/" exact to="/home"/>
+          <Route path="/*">
+            <NotFoundPage/>
+          </Route>
+        </Switch>
+      </div>
     </>
   )
 };

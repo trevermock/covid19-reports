@@ -1,16 +1,11 @@
 import { createStyles, Theme } from '@material-ui/core';
 import { makeStyles } from '@material-ui/styles';
 
-// TODO: Clean these styles up.
-
-const drawerWidth = 240;
+const drawerWidthOpened = 240;
+const drawerWidthClosed = 58;
 
 export default makeStyles((theme: Theme) =>
   createStyles({
-    root: {
-      display: 'flex',
-      textAlign: 'center',
-    },
     appBar: {
       backgroundColor: '#162e51',
       zIndex: theme.zIndex.drawer + 1,
@@ -20,8 +15,8 @@ export default makeStyles((theme: Theme) =>
       }),
     },
     appBarShift: {
-      marginLeft: drawerWidth,
-      width: `calc(100% - ${drawerWidth}px)`,
+      marginLeft: drawerWidthOpened,
+      width: `calc(100% - ${drawerWidthOpened}px)`,
       transition: theme.transitions.create(['width', 'margin'], {
         easing: theme.transitions.easing.sharp,
         duration: theme.transitions.duration.enteringScreen,
@@ -34,12 +29,12 @@ export default makeStyles((theme: Theme) =>
       display: 'none !important',
     },
     drawer: {
-      width: drawerWidth,
+      width: drawerWidthOpened,
       flexShrink: 0,
       whiteSpace: 'nowrap',
     },
     drawerOpen: {
-      width: drawerWidth,
+      width: drawerWidthOpened,
       transition: theme.transitions.create('width', {
         easing: theme.transitions.easing.sharp,
         duration: theme.transitions.duration.enteringScreen,
@@ -51,7 +46,7 @@ export default makeStyles((theme: Theme) =>
         duration: theme.transitions.duration.leavingScreen,
       }),
       overflowX: 'hidden',
-      width: theme.spacing(7) + 1,
+      width: drawerWidthClosed,
     },
     toolbar: {
       display: 'flex',
@@ -62,22 +57,20 @@ export default makeStyles((theme: Theme) =>
       ...theme.mixins.toolbar,
     },
     content: {
-      flexGrow: 1,
-      padding: theme.spacing(3),
+      transition: theme.transitions.create('margin-left', {
+        easing: theme.transitions.easing.sharp,
+        duration: theme.transitions.duration.leavingScreen,
+      }),
+    },
+    contentDrawerOpened: {
+      marginLeft: drawerWidthOpened,
+    },
+    contentDrawerClosed: {
+      marginLeft: drawerWidthClosed,
     },
     title: {
       flexGrow: 1,
       textAlign: 'left',
-    },
-    card: {
-      flex: '1',
-      height: '400px',
-      margin: '20px',
-    },
-    cardContent: {
-      width: '100%',
-      height: '100%',
-      display: 'flex',
     },
   }),
 );
