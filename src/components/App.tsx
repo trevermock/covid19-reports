@@ -87,9 +87,9 @@ export const App = () => {
             </ListItem>
           </Link>
           <a href="/dashboard">
-            <ListItem button key="Dashboard">
+            <ListItem button key="Analytics">
               <ListItemIcon><BarChartIcon/></ListItemIcon>
-              <ListItemText primary="Dashboard"/>
+              <ListItemText primary="Analytics"/>
             </ListItem>
           </a>
         </List>
