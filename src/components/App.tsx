@@ -3,7 +3,7 @@ import React, { useEffect } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
 import { Switch, Route, Redirect, Link } from 'react-router-dom';
 import {
-  AppBar, Button, Divider, Drawer, IconButton, List, ListItem, ListItemIcon, ListItemText, Toolbar, Typography
+  AppBar, Divider, Drawer, IconButton, List, ListItem, ListItemIcon, ListItemText, Toolbar, Typography
 } from '@material-ui/core';
 import BarChartIcon from '@material-ui/icons/BarChart';
 import HomeIcon from '@material-ui/icons/Home';
@@ -17,26 +17,22 @@ import { AppState } from '../store';
 import { HomePage } from './pages/HomePage/HomePage';
 import useStyles from './App.styles';
 import { RosterPage } from './pages/RosterPage/RosterPage';
-import {NotFoundPage} from "./pages/NotFoundPage/NotFoundPage";
-import {UsersPage} from "./pages/UsersPage/UsersPage";
+import { NotFoundPage } from "./pages/NotFoundPage/NotFoundPage";
+import { UsersPage } from "./pages/UsersPage/UsersPage";
 
 export const App = () => {
   const user = useSelector<AppState, UserState>(state => state.user);
   const dispatch = useDispatch();
   const classes = useStyles();
-  const [drawerOpen, setDrawerOpen] = React.useState(false);
+  const [drawerOpen, setDrawerOpen] = React.useState(true);
 
   function toggleDrawerOpen() {
     setDrawerOpen(!drawerOpen);
   }
 
-  function handleLogoutClick() {
-    dispatch(User.logout());
-  }
-
   useEffect(() => {
     dispatch(User.login());
-  },[]);
+  }, [dispatch]);
 
   if (!user.isLoggedIn) {
     return (<></>);
@@ -120,8 +116,7 @@ export const App = () => {
       </Drawer>
 
       <div
-        className={clsx(classes.toolbar, {
-        })}
+        className={classes.toolbar}
       />
 
       <Switch>
