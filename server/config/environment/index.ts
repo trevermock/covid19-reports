@@ -9,12 +9,6 @@ const baseConfig = {
     appPath: process.env.KIBANA_BASEPATH || '/_plugin/kibana',
     uri: process.env.KIBANA_URI || 'http://localhost:5601',
   },
-
-  nfors: {
-    // App basepath: make sure your kibana.yml file isn't using the app root or it will mess up the proxy.
-    appPath: process.env.NFORS_BASEPATH || '/_plugin/kibana',
-    uri: process.env.NFORS_URI || 'http://localhost:5601',
-  },
 };
 
 // Export the config object based on the NODE_ENV
