@@ -55,7 +55,7 @@ export class User extends BaseEntity {
 
   getKibanaUserClaim() {
     const role = this.roles[0];
-    return `${role.org.index_prefix}-${role.index_prefix}`;
+    return `${role.org.id}-${role.id}`;
   }
 
   getKibanaRoles() {
