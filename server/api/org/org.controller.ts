@@ -14,8 +14,7 @@ export namespace OrgController {
     if (!org) {
       throw new NotFoundError('Organization was not found');
     }
-    res.json(org);
-    res.send();
+    await res.json(org);
   }
 
   export async function addOrg(req: any, res: Response) {
@@ -31,9 +30,7 @@ export namespace OrgController {
     org.name = name;
     org.description = description;
     const newOrg = await org.save();
-    res.status(201);
-    res.json(newOrg);
-    res.send();
+    await res.status(201).json(newOrg);
   }
 
   export async function deleteOrg(req: any, res: Response) {
@@ -47,8 +44,7 @@ export namespace OrgController {
       throw new NotFoundError('Organization could not be found.');
     }
     const removedOrg = await org.remove();
-    res.json(removedOrg);
-    res.send();
+    await res.json(removedOrg);
   }
 
   export async function updateOrg(req: any, res: Response) {
@@ -70,7 +66,6 @@ export namespace OrgController {
       org.description = description;
     }
     const updatedOrg = await org.save();
-    res.json(updatedOrg);
-    res.send();
+    await res.json(updatedOrg);
   }
 }

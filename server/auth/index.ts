@@ -53,7 +53,7 @@ export function requireRolePermission(action: (role: Role) => boolean) {
     const org = parseInt(req.params['orgId']);
     const user: User = req['DDSUser'];
     if (org && user) {
-      const orgRole = user.roles.find((role) => role.org.id == org);
+      const orgRole = user.roles.find((role) => role.org.id === org);
       if (user.root_admin || (orgRole && action(orgRole))) {
         return next();
       }

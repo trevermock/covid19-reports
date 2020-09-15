@@ -1,5 +1,5 @@
-import {Entity, PrimaryGeneratedColumn, Column, BaseEntity, JoinColumn, ManyToOne} from "typeorm";
-import {Org} from "../org/org.model";
+import { Entity, PrimaryGeneratedColumn, Column, BaseEntity, JoinColumn, ManyToOne } from "typeorm";
+import { Org } from "../org/org.model";
 
 @Entity()
 export class Role extends BaseEntity {
@@ -17,7 +17,7 @@ export class Role extends BaseEntity {
   })
   description: string;
 
-  @ManyToOne(type => Org)
+  @ManyToOne(() => Org)
   @JoinColumn({
     name: 'org_id'
   })

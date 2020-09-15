@@ -30,8 +30,7 @@ export namespace RosterController {
       }
     });
 
-    res.json(roster);
-    res.send();
+    await res.json(roster);
   }
 
   export async function getRosterCount(req: any, res: Response) {
@@ -46,8 +45,7 @@ export namespace RosterController {
     let result = {
       count
     }
-    res.json(result);
-    res.send();
+    await res.json(result);
   }
 
 
@@ -91,7 +89,7 @@ export namespace RosterController {
         rosterEntries.push(entry);
       });
       await Roster.save(rosterEntries);
-      res.json({
+      await res.json({
         count: rosterEntries.length
       });
     } finally {
@@ -118,9 +116,7 @@ export namespace RosterController {
     getRosterParamsFromBody(entry, req.body);
 
     const newRosterEntry = await entry.save();
-    res.status(201);
-    res.json(newRosterEntry);
-    res.send();
+    await res.status(201).json(newRosterEntry);
   }
 
   export async function getRosterEntry(req: any, res: Response) {
@@ -135,8 +131,7 @@ export namespace RosterController {
     if (!rosterEntry) {
       throw new NotFoundError('User could not be found.');
     }
-    res.json(rosterEntry);
-    res.send();
+    await res.json(rosterEntry);
   }
 
   export async function deleteRosterEntry(req: any, res: Response) {
@@ -152,8 +147,7 @@ export namespace RosterController {
       throw new NotFoundError('User could not be found.');
     }
     const deletedEntry = await rosterEntry.remove();
-    res.json(deletedEntry);
-    res.send();
+    await res.json(deletedEntry);
   }
 
   export async function updateRosterEntry(req: any, res: Response) {
@@ -172,8 +166,7 @@ export namespace RosterController {
     getRosterParamsFromBody(entry, req.body);
 
     const updatedRosterEntry = await entry.save();
-    res.json(updatedRosterEntry);
-    res.send();
+    await res.json(updatedRosterEntry);
   }
 
   function getRosterParamsFromBody(entry: Roster, body: any) {

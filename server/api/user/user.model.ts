@@ -1,5 +1,5 @@
-import {Entity, PrimaryColumn, Column, BaseEntity, ManyToMany, JoinTable} from "typeorm";
-import {Role} from '../role/role.model';
+import { Entity, PrimaryColumn, Column, BaseEntity, ManyToMany, JoinTable } from "typeorm";
+import { Role } from '../role/role.model';
 
 @Entity()
 export class User extends BaseEntity {
@@ -9,7 +9,7 @@ export class User extends BaseEntity {
   })
   edipi: string;
 
-  @ManyToMany(type => Role)
+  @ManyToMany(() => Role)
   @JoinTable({
     name: 'user_roles',
     joinColumn: {

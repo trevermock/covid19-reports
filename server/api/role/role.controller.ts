@@ -12,8 +12,7 @@ export namespace RoleController {
         org: parseInt(orgId)
       }
     });
-    res.json(roles);
-    res.send();
+    await res.json(roles);
   }
 
   export async function addRole(req: any, res: Response) {
@@ -42,9 +41,7 @@ export namespace RoleController {
     getRolePermissionsFromBody(role, req.body);
 
     const newRole = await role.save();
-    res.status(201);
-    res.json(newRole);
-    res.send();
+    await res.status(201).json(newRole);
   }
 
   export async function getRole(req: any, res: Response) {
@@ -59,8 +56,7 @@ export namespace RoleController {
     if (!role) {
       throw new NotFoundError('Role could not be found.');
     }
-    res.json(role);
-    res.send();
+    await res.json(role);
   }
 
   export async function deleteRole(req: any, res: Response) {
@@ -76,8 +72,7 @@ export namespace RoleController {
       throw new NotFoundError('Role could not be found.');
     }
     const removedRole = await role.remove();
-    res.json(removedRole);
-    res.send();
+    await res.json(removedRole);
   }
 
   export async function updateRole(req: any, res: Response) {
@@ -100,8 +95,7 @@ export namespace RoleController {
     }
     getRolePermissionsFromBody(role, req.body);
     const updatedRole = await role.save();
-    res.json(updatedRole);
-    res.send();
+    await res.json(updatedRole);
   }
 
   function getRolePermissionsFromBody(body: any, role: Role) {

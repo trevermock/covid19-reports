@@ -6,7 +6,7 @@ import { BadRequestError, NotFoundError } from "../../util/error";
 export namespace UserController {
 
   export async function current(req: any, res: Response) {
-    res.json(req['DDSUser']);
+    await res.json(req['DDSUser']);
   }
 
   export async function addUser(req: any, res: Response) {
@@ -54,7 +54,7 @@ export namespace UserController {
       user.roles = [];
     }
 
-    const orgRole = user.roles.find((role) => role.org.id == orgId);
+    const orgRole = user.roles.find((role) => role.org.id === orgId);
     if (orgRole) {
       throw new BadRequestError('The user already has a role in the organization.');
     }
@@ -70,9 +70,7 @@ export namespace UserController {
     }
 
     const updatedUser = await user.save();
-    res.status(newUser ? 201 : 200);
-    res.json(updatedUser);
-    res.send();
+    await res.status(newUser ? 201 : 200).json(updatedUser);
   }
 
   export async function getOrgUsers(req: any, res: Response) {
@@ -101,8 +99,7 @@ export namespace UserController {
         users.push(user);
       });
     }
-    res.json(users);
-    res.send();
+    await res.json(users);
   }
 
   export async function deleteUser(req: any, res: Response) {
@@ -118,8 +115,7 @@ export namespace UserController {
       throw new NotFoundError('User could not be found.');
     }
     const removedUser = await user.remove();
-    res.json(removedUser);
-    res.send();
+    await res.json(removedUser);
   }
 
   export async function updateUser(req: any, res: Response) {
