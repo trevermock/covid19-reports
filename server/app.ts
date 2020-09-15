@@ -1,4 +1,4 @@
-import express from 'express';
+import express, { Request, Response } from 'express';
 import 'express-async-errors';
 import process from 'process';
 import passport from 'passport';
@@ -57,7 +57,7 @@ if (process.env.NODE_ENV !== 'test') {
 //
 // Routes
 //
-app.get('/heartbeat', (req: express.Request, res: express.Response) => {
+app.get('/heartbeat', (req: Request, res: Response) => {
   res.status(204).send();
 });
 
@@ -65,12 +65,12 @@ app.use('/api', apiRoutes);
 app.use('/dashboard', kibanaDashboard)
 app.use(config.kibana.appPath, kibanaProxy);
 
-app.get('/*', (req: express.Request, res: express.Response) => {
+app.get('/*', (req: Request, res: Response) => {
   res.sendFile(path.join(__dirname, 'public', 'index.html'));
 });
 
 // Not found
-app.all('*', (req: express.Request, res: express.Response) => {
+app.all('*', (req: Request, res: Response) => {
   res.status(404).send({
     error: {
       message: 'Not found.',

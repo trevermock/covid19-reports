@@ -1,12 +1,11 @@
-import express from 'express';
-import {User} from '../api/user/user.model';
-import {NextFunction} from "express-serve-static-core";
-import {Role} from "../api/role/role.model";
-import {ForbiddenError, UnauthorizedError} from "../util/error";
+import { Response, NextFunction } from 'express';
+import { User } from '../api/user/user.model';
+import { Role } from "../api/role/role.model";
+import { ForbiddenError, UnauthorizedError } from "../util/error";
 
 const ssl_header = 'ssl-client-subject-dn';
 
-export async function requireUserAuth(req: any, res: express.Response, next: NextFunction) {
+export async function requireUserAuth(req: any, res: Response, next: NextFunction) {
   let id: string = "";
   if (req.header(ssl_header)) {
     const certificateContents = req.header(ssl_header);
@@ -41,8 +40,8 @@ export async function requireUserAuth(req: any, res: express.Response, next: Nex
 }
 
 
-export async function requireRootAdmin(req: any, res: express.Response, next: NextFunction) {
-  const user:User = req['DDSUser'];
+export async function requireRootAdmin(req: any, res: Response, next: NextFunction) {
+  const user: User = req['DDSUser'];
   if (user.root_admin) {
     return next();
   }
@@ -50,9 +49,9 @@ export async function requireRootAdmin(req: any, res: express.Response, next: Ne
 }
 
 export function requireRolePermission(action: (role: Role) => boolean) {
-  return async function(req: any, res: express.Response, next: NextFunction) {
+  return async function (req: any, res: Response, next: NextFunction) {
     const org = parseInt(req.params['orgId']);
-    const user:User = req['DDSUser'];
+    const user: User = req['DDSUser'];
     if (org && user) {
       const orgRole = user.roles.find((role) => role.org.id == org);
       if (user.root_admin || (orgRole && action(orgRole))) {

@@ -1,20 +1,19 @@
-import express from 'express';
+import { Response } from 'express';
 import csv from 'csvtojson';
 import fs from 'fs';
-import * as path from 'path';
 import { Roster } from "./roster.model";
 import { Org } from "../org/org.model";
-import {BadRequestError, NotFoundError} from "../../util/error";
+import { BadRequestError, NotFoundError } from "../../util/error";
 import { getOptionalParam, getRequiredParam } from "../../util/util";
 
 export namespace RosterController {
 
-  export async function getRosterTemplate(req: any, res: express.Response) {
+  export async function getRosterTemplate(req: any, res: Response) {
     const file = `${__dirname}/uploads/roster_template.csv`;
     res.download(file);
   }
 
-  export async function getRoster(req: any, res: express.Response) {
+  export async function getRoster(req: any, res: Response) {
     const orgId = req.params['orgId'];
 
     let limit = req.query.hasOwnProperty('limit') ? parseInt(req.query['limit']) : 100;
@@ -35,7 +34,7 @@ export namespace RosterController {
     res.send();
   }
 
-  export async function getRosterCount(req: any, res: express.Response) {
+  export async function getRosterCount(req: any, res: Response) {
     const orgId = req.params['orgId'];
 
     const count = await Roster.count({
@@ -52,7 +51,7 @@ export namespace RosterController {
   }
 
 
-  export async function uploadRosterEntries(req: any, res: express.Response) {
+  export async function uploadRosterEntries(req: any, res: Response) {
     const orgId = req.params['orgId'];
     const org = await Org.findOne({
       where: {
@@ -95,13 +94,12 @@ export namespace RosterController {
       res.json({
         count: rosterEntries.length
       });
-    }
-    finally {
+    } finally {
       fs.unlinkSync(req['file'].path);
     }
   }
 
-  export async function addRosterEntry(req: any, res: express.Response) {
+  export async function addRosterEntry(req: any, res: Response) {
     const orgId = req.params['orgId'];
 
     const entry = new Roster();
@@ -125,7 +123,7 @@ export namespace RosterController {
     res.send();
   }
 
-  export async function getRosterEntry(req: any, res: express.Response) {
+  export async function getRosterEntry(req: any, res: Response) {
     const orgId = req.params['orgId'];
     const userEDIPI = req.params['userEDIPI'];
     const rosterEntry = await Roster.findOne({
@@ -141,7 +139,7 @@ export namespace RosterController {
     res.send();
   }
 
-  export async function deleteRosterEntry(req: any, res: express.Response) {
+  export async function deleteRosterEntry(req: any, res: Response) {
     const orgId = req.params['orgId'];
     const userEDIPI = req.params['userEDIPI'];
     const rosterEntry = await Roster.findOne({
@@ -158,7 +156,7 @@ export namespace RosterController {
     res.send();
   }
 
-  export async function updateRosterEntry(req: any, res: express.Response) {
+  export async function updateRosterEntry(req: any, res: Response) {
     const orgId = req.params['orgId'];
     const userEDIPI = req.params['userEDIPI'];
     const entry = await Roster.findOne({

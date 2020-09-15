@@ -1,4 +1,5 @@
 import { Dispatch } from 'redux';
+import axios, { AxiosResponse } from 'axios';
 
 
 interface UserData {
@@ -43,8 +44,15 @@ export namespace User {
   }
 
   export const login = () => async (dispatch: Dispatch<Actions.Login>) => {
-    const response = await fetch('api/user/current');
-    const userData = await response.json() as UserData;
+    let response: AxiosResponse<UserData>;
+    try {
+      response = await axios.get('api/user/current');
+    } catch (err) {
+      alert(err.message);
+      return;
+    }
+
+    const userData = response.data;
 
     console.log('userData', userData);
 

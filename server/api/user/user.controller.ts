@@ -1,16 +1,15 @@
-import express from 'express';
-import {User} from "./user.model";
-import {Role} from "../role/role.model";
-import {BadRequestError, NotFoundError} from "../../util/error";
-import {Org} from "../org/org.model";
+import { Response } from 'express';
+import { User } from "./user.model";
+import { Role } from "../role/role.model";
+import { BadRequestError, NotFoundError } from "../../util/error";
 
 export namespace UserController {
 
-  export async function current(req: any, res: express.Response) {
+  export async function current(req: any, res: Response) {
     res.json(req['DDSUser']);
   }
 
-  export async function addUser(req: any, res: express.Response) {
+  export async function addUser(req: any, res: Response) {
     const orgId = parseInt(req.params['orgId']);
 
     if (!req.body.hasOwnProperty('role')) {
@@ -76,7 +75,7 @@ export namespace UserController {
     res.send();
   }
 
-  export async function getOrgUsers(req: any, res: express.Response) {
+  export async function getOrgUsers(req: any, res: Response) {
     // TODO: This could potentially be optimized with something like this:
     // SELECT "user".*
     //   FROM role
@@ -106,7 +105,7 @@ export namespace UserController {
     res.send();
   }
 
-  export async function deleteUser(req: any, res: express.Response) {
+  export async function deleteUser(req: any, res: Response) {
     const orgId = req.params['orgId'];
     const userEDIPI = req.params['userEDIPI'];
     const user = await User.findOne({
@@ -123,13 +122,11 @@ export namespace UserController {
     res.send();
   }
 
-  export async function updateUser(req: any, res: express.Response) {
+  export async function updateUser(req: any, res: Response) {
     const org = req.params['orgId'];
     const userEDIPI = req.params['userEDIPI'];
     // TODO: Implement
   }
-
-
 
 
 }

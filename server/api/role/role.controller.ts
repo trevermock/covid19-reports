@@ -1,11 +1,11 @@
-import express from 'express';
-import {Role} from "./role.model";
-import {Org} from "../org/org.model";
-import {BadRequestError, NotFoundError} from "../../util/error";
+import { Response } from 'express';
+import { Role } from "./role.model";
+import { Org } from "../org/org.model";
+import { BadRequestError, NotFoundError } from "../../util/error";
 
 export namespace RoleController {
 
-  export async function getOrgRoles(req: any, res: express.Response) {
+  export async function getOrgRoles(req: any, res: Response) {
     const orgId = req.params['orgId'];
     const roles = await Role.find({
       where: {
@@ -16,7 +16,7 @@ export namespace RoleController {
     res.send();
   }
 
-  export async function addRole(req: any, res: express.Response) {
+  export async function addRole(req: any, res: Response) {
     const orgId = req.params['orgId'];
     const role = new Role();
     if (!req.body.hasOwnProperty('name')) {
@@ -47,7 +47,7 @@ export namespace RoleController {
     res.send();
   }
 
-  export async function getRole(req: any, res: express.Response) {
+  export async function getRole(req: any, res: Response) {
     const orgId = req.params['orgId'];
     const roleId = req.params['roleId'];
     const role = await Role.findOne({
@@ -63,7 +63,7 @@ export namespace RoleController {
     res.send();
   }
 
-  export async function deleteRole(req: any, res: express.Response) {
+  export async function deleteRole(req: any, res: Response) {
     const orgId = req.params['orgId'];
     const roleId = req.params['roleId'];
     const role = await Role.findOne({
@@ -80,7 +80,7 @@ export namespace RoleController {
     res.send();
   }
 
-  export async function updateRole(req: any, res: express.Response) {
+  export async function updateRole(req: any, res: Response) {
     const orgId = req.params['orgId'];
     const roleId = req.params['roleId'];
     const role = await Role.findOne({

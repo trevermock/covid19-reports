@@ -1,10 +1,10 @@
-import express from 'express';
-import {Org} from "./org.model";
-import {BadRequestError, NotFoundError} from "../../util/error";
+import { Response } from 'express';
+import { Org } from "./org.model";
+import { BadRequestError, NotFoundError } from "../../util/error";
 
 export namespace OrgController {
 
-  export async function getOrg(req: any, res: express.Response) {
+  export async function getOrg(req: any, res: Response) {
     const orgId = req.params['orgId'];
     const org = await Org.findOne({
       where: {
@@ -18,9 +18,9 @@ export namespace OrgController {
     res.send();
   }
 
-  export async function addOrg(req: any, res: express.Response) {
-    let name:string = req.body['name'];
-    let description:string = req.body['description'];
+  export async function addOrg(req: any, res: Response) {
+    let name: string = req.body['name'];
+    let description: string = req.body['description'];
     if (!name) {
       throw new BadRequestError('An organization name must be supplied when adding an organization.');
     }
@@ -36,7 +36,7 @@ export namespace OrgController {
     res.send();
   }
 
-  export async function deleteOrg(req: any, res: express.Response) {
+  export async function deleteOrg(req: any, res: Response) {
     const orgId = req.params['orgId'];
     const org = await Org.findOne({
       where: {
@@ -51,7 +51,7 @@ export namespace OrgController {
     res.send();
   }
 
-  export async function updateOrg(req: any, res: express.Response) {
+  export async function updateOrg(req: any, res: Response) {
     const orgId = req.params['orgId'];
     const org = await Org.findOne({
       where: {
@@ -61,11 +61,11 @@ export namespace OrgController {
     if (!org) {
       throw new NotFoundError('Organization could not be found.');
     }
-    let name:string = req.body['name'];
+    let name: string = req.body['name'];
     if (name) {
       org.name = name;
     }
-    let description:string = req.body['description'];
+    let description: string = req.body['description'];
     if (description) {
       org.description = description;
     }

@@ -1,4 +1,4 @@
-import express, {NextFunction} from 'express';
+import { Response, NextFunction } from 'express';
 import path from "path";
 
 export class RequestError extends Error {
@@ -15,41 +15,41 @@ export class RequestError extends Error {
 }
 
 export class BadRequestError extends RequestError {
-  constructor(message:string, htmlError=false) {
+  constructor(message: string, htmlError = false) {
     super(message, 'BadRequestError', 400, htmlError);
     Error.captureStackTrace(this, BadRequestError);
   }
 }
 
 export class UnauthorizedError extends RequestError {
-  constructor(message: string, htmlError=false) {
+  constructor(message: string, htmlError = false) {
     super(message, 'UnathorizedError', 401, htmlError);
     Error.captureStackTrace(this, UnauthorizedError);
   }
 }
 
 export class ForbiddenError extends RequestError {
-  constructor(message: string, htmlError=false) {
+  constructor(message: string, htmlError = false) {
     super(message, 'ForbiddenError', 403, htmlError);
     Error.captureStackTrace(this, ForbiddenError);
   }
 }
 
 export class NotFoundError extends RequestError {
-  constructor(message: string, htmlError=false) {
+  constructor(message: string, htmlError = false) {
     super(message, 'NotFound', 404, htmlError);
     Error.captureStackTrace(this, NotFoundError);
   }
 }
 
 export class InternalServerError extends RequestError {
-  constructor(message: string, htmlError=false) {
+  constructor(message: string, htmlError = false) {
     super(message, 'InternalServerError', 500, htmlError);
     Error.captureStackTrace(this, InternalServerError);
   }
 }
 
-export function errorHandler(error: any, req: any, res: express.Response, next: NextFunction) {
+export function errorHandler(error: any, req: any, res: Response, next: NextFunction) {
   // Send an error response if one hasn't already been sent. Otherwise the reqeust will
   // fail and make the client hang.
   if (res.headersSent) {
@@ -74,7 +74,6 @@ export function errorHandler(error: any, req: any, res: express.Response, next: 
     } else if (error instanceof String) {
       message = error;
     }
-
 
 
     if (process.env.NODE_ENV === 'development') {
