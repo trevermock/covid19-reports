@@ -56,6 +56,8 @@ export function errorHandler(error: any, req: any, res: Response, next: NextFunc
     return;
   }
 
+  console.error(error);
+
   let statusCode;
   let errors;
   let message;
@@ -74,7 +76,6 @@ export function errorHandler(error: any, req: any, res: Response, next: NextFunc
     } else if (error instanceof String) {
       message = error;
     }
-
 
     if (process.env.NODE_ENV === 'development') {
       errors = [{
