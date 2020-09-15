@@ -6,25 +6,31 @@ import { BadRequestError, NotFoundError } from "../../util/error";
 export namespace UserController {
 
   export async function current(req: any, res: Response) {
-    await res.json(req['DDSUser']);
+    await res.json(req.user);
   }
 
   export async function addUser(req: any, res: Response) {
-    const orgId = parseInt(req.params['orgId']);
+    const orgId = parseInt(req.params.orgId);
+    const roleId = (req.body.role != null) ? parseInt(req.body.role) : undefined;
+    const edipi = req.body.edipi;
+    const firstName = req.body.first_name;
+    const lastName = req.body.last_name;
 
-    if (!req.body.hasOwnProperty('role')) {
+    if (roleId == null) {
       throw new BadRequestError('A role id must be supplied when adding a user.');
     }
-    if (!req.body.hasOwnProperty('edipi')) {
+
+    if (edipi == null) {
       throw new BadRequestError('An EDIPI must be supplied when adding a user.');
     }
 
     const role = await Role.findOne({
       where: {
-        id: parseInt(req.body.role),
-        org: orgId
-      }
+        id: roleId,
+        org: orgId,
+      },
     });
+
     if (!role) {
       throw new NotFoundError('The role was not found in the organization.');
     }
@@ -33,20 +39,20 @@ export namespace UserController {
     let user = await User.findOne({
       relations: ['roles'],
       where: {
-        edipi: req.body.edipi
+        edipi: edipi,
       },
       join: {
         alias: 'user',
         leftJoinAndSelect: {
           'roles': 'user.roles',
-          'org': 'roles.org'
-        }
-      }
+          'org': 'roles.org',
+        },
+      },
     });
 
     if (!user) {
       user = new User();
-      user.edipi = req.body.edipi;
+      user.edipi = edipi;
       newUser = true;
     }
 
@@ -54,22 +60,23 @@ export namespace UserController {
       user.roles = [];
     }
 
-    const orgRole = user.roles.find((role) => role.org.id === orgId);
+    const orgRole = user.roles.find(role => role.org.id === orgId);
     if (orgRole) {
       throw new BadRequestError('The user already has a role in the organization.');
     }
 
     user.roles.push(role);
 
-    if (req.body.hasOwnProperty('first_name')) {
-      user.first_name = req.body.first_name;
+    if (firstName) {
+      user.first_name = firstName;
     }
 
-    if (req.body.hasOwnProperty('last_name')) {
-      user.last_name = req.body.last_name;
+    if (lastName) {
+      user.last_name = lastName;
     }
 
     const updatedUser = await user.save();
+
     await res.status(newUser ? 201 : 200).json(updatedUser);
   }
 
@@ -82,47 +89,54 @@ export namespace UserController {
     // INNER JOIN "user"
     //   ON user_roles."user" = "user"."EDIPI"
     // WHERE role.org_id=1
-    const orgId = req.params['orgId'];
+
+    const orgId = parseInt(req.params.orgId);
+
     const roles = await Role.find({
       where: {
-        org: parseInt(orgId)
-      }
+        org: orgId,
+      },
     });
+
     const users: User[] = [];
-    for (let i = 0; i < roles.length; i++) {
+    for (const role of roles) {
       const roleUsers = await User.createQueryBuilder('user')
         .innerJoin('user.roles', 'role')
-        .where('role.id = :id', { id: roles[i].id })
+        .where('role.id = :id', { id: role.id })
         .getMany();
-      roleUsers.forEach((user) => {
-        user.roles = [roles[i]];
+
+      roleUsers.forEach(user => {
+        user.roles = [role];
         users.push(user);
       });
     }
+
     await res.json(users);
   }
 
   export async function deleteUser(req: any, res: Response) {
-    const orgId = req.params['orgId'];
-    const userEDIPI = req.params['userEDIPI'];
+    const orgId = parseInt(req.params.orgId);
+    const userEDIPI = req.params.userEDIPI;
+
     const user = await User.findOne({
       where: {
         edipi: userEDIPI,
-        org: parseInt(orgId)
-      }
+        org: orgId,
+      },
     });
+
     if (!user) {
       throw new NotFoundError('User could not be found.');
     }
+
     const removedUser = await user.remove();
+
     await res.json(removedUser);
   }
 
   export async function updateUser(req: any, res: Response) {
-    const org = req.params['orgId'];
-    const userEDIPI = req.params['userEDIPI'];
+    const org = req.params.orgId;
+    const userEDIPI = req.params.userEDIPI;
     // TODO: Implement
   }
-
-
 }

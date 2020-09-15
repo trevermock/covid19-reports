@@ -14,7 +14,7 @@ export const kibanaProxySettings = {
 
   // add custom headers to request
   onProxyReq: (proxyReq: any, req: any) => {
-    const user: User = req.DDSUser;
+    const user: User = req.user;
     proxyReq.setHeader('x-se-fire-department-all', user.getKibanaIndex());
   },
 

@@ -1,7 +1,7 @@
 import express from 'express';
 import bodyParser from 'body-parser';
 import { UserController } from './user.controller';
-import {requireRolePermission} from "../../auth";
+import { requireRolePermission } from "../../auth";
 
 const router = express.Router();
 

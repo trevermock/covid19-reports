@@ -1,7 +1,6 @@
 import { Dispatch } from 'redux';
 import axios, { AxiosResponse } from 'axios';
 
-
 interface UserData {
   edipi: string,
   first_name: string,
@@ -25,7 +24,6 @@ interface UserData {
     }
   }]
 }
-
 
 export namespace User {
   export namespace Actions {
@@ -65,4 +63,3 @@ export namespace User {
     dispatch({ ...new Actions.Logout() });
   }
 }
-

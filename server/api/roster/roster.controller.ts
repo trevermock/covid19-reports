@@ -3,7 +3,7 @@ import csv from 'csvtojson';
 import fs from 'fs';
 import { Roster } from "./roster.model";
 import { Org } from "../org/org.model";
-import { BadRequestError, NotFoundError } from "../../util/error";
+import { BadRequestError, NotFoundError, UnprocessableEntity } from "../../util/error";
 import { getOptionalParam, getRequiredParam } from "../../util/util";
 
 export namespace RosterController {
@@ -14,59 +14,57 @@ export namespace RosterController {
   }
 
   export async function getRoster(req: any, res: Response) {
-    const orgId = req.params['orgId'];
+    const orgId = parseInt(req.params.orgId);
 
-    let limit = req.query.hasOwnProperty('limit') ? parseInt(req.query['limit']) : 100;
-    let page = req.query.hasOwnProperty('page') ? parseInt(req.query['page']) : 0;
+    let limit = (req.query.limit != null) ? parseInt(req.query.limit) : 100;
+    let page = (req.query.page != null) ? parseInt(req.query.page) : 0;
 
     const roster = await Roster.find({
       skip: page * limit,
       take: limit,
       where: {
-        org: parseInt(orgId)
+        org: orgId,
       },
       order: {
-        edipi: 'ASC'
-      }
+        edipi: 'ASC',
+      },
     });
 
     await res.json(roster);
   }
 
   export async function getRosterCount(req: any, res: Response) {
-    const orgId = req.params['orgId'];
+    const orgId = parseInt(req.params.orgId);
 
     const count = await Roster.count({
       where: {
-        org: parseInt(orgId)
-      }
+        org: orgId,
+      },
     });
 
-    let result = {
-      count
-    }
-    await res.json(result);
+    await res.json({ count });
   }
 
-
   export async function uploadRosterEntries(req: any, res: Response) {
-    const orgId = req.params['orgId'];
+    const orgId = parseInt(req.params.orgId);
+
     const org = await Org.findOne({
       where: {
-        id: parseInt(orgId)
-      }
+        id: orgId,
+      },
     });
+
     if (!org) {
       throw new NotFoundError('Organization for role was not found.');
     }
 
-    if (!req.hasOwnProperty('file') || !req['file'].path) {
+    if (!req.file || !req.file.path) {
       throw new BadRequestError('No file to process.');
     }
 
+    let rosterEntries: Roster[] = [];
     try {
-      const roster = await csv().fromFile(req['file'].path);
-      const rosterEntries: Roster[] = [];
+      const roster = await csv().fromFile(req.file.path);
       roster.forEach(row => {
         const entry = new Roster();
         entry.edipi = getRequiredParam('edipi', row);
@@ -89,87 +87,99 @@ export namespace RosterController {
         rosterEntries.push(entry);
       });
       await Roster.save(rosterEntries);
-      await res.json({
-        count: rosterEntries.length
-      });
+    } catch (err) {
+      throw new UnprocessableEntity('Roster file was unable to be processed. Check that it is formatted correctly.');
     } finally {
-      fs.unlinkSync(req['file'].path);
+      fs.unlinkSync(req.file.path);
     }
+
+    await res.json({
+      count: rosterEntries.length
+    });
   }
 
   export async function addRosterEntry(req: any, res: Response) {
-    const orgId = req.params['orgId'];
-
-    const entry = new Roster();
-    entry.edipi = getRequiredParam('edipi', req.body);
+    const orgId = parseInt(req.params.orgId);
 
     const org = await Org.findOne({
       where: {
-        id: parseInt(orgId)
-      }
+        id: orgId,
+      },
     });
+
     if (!org) {
       throw new NotFoundError('Organization for role was not found.');
     }
+
+    const entry = new Roster();
+    entry.edipi = getRequiredParam('edipi', req.body);
     entry.org = org;
-
-    getRosterParamsFromBody(entry, req.body);
-
+    setRosterParamsFromBody(entry, req.body);
     const newRosterEntry = await entry.save();
+
     await res.status(201).json(newRosterEntry);
   }
 
   export async function getRosterEntry(req: any, res: Response) {
-    const orgId = req.params['orgId'];
-    const userEDIPI = req.params['userEDIPI'];
+    const orgId = parseInt(req.params.orgId);
+    const userEDIPI = req.params.userEDIPI;
+
     const rosterEntry = await Roster.findOne({
       where: {
         edipi: userEDIPI,
-        org: parseInt(orgId)
-      }
+        org: orgId,
+      },
     });
+
     if (!rosterEntry) {
       throw new NotFoundError('User could not be found.');
     }
+
     await res.json(rosterEntry);
   }
 
   export async function deleteRosterEntry(req: any, res: Response) {
-    const orgId = req.params['orgId'];
-    const userEDIPI = req.params['userEDIPI'];
+    const orgId = parseInt(req.params.orgId);
+    const userEDIPI = req.params.userEDIPI;
+
     const rosterEntry = await Roster.findOne({
       where: {
         edipi: userEDIPI,
-        org: parseInt(orgId)
+        org: orgId,
       }
     });
+
     if (!rosterEntry) {
       throw new NotFoundError('User could not be found.');
     }
+
     const deletedEntry = await rosterEntry.remove();
+
     await res.json(deletedEntry);
   }
 
   export async function updateRosterEntry(req: any, res: Response) {
-    const orgId = req.params['orgId'];
-    const userEDIPI = req.params['userEDIPI'];
+    const orgId = parseInt(req.params.orgId);
+    const userEDIPI = req.params.userEDIPI;
+
     const entry = await Roster.findOne({
       where: {
         edipi: userEDIPI,
-        org: parseInt(orgId)
-      }
+        org: orgId,
+      },
     });
+
     if (!entry) {
       throw new NotFoundError('User could not be found.');
     }
 
-    getRosterParamsFromBody(entry, req.body);
-
+    setRosterParamsFromBody(entry, req.body);
     const updatedRosterEntry = await entry.save();
+
     await res.json(updatedRosterEntry);
   }
 
-  function getRosterParamsFromBody(entry: Roster, body: any) {
+  function setRosterParamsFromBody(entry: Roster, body: any) {
     entry.rate_rank = getOptionalParam('rate_rank', body);
     entry.first_name = getRequiredParam('first_name', body);
     entry.last_name = getRequiredParam('last_name', body);

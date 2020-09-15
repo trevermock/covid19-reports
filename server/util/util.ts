@@ -1,4 +1,4 @@
-import {BadRequestError} from "./error";
+import { BadRequestError } from "./error";
 
 export function getOptionalParam(param: string, params: any, type: string = 'string') {
   if (!params.hasOwnProperty(param)) {

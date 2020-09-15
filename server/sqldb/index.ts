@@ -1,8 +1,8 @@
-import {createConnection} from 'typeorm';
-import {User} from "../api/user/user.model";
-import {Role} from "../api/role/role.model";
-import {Org} from "../api/org/org.model";
-import {Roster} from "../api/roster/roster.model";
+import { createConnection } from 'typeorm';
+import { User } from "../api/user/user.model";
+import { Role } from "../api/role/role.model";
+import { Org } from "../api/org/org.model";
+import { Roster } from "../api/roster/roster.model";
 
 export default createConnection({
   type: 'postgres',

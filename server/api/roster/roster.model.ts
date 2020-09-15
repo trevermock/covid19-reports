@@ -1,5 +1,5 @@
-import {Entity, Column, BaseEntity, JoinColumn, ManyToOne, PrimaryColumn} from "typeorm";
-import {Org} from "../org/org.model";
+import { Entity, Column, BaseEntity, JoinColumn, ManyToOne, PrimaryColumn } from "typeorm";
+import { Org } from "../org/org.model";
 
 @Entity()
 export class Roster extends BaseEntity {

@@ -1,7 +1,7 @@
 import bodyParser from 'body-parser';
 import express from 'express';
-import {OrgController} from './org.controller';
-import {requireRootAdmin} from "../../auth";
+import { OrgController } from './org.controller';
+import { requireRootAdmin } from "../../auth";
 
 const router = express.Router();
 

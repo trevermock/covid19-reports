@@ -6,109 +6,128 @@ import { BadRequestError, NotFoundError } from "../../util/error";
 export namespace RoleController {
 
   export async function getOrgRoles(req: any, res: Response) {
-    const orgId = req.params['orgId'];
+    const orgId = parseInt(req.params.orgId);
+
     const roles = await Role.find({
       where: {
-        org: parseInt(orgId)
-      }
+        org: orgId,
+      },
     });
+
     await res.json(roles);
   }
 
   export async function addRole(req: any, res: Response) {
-    const orgId = req.params['orgId'];
-    const role = new Role();
-    if (!req.body.hasOwnProperty('name')) {
+    const orgId = parseInt(req.params.orgId);
+
+    if (!req.body.name) {
       throw new BadRequestError('A name must be supplied when adding a role.');
     }
-    role.name = req.body.name;
 
-    if (!req.body.hasOwnProperty('description')) {
+    if (!req.body.description) {
       throw new BadRequestError('A description must be supplied when adding a role.');
     }
-    role.description = req.body.description;
 
     const org = await Org.findOne({
       where: {
-        id: parseInt(orgId)
-      }
+        id: orgId,
+      },
     });
+
     if (!org) {
       throw new NotFoundError('Organization for role was not found.');
     }
+
+    const role = new Role();
+    role.name = req.body.name;
+    role.description = req.body.description;
     role.org = org;
-
-    getRolePermissionsFromBody(role, req.body);
-
+    setRolePermissionsFromBody(role, req.body);
     const newRole = await role.save();
+
     await res.status(201).json(newRole);
   }
 
   export async function getRole(req: any, res: Response) {
-    const orgId = req.params['orgId'];
-    const roleId = req.params['roleId'];
+    const orgId = parseInt(req.params.orgId);
+    const roleId = parseInt(req.params.roleId);
+
     const role = await Role.findOne({
       where: {
-        id: parseInt(roleId),
-        org: parseInt(orgId)
-      }
+        id: roleId,
+        org: orgId,
+      },
     });
+
     if (!role) {
       throw new NotFoundError('Role could not be found.');
     }
+
     await res.json(role);
   }
 
   export async function deleteRole(req: any, res: Response) {
-    const orgId = req.params['orgId'];
-    const roleId = req.params['roleId'];
+    const orgId = parseInt(req.params.orgId);
+    const roleId = parseInt(req.params.roleId);
+
     const role = await Role.findOne({
       where: {
-        id: parseInt(roleId),
-        org: parseInt(orgId)
-      }
+        id: roleId,
+        org: orgId,
+      },
     });
+
     if (!role) {
       throw new NotFoundError('Role could not be found.');
     }
+
     const removedRole = await role.remove();
+
     await res.json(removedRole);
   }
 
   export async function updateRole(req: any, res: Response) {
-    const orgId = req.params['orgId'];
-    const roleId = req.params['roleId'];
+    const orgId = parseInt(req.params.orgId);
+    const roleId = parseInt(req.params.roleId);
+    const name = req.body.name as string | undefined;
+    const description = req.body.description as string | undefined;
+
     const role = await Role.findOne({
       where: {
-        id: parseInt(roleId),
-        org: parseInt(orgId)
+        id: roleId,
+        org: orgId,
       }
     });
+
     if (!role) {
       throw new NotFoundError('Role could not be found.');
     }
-    if (req.body.hasOwnProperty('name')) {
-      role.name = req.body.name;
+
+    if (name != null) {
+      role.name = name;
     }
-    if (req.body.hasOwnProperty('description')) {
-      role.description = req.body.description;
+
+    if (description != null) {
+      role.description = description;
     }
-    getRolePermissionsFromBody(role, req.body);
+
+    setRolePermissionsFromBody(role, req.body);
     const updatedRole = await role.save();
+
     await res.json(updatedRole);
   }
 
-  function getRolePermissionsFromBody(body: any, role: Role) {
-    if (body.hasOwnProperty('can_manage_users')) {
+  function setRolePermissionsFromBody(body: any, role: Role) {
+    if (body.can_manage_users != null) {
       role.can_manage_users = body.can_manage_users;
     }
-    if (body.hasOwnProperty('can_manage_roles')) {
+    if (body.can_manage_roles != null) {
       role.can_manage_roles = body.can_manage_roles;
     }
-    if (body.hasOwnProperty('can_manage_roster')) {
+    if (body.can_manage_roster != null) {
       role.can_manage_roster = body.can_manage_roster;
     }
-    if (body.hasOwnProperty('can_view_roster')) {
+    if (body.can_view_roster != null) {
       role.can_view_roster = body.can_view_roster;
     }
   }

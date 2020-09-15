@@ -1,50 +1,71 @@
 import { Response, NextFunction } from 'express';
-import path from "path";
+import path from 'path';
+
+export type RequestErrorType = (
+  'BadRequest' |
+  'Unauthorized' |
+  'Forbidden' |
+  'NotFound' |
+  'UnprocessableEntity' |
+  'InternalServerError'
+);
 
 export class RequestError extends Error {
-  type: string;
+  type: RequestErrorType;
   statusCode: number;
-  htmlError: boolean;
+  errorPage?: string;
+  showErrorPage: boolean;
 
-  constructor(message: string, type: string, statusCode: number, htmlError: boolean) {
+  constructor(message: string, type: RequestErrorType, statusCode: number, showErrorPage: boolean) {
     super(message);
     this.type = type;
     this.statusCode = statusCode;
-    this.htmlError = htmlError;
+    this.showErrorPage = showErrorPage;
   }
 }
 
 export class BadRequestError extends RequestError {
-  constructor(message: string, htmlError = false) {
-    super(message, 'BadRequestError', 400, htmlError);
+  constructor(message: string, showErrorPage = false) {
+    super(message, 'BadRequest', 400, showErrorPage);
     Error.captureStackTrace(this, BadRequestError);
   }
 }
 
 export class UnauthorizedError extends RequestError {
-  constructor(message: string, htmlError = false) {
-    super(message, 'UnathorizedError', 401, htmlError);
+  errorPage = 'not-authorized.html';
+
+  constructor(message: string, showErrorPage = false) {
+    super(message, 'Unauthorized', 401, showErrorPage);
     Error.captureStackTrace(this, UnauthorizedError);
   }
 }
 
 export class ForbiddenError extends RequestError {
-  constructor(message: string, htmlError = false) {
-    super(message, 'ForbiddenError', 403, htmlError);
+  errorPage = 'not-authorized.html';
+
+  constructor(message: string, showErrorPage = false) {
+    super(message, 'Forbidden', 403, showErrorPage);
     Error.captureStackTrace(this, ForbiddenError);
   }
 }
 
 export class NotFoundError extends RequestError {
-  constructor(message: string, htmlError = false) {
-    super(message, 'NotFound', 404, htmlError);
+  constructor(message: string, showErrorPage = false) {
+    super(message, 'NotFound', 404, showErrorPage);
     Error.captureStackTrace(this, NotFoundError);
   }
 }
 
+export class UnprocessableEntity extends RequestError {
+  constructor(message: string, showErrorPage = false) {
+    super(message, 'UnprocessableEntity', 422, showErrorPage);
+    Error.captureStackTrace(this, UnprocessableEntity);
+  }
+}
+
 export class InternalServerError extends RequestError {
-  constructor(message: string, htmlError = false) {
-    super(message, 'InternalServerError', 500, htmlError);
+  constructor(message: string, showErrorPage = false) {
+    super(message, 'InternalServerError', 500, showErrorPage);
     Error.captureStackTrace(this, InternalServerError);
   }
 }
@@ -61,7 +82,6 @@ export function errorHandler(error: any, req: any, res: Response, next: NextFunc
   let statusCode;
   let errors;
   let message;
-  let htmlError = false;
 
   if (error.errors) {
     errors = error.errors;
@@ -72,7 +92,6 @@ export function errorHandler(error: any, req: any, res: Response, next: NextFunc
       statusCode = error.statusCode;
       message = error.message;
       type = error.type;
-      htmlError = error.htmlError;
     } else if (error instanceof String) {
       message = error;
     }
@@ -95,8 +114,9 @@ export function errorHandler(error: any, req: any, res: Response, next: NextFunc
   }
 
   res.status(statusCode || 500);
-  if (htmlError && (statusCode === 401 || statusCode === 403)) {
-    res.sendFile(path.join(__dirname, '../public', 'not_authorized.html'));
+
+  if (error.showErrorPage && error.errorPage) {
+    res.sendFile(path.join(__dirname, '../public', error.errorPage));
   } else {
     res.send({ errors });
     next();

@@ -1,7 +1,7 @@
 import bodyParser from 'body-parser';
 import express from 'express';
-import {RoleController} from './role.controller';
-import {requireRolePermission} from "../../auth";
+import { RoleController } from './role.controller';
+import { requireRolePermission } from "../../auth";
 
 const router = express.Router();
 

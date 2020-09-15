@@ -1,5 +1,6 @@
 import { User } from '../../api/user/user.model';
 import config from '../../config/environment';
+
 const nJwt = require('njwt');
 
 // Builds ReadOnlyRest JWT token.
@@ -26,11 +27,11 @@ export function buildJWT(user: User) {
 export function login(req: any, res: any) {
   console.log('ror login()');
 
-  if (req.DDSUser == null) {
-    throw new Error('req.DDSUser is not set');
+  if (req.user == null) {
+    throw new Error('req.user is not set');
   }
 
-  const rorJwt = buildJWT(req.DDSUser);
+  const rorJwt = buildJWT(req.user);
   console.log('ror jwt', rorJwt);
   return res.redirect(`${config.kibana.appPath}/login?jwt=${rorJwt}`);
 }
