@@ -100,12 +100,12 @@ export function errorHandler(error: any, req: any, res: Response, next: NextFunc
       errors = [{
         message: message || 'An unknown error occurred!',
         type: type || 'InternalServerError',
-        sourceError: error
+        sourceError: error,
       }];
     } else {
       errors = [{
         message: message || 'An unknown error occurred!',
-        type: type || 'InternalServerError'
+        type: type || 'InternalServerError',
       }];
       if (!(error instanceof RequestError) || error instanceof BadRequestError) {
         console.log('Unknown Internal Server Error: ', error);

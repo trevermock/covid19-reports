@@ -1,8 +1,9 @@
 import React from 'react';
 import { useSelector } from 'react-redux';
-import { Button, Card, CardActions, CardContent, Container, Grid, Typography } from '@material-ui/core';
+import {
+  Button, Card, CardActions, CardContent, Container, Grid, Typography,
+} from '@material-ui/core';
 import { Link } from 'react-router-dom';
-
 import { UserState } from '../../../reducers/userReducer';
 import { AppState } from '../../../store';
 import useStyles from './HomePage.styles';
@@ -27,8 +28,10 @@ export const HomePage = () => {
                     </Typography>
 
                     <Typography>
-                      With StatusEngine you can easily monitor COVID-19 cases across your entire organization. Easily setup
-                      daily symptom reports, monitor quarantine and non-outbreak scenarios, analyze long-term trends and more!
+                      With StatusEngine you can easily monitor COVID-19 cases across your entire organization. Easily
+                      setup
+                      daily symptom reports, monitor quarantine and non-outbreak scenarios, analyze long-term trends and
+                      more!
                     </Typography>
 
                     <ul>
@@ -44,7 +47,7 @@ export const HomePage = () => {
                       </li>
                       <li>
                         <Typography>
-                          <strong>Track individuals' symptoms</strong> before, during and after their illness
+                          <strong>Track individuals&apos symptoms</strong> before, during and after their illness
                         </Typography>
                       </li>
                       <li>
@@ -78,7 +81,7 @@ export const HomePage = () => {
 
                 <Typography>
                   Lorem ipsum dolor sit amet, consectetuer adipiscing elit. Donec odque volutpat mm malesuada erat ut
-                  tupendisse  nibh, viverra non, semper suscipit, posuere a, pede.
+                  tupendisse nibh, viverra non, semper suscipit, posuere a, pede.
                 </Typography>
               </CardContent>
 
@@ -93,32 +96,32 @@ export const HomePage = () => {
           </Grid>
 
           {/* Roster Management */}
-          {user.roles[0].canManageRoster &&
-          <Grid item xs={6}>
-            <Card className={classes.card}>
-              <CardContent>
-                <Typography variant="h5" gutterBottom>
-                  Roster Management
-                </Typography>
+          {user.roles[0].canManageRoster && (
+            <Grid item xs={6}>
+              <Card className={classes.card}>
+                <CardContent>
+                  <Typography variant="h5" gutterBottom>
+                    Roster Management
+                  </Typography>
 
-                <Typography>
-                  Morbi in sem quis dui placerat ornare ellentesque odio nisi, euismod in, pharetra a, ultricies in,
-                  diad arcuras consequ. Uguae, eu vulputate magna eroiquam erat volutptincidunt quirt.
-                </Typography>
-              </CardContent>
+                  <Typography>
+                    Morbi in sem quis dui placerat ornare ellentesque odio nisi, euismod in, pharetra a, ultricies in,
+                    diad arcuras consequ. Uguae, eu vulputate magna eroiquam erat volutptincidunt quirt.
+                  </Typography>
+                </CardContent>
 
-              <CardActions>
-                <Link to="/roster">
-                  <Button variant="contained" color="primary">
-                    View Roster
-                  </Button>
-                </Link>
-              </CardActions>
-            </Card>
-          </Grid>
-          }
+                <CardActions>
+                  <Link to="/roster">
+                    <Button variant="contained" color="primary">
+                      View Roster
+                    </Button>
+                  </Link>
+                </CardActions>
+              </Card>
+            </Grid>
+          )}
         </Grid>
       </Container>
     </main>
-  )
+  );
 };

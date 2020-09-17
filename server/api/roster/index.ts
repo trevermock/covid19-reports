@@ -2,7 +2,7 @@ import express from 'express';
 import multer from 'multer';
 import path from 'path';
 import { RosterController } from './roster.controller';
-import { requireRolePermission } from "../../auth";
+import { requireRolePermission } from '../../auth';
 
 const rosterUpload = multer({
   storage: multer.diskStorage({
@@ -21,51 +21,51 @@ const router = express.Router();
 
 router.get(
   '/:orgId/template',
-  requireRolePermission((role) => role.can_manage_roster),
+  requireRolePermission(role => role.can_manage_roster),
   RosterController.getRosterTemplate,
 );
 
 router.get(
   '/:orgId',
-  requireRolePermission((role) => role.can_manage_roster),
+  requireRolePermission(role => role.can_manage_roster),
   RosterController.getRoster,
 );
 
 router.get(
   '/:orgId/count',
-  requireRolePermission((role) => role.can_manage_roster),
+  requireRolePermission(role => role.can_manage_roster),
   RosterController.getRosterCount,
 );
 
 router.post(
   '/:orgId',
-  requireRolePermission((role) => role.can_manage_roster),
-  RosterController.addRosterEntry
+  requireRolePermission(role => role.can_manage_roster),
+  RosterController.addRosterEntry,
 );
 
 router.post(
   '/:orgId/bulk',
-  requireRolePermission((role) => role.can_manage_roster),
+  requireRolePermission(role => role.can_manage_roster),
   rosterUpload.single('roster_csv'),
-  RosterController.uploadRosterEntries
-)
+  RosterController.uploadRosterEntries,
+);
 
 router.get(
   '/:orgId/:rosterEDIPI',
-  requireRolePermission((role) => role.can_manage_roster),
+  requireRolePermission(role => role.can_manage_roster),
   RosterController.getRosterEntry,
 );
 
 router.delete(
   '/:orgId/:rosterEDIPI',
-  requireRolePermission((role) => role.can_manage_roster),
+  requireRolePermission(role => role.can_manage_roster),
   RosterController.deleteRosterEntry,
 );
 
 router.put(
   '/:orgId/:rosterEDIPI',
-  requireRolePermission((role) => role.can_manage_roster),
-  RosterController.updateRosterEntry
+  requireRolePermission(role => role.can_manage_roster),
+  RosterController.updateRosterEntry,
 );
 
 export default router;

@@ -1,6 +1,6 @@
 import { Response } from 'express';
-import { Org } from "./org.model";
-import { BadRequestError, NotFoundError } from "../../util/error";
+import { Org } from './org.model';
+import { BadRequestError, NotFoundError } from '../../util/error';
 
 export namespace OrgController {
 

@@ -1,10 +1,10 @@
 import { Response } from 'express';
 import csv from 'csvtojson';
 import fs from 'fs';
-import { Roster } from "./roster.model";
-import { Org } from "../org/org.model";
-import { BadRequestError, NotFoundError, UnprocessableEntity } from "../../util/error";
-import { getOptionalParam, getRequiredParam } from "../../util/util";
+import { Roster } from './roster.model';
+import { Org } from '../org/org.model';
+import { BadRequestError, NotFoundError, UnprocessableEntity } from '../../util/error';
+import { getOptionalParam, getRequiredParam } from '../../util/util';
 
 export namespace RosterController {
 
@@ -16,8 +16,8 @@ export namespace RosterController {
   export async function getRoster(req: any, res: Response) {
     const orgId = parseInt(req.params.orgId);
 
-    let limit = (req.query.limit != null) ? parseInt(req.query.limit) : 100;
-    let page = (req.query.page != null) ? parseInt(req.query.page) : 0;
+    const limit = (req.query.limit != null) ? parseInt(req.query.limit) : 100;
+    const page = (req.query.page != null) ? parseInt(req.query.page) : 0;
 
     const roster = await Roster.find({
       skip: page * limit,
@@ -62,7 +62,7 @@ export namespace RosterController {
       throw new BadRequestError('No file to process.');
     }
 
-    let rosterEntries: Roster[] = [];
+    const rosterEntries: Roster[] = [];
     try {
       const roster = await csv().fromFile(req.file.path);
       roster.forEach(row => {
@@ -94,7 +94,7 @@ export namespace RosterController {
     }
 
     await res.json({
-      count: rosterEntries.length
+      count: rosterEntries.length,
     });
   }
 
@@ -146,7 +146,7 @@ export namespace RosterController {
       where: {
         edipi: userEDIPI,
         org: orgId,
-      }
+      },
     });
 
     if (!rosterEntry) {
@@ -179,25 +179,26 @@ export namespace RosterController {
     await res.json(updatedRosterEntry);
   }
 
-  function setRosterParamsFromBody(entry: Roster, body: any) {
-    entry.rate_rank = getOptionalParam('rate_rank', body);
-    entry.first_name = getRequiredParam('first_name', body);
-    entry.last_name = getRequiredParam('last_name', body);
-    entry.unit = getRequiredParam('unit', body);
-    entry.billet_workcenter = getRequiredParam('billet_workcenter', body);
-    entry.contract_number = getRequiredParam('contract_number', body);
-    entry.pilot = getOptionalParam('pilot', body, 'boolean');
-    entry.aircrew = getOptionalParam('aircrew', body, 'boolean');
-    entry.cdi = getOptionalParam('cdi', body, 'boolean');
-    entry.cdqar = getOptionalParam('cdqar', body, 'boolean');
-    entry.dscacrew = getOptionalParam('dscacrew', body, 'boolean');
-    entry.advanced_party = getOptionalParam('advanced_party', body, 'boolean');
-    entry.pui = getOptionalParam('pui', body, 'boolean');
-    const date = getOptionalParam('covid19_test_return_date', body);
-    if (date) {
-      entry.covid19_test_return_date = new Date(date);
-    }
-    entry.rom = getOptionalParam('rom', body);
-    entry.rom_release = getOptionalParam('rom_release', body);
+}
+
+function setRosterParamsFromBody(entry: Roster, body: any) {
+  entry.rate_rank = getOptionalParam('rate_rank', body);
+  entry.first_name = getRequiredParam('first_name', body);
+  entry.last_name = getRequiredParam('last_name', body);
+  entry.unit = getRequiredParam('unit', body);
+  entry.billet_workcenter = getRequiredParam('billet_workcenter', body);
+  entry.contract_number = getRequiredParam('contract_number', body);
+  entry.pilot = getOptionalParam('pilot', body, 'boolean');
+  entry.aircrew = getOptionalParam('aircrew', body, 'boolean');
+  entry.cdi = getOptionalParam('cdi', body, 'boolean');
+  entry.cdqar = getOptionalParam('cdqar', body, 'boolean');
+  entry.dscacrew = getOptionalParam('dscacrew', body, 'boolean');
+  entry.advanced_party = getOptionalParam('advanced_party', body, 'boolean');
+  entry.pui = getOptionalParam('pui', body, 'boolean');
+  const date = getOptionalParam('covid19_test_return_date', body);
+  if (date) {
+    entry.covid19_test_return_date = new Date(date);
   }
+  entry.rom = getOptionalParam('rom', body);
+  entry.rom_release = getOptionalParam('rom_release', body);
 }

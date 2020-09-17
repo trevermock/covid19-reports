@@ -26,7 +26,9 @@ interface UserData {
 }
 
 export namespace User {
+
   export namespace Actions {
+
     export class Login {
       static type = 'USER_LOGIN';
       type = Login.type;
@@ -39,27 +41,23 @@ export namespace User {
       static type = 'USER_LOGOUT';
       type = Logout.type;
     }
+
   }
 
   export const login = () => async (dispatch: Dispatch<Actions.Login>) => {
-    let response: AxiosResponse<UserData>;
-    try {
-      response = await axios.get('api/user/current');
-    } catch (err) {
-      alert(err.message);
-      return;
-    }
-
+    const response = await axios.get('api/user/current') as AxiosResponse<UserData>;
     const userData = response.data;
 
     console.log('userData', userData);
 
     dispatch({
-      ...new Actions.Login({ userData })
+      ...new Actions.Login({ userData }),
     });
-  }
+  };
 
   export const logout = () => (dispatch: Dispatch<Actions.Logout>) => {
-    dispatch({ ...new Actions.Logout() });
-  }
+    dispatch({
+      ...new Actions.Logout(),
+    });
+  };
 }

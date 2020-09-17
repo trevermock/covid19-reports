@@ -1,7 +1,7 @@
 const baseConfig = {
   // Local vs AWS Kibana
   ror: {
-    secret: process.env.ROR_JWT_SIGNATURE_KEY || 'woEayHiICafruph^gZJb3EG5Fnl1qou6XUT8xR^7OMwaCYxz^&@rr#Hi5*s*918tQS&iDJO&67xy0hP!F@pThb3#Aymx%XPV3x^'
+    secret: process.env.ROR_JWT_SIGNATURE_KEY || 'woEayHiICafruph^gZJb3EG5Fnl1qou6XUT8xR^7OMwaCYxz^&@rr#Hi5*s*918tQS&iDJO&67xy0hP!F@pThb3#Aymx%XPV3x^',
   },
 
   kibana: {
@@ -16,4 +16,4 @@ const baseConfig = {
 export default {
   ...baseConfig,
   ...require(`./${process.env.NODE_ENV}`).default,
-}
+};

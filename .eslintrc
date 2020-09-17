@@ -1,0 +1,66 @@
+{
+  "extends": "airbnb-typescript",
+  "parserOptions": {
+    "project": "./tsconfig.json"
+  },
+  "env": {
+    "es6": true,
+    "jquery": true,
+    "node": true,
+    "browser": true
+  },
+  "globals": {},
+  "plugins": [
+    "@typescript-eslint"
+  ],
+  "rules": {
+    "@typescript-eslint/lines-between-class-members": "off",
+    "@typescript-eslint/no-use-before-define": "off",
+    "arrow-body-style": "off",
+    "arrow-parens": ["error", "as-needed", { "requireForBlockBody": false }],
+    "class-methods-use-this": "off",
+    "curly": ["error", "all"],
+    "func-names": "off",
+    "global-require": "off",
+    "import/no-dynamic-require": "off",
+    "import/prefer-default-export": "off",
+    "jsx-a11y/label-has-associated-control": "off",
+    "max-classes-per-file": "off",
+    "max-len": "off",
+    "no-await-in-loop": "off",
+    "no-console": "off",
+    "no-empty": ["error", { "allowEmptyCatch":  true }],
+    "no-multiple-empty-lines": ["error", { "max": 2, "maxBOF": 0, "maxEOF": 1 }],
+    "no-nested-ternary": "off",
+    "no-param-reassign": "off",
+    "no-plusplus": ["error", { "allowForLoopAfterthoughts": true }],
+    "no-prototype-builtins": "off",
+    "no-restricted-syntax": [
+      "error",
+      {
+        "selector": "ForInStatement",
+        "message": "for..in loops iterate over the entire prototype chain, which is virtually never what you want. Use Object.{keys,values,entries}, and iterate over the resulting array."
+      },
+      {
+        "selector": "LabeledStatement",
+        "message": "Labels are a form of GOTO; using them makes code confusing and hard to maintain and understand."
+      },
+      {
+        "selector": "WithStatement",
+        "message": "`with` is disallowed in strict mode because it makes code impossible to predict and optimize."
+      }
+    ],
+    "no-underscore-dangle": "off",
+    "no-use-before-define": "off",
+    "padded-blocks": "off",
+    "prefer-destructuring": "off",
+    "radix": "off",
+    "react/jsx-one-expression-per-line": "off",
+    "space-before-function-paren": ["error", {
+      "anonymous": "never",
+      "named": "never",
+      "asyncArrow": "always"
+    }],
+    "valid-typeof": "off"
+  }
+}

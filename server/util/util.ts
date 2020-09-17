@@ -1,11 +1,11 @@
-import { BadRequestError } from "./error";
+import { BadRequestError } from './error';
 
 export function getOptionalParam(param: string, params: any, type: string = 'string') {
   if (!params.hasOwnProperty(param)) {
     return undefined;
   }
   if (typeof params[param] !== type) {
-    throw new BadRequestError(`Expected type '${type}' for parameter: ${param}`)
+    throw new BadRequestError(`Expected type '${type}' for parameter: ${param}`);
   }
   return params[param];
 }

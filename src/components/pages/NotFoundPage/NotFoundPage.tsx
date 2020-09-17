@@ -1,8 +1,6 @@
 import { Container } from '@material-ui/core';
 import React from 'react';
-
 import useStyles from './NotFoundPage.styles';
-
 
 export const NotFoundPage = () => {
   const classes = useStyles();
@@ -13,5 +11,5 @@ export const NotFoundPage = () => {
         <h1>Page not found.</h1>
       </Container>
     </main>
-  )
-}
+  );
+};

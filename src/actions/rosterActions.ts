@@ -1,13 +1,16 @@
 import { Dispatch } from 'redux';
 import axios from 'axios';
-import {AppState} from "../store";
+import { AppState } from '../store';
 
 export namespace Roster {
+
   export namespace Actions {
+
     export class Upload {
       static type = 'ROSTER_UPLOAD';
       type = Upload.type;
     }
+
   }
 
   export const upload = (file: File, onComplete: (count: number) => void) => async (dispatch: Dispatch<Actions.Upload>, getState: () => AppState) => {
@@ -16,7 +19,7 @@ export namespace Roster {
 
     const appState = getState();
 
-    var formData = new FormData();
+    const formData = new FormData();
     // var imagefile = document.querySelector('#file');
     // formData.append("image", imagefile.files[0]);
     formData.append('roster_csv', file);
@@ -24,8 +27,8 @@ export namespace Roster {
     try {
       const response = await axios.post(`api/roster/${appState.user.roles[0].org.id}/bulk`, formData, {
         headers: {
-          'Content-Type': 'multipart/form-data'
-        }
+          'Content-Type': 'multipart/form-data',
+        },
       });
 
       onComplete(response.data.count);
@@ -33,12 +36,11 @@ export namespace Roster {
       onComplete(-1);
     }
 
-
     console.log('upload complete!');
 
     dispatch({
-      ...new Actions.Upload()
+      ...new Actions.Upload(),
     });
-  }
+  };
 }
 

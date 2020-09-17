@@ -1,5 +1,4 @@
 import { Router } from 'express';
-
 import * as rorController from './read-only-rest.controller';
 
 const router = Router();

@@ -1,5 +1,7 @@
-import { Entity, PrimaryGeneratedColumn, Column, BaseEntity, JoinColumn, ManyToOne } from "typeorm";
-import { Org } from "../org/org.model";
+import {
+  Entity, PrimaryGeneratedColumn, Column, BaseEntity, JoinColumn, ManyToOne,
+} from 'typeorm';
+import { Org } from '../org/org.model';
 
 @Entity()
 export class Role extends BaseEntity {
@@ -8,43 +10,43 @@ export class Role extends BaseEntity {
   id: number;
 
   @Column({
-    length: 2048
+    length: 2048,
   })
   name: string;
 
   @Column({
-    length: 2048
+    length: 2048,
   })
   description: string;
 
   @ManyToOne(() => Org)
   @JoinColumn({
-    name: 'org_id'
+    name: 'org_id',
   })
   org: Org;
 
   @Column({
-    default: ""
+    default: '',
   })
   index_prefix: string;
 
   @Column({
-    default: false
+    default: false,
   })
   can_manage_users: boolean;
 
   @Column({
-    default: false
+    default: false,
   })
   can_manage_roster: boolean;
 
   @Column({
-    default: false
+    default: false,
   })
   can_manage_roles: boolean;
 
   @Column({
-    default: false
+    default: false,
   })
   can_view_roster: boolean;
 

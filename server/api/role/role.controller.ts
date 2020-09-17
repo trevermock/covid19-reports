@@ -1,7 +1,7 @@
 import { Response } from 'express';
-import { Role } from "./role.model";
-import { Org } from "../org/org.model";
-import { BadRequestError, NotFoundError } from "../../util/error";
+import { Role } from './role.model';
+import { Org } from '../org/org.model';
+import { BadRequestError, NotFoundError } from '../../util/error';
 
 export namespace RoleController {
 
@@ -96,7 +96,7 @@ export namespace RoleController {
       where: {
         id: roleId,
         org: orgId,
-      }
+      },
     });
 
     if (!role) {
@@ -117,18 +117,19 @@ export namespace RoleController {
     await res.json(updatedRole);
   }
 
-  function setRolePermissionsFromBody(body: any, role: Role) {
-    if (body.can_manage_users != null) {
-      role.can_manage_users = body.can_manage_users;
-    }
-    if (body.can_manage_roles != null) {
-      role.can_manage_roles = body.can_manage_roles;
-    }
-    if (body.can_manage_roster != null) {
-      role.can_manage_roster = body.can_manage_roster;
-    }
-    if (body.can_view_roster != null) {
-      role.can_view_roster = body.can_view_roster;
-    }
+}
+
+function setRolePermissionsFromBody(body: any, role: Role) {
+  if (body.can_manage_users != null) {
+    role.can_manage_users = body.can_manage_users;
+  }
+  if (body.can_manage_roles != null) {
+    role.can_manage_roles = body.can_manage_roles;
+  }
+  if (body.can_manage_roster != null) {
+    role.can_manage_roster = body.can_manage_roster;
+  }
+  if (body.can_view_roster != null) {
+    role.can_view_roster = body.can_view_roster;
   }
 }

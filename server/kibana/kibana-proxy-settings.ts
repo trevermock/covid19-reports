@@ -1,6 +1,6 @@
+/* eslint @typescript-eslint/no-unused-vars: "off" */
 import { User } from '../api/user/user.model';
 import config from '../config/environment';
-// import { Options } from 'http-proxy-middleware';
 
 export const kibanaProxySettings = {
   target: config.kibana.uri,
@@ -18,7 +18,8 @@ export const kibanaProxySettings = {
     proxyReq.setHeader('x-se-fire-department-all', user.getKibanaIndex());
   },
 
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
   router: (req: any) => {
     return config.kibana.uri;
-  }
+  },
 };

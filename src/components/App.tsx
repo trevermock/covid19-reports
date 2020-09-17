@@ -1,24 +1,25 @@
 import clsx from 'clsx';
 import React, { useEffect } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
-import { Switch, Route, Redirect, Link } from 'react-router-dom';
 import {
-  AppBar, Divider, Drawer, IconButton, List, ListItem, ListItemIcon, ListItemText, Toolbar, Typography
+  Switch, Route, Redirect, Link,
+} from 'react-router-dom';
+import {
+  AppBar, Divider, Drawer, IconButton, List, ListItem, ListItemIcon, ListItemText, Toolbar,
 } from '@material-ui/core';
 import BarChartIcon from '@material-ui/icons/BarChart';
 import HomeIcon from '@material-ui/icons/Home';
 import ListAltIcon from '@material-ui/icons/ListAlt';
 import MenuIcon from '@material-ui/icons/Menu';
 import PeopleIcon from '@material-ui/icons/People';
-
 import { User } from '../actions/userActions';
 import { UserState } from '../reducers/userReducer';
 import { AppState } from '../store';
 import { HomePage } from './pages/HomePage/HomePage';
 import useStyles from './App.styles';
 import { RosterPage } from './pages/RosterPage/RosterPage';
-import { NotFoundPage } from "./pages/NotFoundPage/NotFoundPage";
-import { UsersPage } from "./pages/UsersPage/UsersPage";
+import { NotFoundPage } from './pages/NotFoundPage/NotFoundPage';
+import { UsersPage } from './pages/UsersPage/UsersPage';
 import logoIcon from '../media/images/logo-icon.png';
 import logoText from '../media/images/logo-text.png';
 
@@ -45,7 +46,7 @@ export const App = () => {
       <AppBar
         position="fixed"
         className={clsx(classes.appBar, {
-          [classes.appBarShift]: drawerOpen
+          [classes.appBarShift]: drawerOpen,
         })}
       >
         <Toolbar>
@@ -56,7 +57,7 @@ export const App = () => {
             edge="start"
             className={classes.menuButton}
           >
-            <MenuIcon/>
+            <MenuIcon />
           </IconButton>
         </Toolbar>
       </AppBar>
@@ -65,7 +66,7 @@ export const App = () => {
         variant="permanent"
         className={clsx(classes.drawer, {
           [classes.drawerOpen]: drawerOpen,
-          [classes.drawerClose]: !drawerOpen
+          [classes.drawerClose]: !drawerOpen,
         })}
         classes={{
           paper: clsx({
@@ -76,46 +77,48 @@ export const App = () => {
       >
         <div className={classes.toolbar}>
           <img src={logoIcon} height="34" alt="Status Engine Logo Icon" />
-          <img src={logoText} height="20" style={{marginLeft: '10px'}} alt="Status Engine Logo Text" />
+          <img src={logoText} height="20" style={{ marginLeft: '10px' }} alt="Status Engine Logo Text" />
         </div>
-        <Divider/>
+        <Divider />
         <List>
           <Link to="/home">
             <ListItem button key="Home">
-              <ListItemIcon><HomeIcon/></ListItemIcon>
-              <ListItemText primary="Home"/>
+              <ListItemIcon><HomeIcon /></ListItemIcon>
+              <ListItemText primary="Home" />
             </ListItem>
           </Link>
           <a href="/dashboard">
             <ListItem button key="Analytics">
-              <ListItemIcon><BarChartIcon/></ListItemIcon>
-              <ListItemText primary="Analytics"/>
+              <ListItemIcon><BarChartIcon /></ListItemIcon>
+              <ListItemText primary="Analytics" />
             </ListItem>
           </a>
         </List>
-        <Divider/>
+        <Divider />
         <List>
-          {user.roles[0].canManageUsers &&
+          {user.roles[0].canManageUsers
+            && (
             <Link to="/users">
               <ListItem button key="Users">
-                <ListItemIcon><PeopleIcon/></ListItemIcon>
-                <ListItemText primary="Users"/>
+                <ListItemIcon><PeopleIcon /></ListItemIcon>
+                <ListItemText primary="Users" />
               </ListItem>
             </Link>
-          }
+            )}
 
-          {user.roles[0].canManageRoster &&
+          {user.roles[0].canManageRoster
+            && (
             <Link to="/roster">
               <ListItem button key="Roster">
-                <ListItemIcon><ListAltIcon/></ListItemIcon>
-                <ListItemText primary="Roster"/>
+                <ListItemIcon><ListAltIcon /></ListItemIcon>
+                <ListItemText primary="Roster" />
               </ListItem>
             </Link>
-          }
+            )}
         </List>
       </Drawer>
 
-      <div className={classes.toolbar}/>
+      <div className={classes.toolbar} />
 
       <div
         className={clsx(classes.content, {
@@ -125,22 +128,22 @@ export const App = () => {
       >
         <Switch>
           <Route path="/home">
-            <HomePage/>
+            <HomePage />
           </Route>
           <Route path="/roster">
-            <RosterPage/>
+            <RosterPage />
           </Route>
           <Route path="/users">
-            <UsersPage/>
+            <UsersPage />
           </Route>
-          <Redirect from="/" exact to="/home"/>
+          <Redirect from="/" exact to="/home" />
           <Route path="/*">
-            <NotFoundPage/>
+            <NotFoundPage />
           </Route>
         </Switch>
       </div>
     </>
-  )
+  );
 };
 
 export default App;

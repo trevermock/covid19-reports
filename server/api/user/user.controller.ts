@@ -1,7 +1,7 @@
 import { Response } from 'express';
-import { User } from "./user.model";
-import { Role } from "../role/role.model";
-import { BadRequestError, NotFoundError } from "../../util/error";
+import { User } from './user.model';
+import { Role } from '../role/role.model';
+import { BadRequestError, NotFoundError } from '../../util/error';
 
 export namespace UserController {
 
@@ -39,13 +39,13 @@ export namespace UserController {
     let user = await User.findOne({
       relations: ['roles'],
       where: {
-        edipi: edipi,
+        edipi,
       },
       join: {
         alias: 'user',
         leftJoinAndSelect: {
-          'roles': 'user.roles',
-          'org': 'roles.org',
+          roles: 'user.roles',
+          org: 'roles.org',
         },
       },
     });
@@ -60,7 +60,7 @@ export namespace UserController {
       user.roles = [];
     }
 
-    const orgRole = user.roles.find(role => role.org.id === orgId);
+    const orgRole = user.roles.find(userRole => userRole.org.id === orgId);
     if (orgRole) {
       throw new BadRequestError('The user already has a role in the organization.');
     }
@@ -134,9 +134,9 @@ export namespace UserController {
     await res.json(removedUser);
   }
 
-  export async function updateUser(req: any, res: Response) {
-    const org = req.params.orgId;
-    const userEDIPI = req.params.userEDIPI;
-    // TODO: Implement
-  }
+  // export async function updateUser(req: any, res: Response) {
+  //   const org = req.params.orgId;
+  //   const userEDIPI = req.params.userEDIPI;
+  //   // TODO: Implement
+  // }
 }
