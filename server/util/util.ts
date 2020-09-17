@@ -1,6 +1,6 @@
-import { BadRequestError } from './error';
+import { BadRequestError } from './error-types';
 
-export function getOptionalParam(param: string, params: any, type: string = 'string') {
+export function getOptionalParam<T extends object, K extends keyof T>(param: K, params: T, type: BaseType = 'string'): T[K] | undefined {
   if (!params.hasOwnProperty(param)) {
     return undefined;
   }
@@ -10,7 +10,7 @@ export function getOptionalParam(param: string, params: any, type: string = 'str
   return params[param];
 }
 
-export function getRequiredParam(param: string, params: any, type: string = 'string') {
+export function getRequiredParam<T extends object, K extends keyof T>(param: K, params: T, type: BaseType = 'string'): T[K] {
   if (!params.hasOwnProperty(param)) {
     throw new BadRequestError(`Missing parameter: ${param}`);
   }
@@ -19,3 +19,12 @@ export function getRequiredParam(param: string, params: any, type: string = 'str
   }
   return params[param];
 }
+
+export type BaseType = (
+  'string' |
+  'number' |
+  'boolean' |
+  'object' |
+  'function' |
+  'undefined'
+);

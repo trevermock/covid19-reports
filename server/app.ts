@@ -9,9 +9,9 @@ import apiRoutes from './api';
 import kibanaProxy from './kibana';
 import kibanaDashboard from './kibana/dashboard';
 import database from './sqldb';
-import config from './config/environment';
+import config from './config';
 import { requireUserAuth } from './auth';
-import { errorHandler } from './util/error';
+import { errorHandler } from './util/error-handler';
 
 database.then(() => {
   console.log('Database ready');

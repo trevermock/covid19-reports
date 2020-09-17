@@ -22,6 +22,7 @@
     "curly": ["error", "all"],
     "func-names": "off",
     "global-require": "off",
+    "import/no-cycle": "off",
     "import/no-dynamic-require": "off",
     "import/prefer-default-export": "off",
     "jsx-a11y/label-has-associated-control": "off",

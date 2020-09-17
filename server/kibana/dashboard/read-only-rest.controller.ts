@@ -1,10 +1,38 @@
+import { Response, NextFunction } from 'express';
+import { ApiRequest } from '../../api';
 import { User } from '../../api/user/user.model';
-import config from '../../config/environment';
+import config from '../../config';
 
 const nJwt = require('njwt');
 
+class ReadOnlyRestController {
+
+  // Redirects user to Kibana login page. By attaching the rorJWT this will affectively login in the user seamlessly,
+  // and store rorCookie in the browser.
+  login(req: ApiRequest, res: Response) {
+    console.log('ror login()');
+
+    if (req.appUser == null) {
+      throw new Error('req.appUser is not set');
+    }
+
+    const rorJwt = buildJWT(req.appUser);
+    console.log('ror jwt', rorJwt);
+    return res.redirect(`${config.kibana.appPath}/login?jwt=${rorJwt}`);
+  }
+
+  // Logs out of a Kibana session by clearing the rorCookie.
+  logout(req: ApiRequest, res: Response, next: NextFunction) {
+    console.log('ror logout()');
+
+    res.clearCookie('rorCookie');
+    next();
+  }
+
+}
+
 // Builds ReadOnlyRest JWT token.
-export function buildJWT(user: User) {
+function buildJWT(user: User) {
   console.log('ror buildJWT()');
 
   const claims = {
@@ -22,24 +50,4 @@ export function buildJWT(user: User) {
   return jwt.compact();
 }
 
-// Redirects user to Kibana login page. By attaching the rorJWT this will affectively login in the user seamlessly,
-// and store rorCookie in the browser.
-export function login(req: any, res: any) {
-  console.log('ror login()');
-
-  if (req.user == null) {
-    throw new Error('req.user is not set');
-  }
-
-  const rorJwt = buildJWT(req.user);
-  console.log('ror jwt', rorJwt);
-  return res.redirect(`${config.kibana.appPath}/login?jwt=${rorJwt}`);
-}
-
-// Logs out of a Kibana session by clearing the rorCookie.
-export function logout(req: any, res: any, next: any) {
-  console.log('ror logout()');
-
-  res.clearCookie('rorCookie');
-  next();
-}
+export default new ReadOnlyRestController();

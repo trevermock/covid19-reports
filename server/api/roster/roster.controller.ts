@@ -1,19 +1,20 @@
 import { Response } from 'express';
 import csv from 'csvtojson';
 import fs from 'fs';
+import { ApiRequest, OrgEdipiParams, OrgParam } from '../index';
 import { Roster } from './roster.model';
 import { Org } from '../org/org.model';
-import { BadRequestError, NotFoundError, UnprocessableEntity } from '../../util/error';
+import { BadRequestError, NotFoundError, UnprocessableEntity } from '../../util/error-types';
 import { getOptionalParam, getRequiredParam } from '../../util/util';
 
-export namespace RosterController {
+class RosterController {
 
-  export async function getRosterTemplate(req: any, res: Response) {
+  async getRosterTemplate(req: ApiRequest, res: Response) {
     const file = `${__dirname}/uploads/roster_template.csv`;
     res.download(file);
   }
 
-  export async function getRoster(req: any, res: Response) {
+  async getRoster(req: ApiRequest<OrgParam, any, GetRosterQuery>, res: Response) {
     const orgId = parseInt(req.params.orgId);
 
     const limit = (req.query.limit != null) ? parseInt(req.query.limit) : 100;
@@ -30,10 +31,10 @@ export namespace RosterController {
       },
     });
 
-    await res.json(roster);
+    res.json(roster);
   }
 
-  export async function getRosterCount(req: any, res: Response) {
+  async getRosterCount(req: ApiRequest<OrgParam>, res: Response) {
     const orgId = parseInt(req.params.orgId);
 
     const count = await Roster.count({
@@ -42,10 +43,10 @@ export namespace RosterController {
       },
     });
 
-    await res.json({ count });
+    res.json({ count });
   }
 
-  export async function uploadRosterEntries(req: any, res: Response) {
+  async uploadRosterEntries(req: ApiRequest<OrgParam>, res: Response) {
     const orgId = parseInt(req.params.orgId);
 
     const org = await Org.findOne({
@@ -64,7 +65,7 @@ export namespace RosterController {
 
     const rosterEntries: Roster[] = [];
     try {
-      const roster = await csv().fromFile(req.file.path);
+      const roster = await csv().fromFile(req.file.path) as RosterFileRow[];
       roster.forEach(row => {
         const entry = new Roster();
         entry.edipi = getRequiredParam('edipi', row);
@@ -93,12 +94,12 @@ export namespace RosterController {
       fs.unlinkSync(req.file.path);
     }
 
-    await res.json({
+    res.json({
       count: rosterEntries.length,
     });
   }
 
-  export async function addRosterEntry(req: any, res: Response) {
+  async addRosterEntry(req: ApiRequest<OrgParam, RosterEntryData>, res: Response) {
     const orgId = parseInt(req.params.orgId);
 
     const org = await Org.findOne({
@@ -120,7 +121,7 @@ export namespace RosterController {
     await res.status(201).json(newRosterEntry);
   }
 
-  export async function getRosterEntry(req: any, res: Response) {
+  async getRosterEntry(req: ApiRequest<OrgEdipiParams>, res: Response) {
     const orgId = parseInt(req.params.orgId);
     const userEDIPI = req.params.userEDIPI;
 
@@ -135,10 +136,10 @@ export namespace RosterController {
       throw new NotFoundError('User could not be found.');
     }
 
-    await res.json(rosterEntry);
+    res.json(rosterEntry);
   }
 
-  export async function deleteRosterEntry(req: any, res: Response) {
+  async deleteRosterEntry(req: ApiRequest<OrgEdipiParams>, res: Response) {
     const orgId = parseInt(req.params.orgId);
     const userEDIPI = req.params.userEDIPI;
 
@@ -155,10 +156,10 @@ export namespace RosterController {
 
     const deletedEntry = await rosterEntry.remove();
 
-    await res.json(deletedEntry);
+    res.json(deletedEntry);
   }
 
-  export async function updateRosterEntry(req: any, res: Response) {
+  async updateRosterEntry(req: ApiRequest<OrgEdipiParams, RosterEntryData>, res: Response) {
     const orgId = parseInt(req.params.orgId);
     const userEDIPI = req.params.userEDIPI;
 
@@ -176,18 +177,18 @@ export namespace RosterController {
     setRosterParamsFromBody(entry, req.body);
     const updatedRosterEntry = await entry.save();
 
-    await res.json(updatedRosterEntry);
+    res.json(updatedRosterEntry);
   }
 
 }
 
-function setRosterParamsFromBody(entry: Roster, body: any) {
-  entry.rate_rank = getOptionalParam('rate_rank', body);
+function setRosterParamsFromBody(entry: Roster, body: RosterEntryData) {
   entry.first_name = getRequiredParam('first_name', body);
   entry.last_name = getRequiredParam('last_name', body);
   entry.unit = getRequiredParam('unit', body);
   entry.billet_workcenter = getRequiredParam('billet_workcenter', body);
   entry.contract_number = getRequiredParam('contract_number', body);
+  entry.rate_rank = getOptionalParam('rate_rank', body);
   entry.pilot = getOptionalParam('pilot', body, 'boolean');
   entry.aircrew = getOptionalParam('aircrew', body, 'boolean');
   entry.cdi = getOptionalParam('cdi', body, 'boolean');
@@ -202,3 +203,50 @@ function setRosterParamsFromBody(entry: Roster, body: any) {
   entry.rom = getOptionalParam('rom', body);
   entry.rom_release = getOptionalParam('rom_release', body);
 }
+
+type GetRosterQuery = {
+  limit: string
+  page: string
+};
+
+type RosterFileRow = {
+  edipi: string
+  first_name: string
+  last_name: string
+  unit: string
+  billet_workcenter: string
+  contract_number: string
+  rate_rank?: string
+  pilot?: string
+  aircrew?: string
+  cdi?: string
+  cdqar?: string
+  dscacrew?: string
+  advanced_party?: string
+  pui?: string
+  covid19_test_return_date?: string
+  rom?: string
+  rom_release?: string
+};
+
+type RosterEntryData = {
+  edipi: Roster['edipi']
+  first_name: Roster['first_name']
+  last_name: Roster['last_name']
+  unit: Roster['unit']
+  billet_workcenter: Roster['billet_workcenter']
+  contract_number: Roster['contract_number']
+  rate_rank?: Roster['rate_rank']
+  pilot?: Roster['pilot']
+  aircrew?: Roster['aircrew']
+  cdi?: Roster['cdi']
+  cdqar?: Roster['cdqar']
+  dscacrew?: Roster['dscacrew']
+  advanced_party?: Roster['advanced_party']
+  pui?: Roster['pui']
+  covid19_test_return_date?: Roster['covid19_test_return_date']
+  rom?: Roster['rom']
+  rom_release?: Roster['rom_release']
+};
+
+export default new RosterController();

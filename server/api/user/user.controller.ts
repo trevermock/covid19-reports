@@ -1,15 +1,16 @@
 import { Response } from 'express';
+import { ApiRequest, OrgEdipiParams, OrgParam } from '../index';
 import { User } from './user.model';
 import { Role } from '../role/role.model';
-import { BadRequestError, NotFoundError } from '../../util/error';
+import { BadRequestError, NotFoundError } from '../../util/error-types';
 
-export namespace UserController {
+class UserController {
 
-  export async function current(req: any, res: Response) {
-    await res.json(req.user);
+  async current(req: ApiRequest, res: Response) {
+    res.json(req.appUser);
   }
 
-  export async function addUser(req: any, res: Response) {
+  async addUser(req: ApiRequest<OrgParam, AddUserBody>, res: Response) {
     const orgId = parseInt(req.params.orgId);
     const roleId = (req.body.role != null) ? parseInt(req.body.role) : undefined;
     const edipi = req.body.edipi;
@@ -80,7 +81,7 @@ export namespace UserController {
     await res.status(newUser ? 201 : 200).json(updatedUser);
   }
 
-  export async function getOrgUsers(req: any, res: Response) {
+  async getOrgUsers(req: ApiRequest<OrgParam>, res: Response) {
     // TODO: This could potentially be optimized with something like this:
     // SELECT "user".*
     //   FROM role
@@ -111,10 +112,10 @@ export namespace UserController {
       });
     }
 
-    await res.json(users);
+    res.json(users);
   }
 
-  export async function deleteUser(req: any, res: Response) {
+  async deleteUser(req: ApiRequest<OrgEdipiParams>, res: Response) {
     const orgId = parseInt(req.params.orgId);
     const userEDIPI = req.params.userEDIPI;
 
@@ -131,12 +132,21 @@ export namespace UserController {
 
     const removedUser = await user.remove();
 
-    await res.json(removedUser);
+    res.json(removedUser);
   }
 
-  // export async function updateUser(req: any, res: Response) {
+  // async updateUser(req: any, res: Response) {
   //   const org = req.params.orgId;
   //   const userEDIPI = req.params.userEDIPI;
   //   // TODO: Implement
   // }
 }
+
+type AddUserBody = {
+  edipi: string
+  role: string
+  first_name: string
+  last_name: string
+};
+
+export default new UserController();

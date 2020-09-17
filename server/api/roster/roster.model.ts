@@ -19,12 +19,6 @@ export class Roster extends BaseEntity {
 
   @Column({
     length: 100,
-    nullable: true,
-  })
-  rate_rank: string;
-
-  @Column({
-    length: 100,
   })
   first_name: string;
 
@@ -49,55 +43,61 @@ export class Roster extends BaseEntity {
   contract_number: string;
 
   @Column({
-    default: false,
+    length: 100,
+    nullable: true,
   })
-  pilot: boolean;
+  rate_rank?: string;
 
   @Column({
     default: false,
   })
-  aircrew: boolean;
+  pilot?: boolean;
 
   @Column({
     default: false,
   })
-  cdi: boolean;
+  aircrew?: boolean;
 
   @Column({
     default: false,
   })
-  cdqar: boolean;
+  cdi?: boolean;
 
   @Column({
     default: false,
   })
-  dscacrew: boolean;
+  cdqar?: boolean;
 
   @Column({
     default: false,
   })
-  advanced_party: boolean;
+  dscacrew?: boolean;
 
   @Column({
     default: false,
   })
-  pui: boolean;
+  advanced_party?: boolean;
+
+  @Column({
+    default: false,
+  })
+  pui?: boolean;
 
   @Column({
     nullable: true,
   })
-  covid19_test_return_date: Date;
+  covid19_test_return_date?: Date;
 
   @Column({
     length: 50,
     nullable: true,
   })
-  rom: string;
+  rom?: string;
 
   @Column({
     length: 100,
     nullable: true,
   })
-  rom_release: string;
+  rom_release?: string;
 
 }

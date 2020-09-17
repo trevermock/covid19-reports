@@ -1,11 +1,12 @@
 import { Response } from 'express';
+import { ApiRequest, OrgParam, OrgRoleParams } from '../index';
 import { Role } from './role.model';
 import { Org } from '../org/org.model';
-import { BadRequestError, NotFoundError } from '../../util/error';
+import { BadRequestError, NotFoundError } from '../../util/error-types';
 
-export namespace RoleController {
+class RoleController {
 
-  export async function getOrgRoles(req: any, res: Response) {
+  async getOrgRoles(req: ApiRequest<OrgParam>, res: Response) {
     const orgId = parseInt(req.params.orgId);
 
     const roles = await Role.find({
@@ -14,10 +15,10 @@ export namespace RoleController {
       },
     });
 
-    await res.json(roles);
+    res.json(roles);
   }
 
-  export async function addRole(req: any, res: Response) {
+  async addRole(req: ApiRequest<OrgParam, AddRoleBody>, res: Response) {
     const orgId = parseInt(req.params.orgId);
 
     if (!req.body.name) {
@@ -48,7 +49,7 @@ export namespace RoleController {
     await res.status(201).json(newRole);
   }
 
-  export async function getRole(req: any, res: Response) {
+  async getRole(req: ApiRequest<OrgRoleParams>, res: Response) {
     const orgId = parseInt(req.params.orgId);
     const roleId = parseInt(req.params.roleId);
 
@@ -63,10 +64,10 @@ export namespace RoleController {
       throw new NotFoundError('Role could not be found.');
     }
 
-    await res.json(role);
+    res.json(role);
   }
 
-  export async function deleteRole(req: any, res: Response) {
+  async deleteRole(req: ApiRequest<OrgRoleParams>, res: Response) {
     const orgId = parseInt(req.params.orgId);
     const roleId = parseInt(req.params.roleId);
 
@@ -83,14 +84,14 @@ export namespace RoleController {
 
     const removedRole = await role.remove();
 
-    await res.json(removedRole);
+    res.json(removedRole);
   }
 
-  export async function updateRole(req: any, res: Response) {
+  async updateRole(req: ApiRequest<OrgRoleParams, UpdateRoleBody>, res: Response) {
     const orgId = parseInt(req.params.orgId);
     const roleId = parseInt(req.params.roleId);
-    const name = req.body.name as string | undefined;
-    const description = req.body.description as string | undefined;
+    const name = req.body.name;
+    const description = req.body.description;
 
     const role = await Role.findOne({
       where: {
@@ -114,12 +115,12 @@ export namespace RoleController {
     setRolePermissionsFromBody(role, req.body);
     const updatedRole = await role.save();
 
-    await res.json(updatedRole);
+    res.json(updatedRole);
   }
 
 }
 
-function setRolePermissionsFromBody(body: any, role: Role) {
+function setRolePermissionsFromBody(role: Role, body: RolePermissionsBody) {
   if (body.can_manage_users != null) {
     role.can_manage_users = body.can_manage_users;
   }
@@ -133,3 +134,19 @@ function setRolePermissionsFromBody(body: any, role: Role) {
     role.can_view_roster = body.can_view_roster;
   }
 }
+
+type RolePermissionsBody = {
+  can_manage_users?: boolean
+  can_manage_roles?: boolean
+  can_manage_roster?: boolean
+  can_view_roster?: boolean
+};
+
+type AddRoleBody = {
+  name: string
+  description: string
+} & RolePermissionsBody;
+
+type UpdateRoleBody = AddRoleBody;
+
+export default new RoleController();

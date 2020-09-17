@@ -1,12 +1,12 @@
 import { Router } from 'express';
-import * as rorController from './read-only-rest.controller';
+import controller from './read-only-rest.controller';
 
-const router = Router();
+const router = Router() as any;
 
 router.get(
   '/',
-  rorController.logout,
-  rorController.login,
+  controller.logout,
+  controller.login,
 );
 
 export default router;
