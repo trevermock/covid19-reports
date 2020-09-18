@@ -9,6 +9,9 @@ BRANCH=$(shell git rev-parse --symbolic-full-name --abbrev-ref HEAD)
 
 TAG=${BRANCH}-${SHA}-${ENVIRONMENT}
 
+login:  
+        $$(aws ecr get-login --no-include-email --region us-east-1)
+
 build:
 	docker build \
 	-t $(ORG)/$(REPO):${TAG} \
