@@ -37,6 +37,8 @@ if (process.env.NODE_ENV === 'development') {
 type Config = typeof baseConfig
   & Partial<typeof devConfig>
   & Partial<typeof prodConfig>
-  & Partial<typeof testConfig>
+  & Partial<typeof testConfig>;
 
-export default config;
+const configExport = config;
+
+export default configExport;

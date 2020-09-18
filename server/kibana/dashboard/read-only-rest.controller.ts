@@ -1,6 +1,7 @@
 import { Response, NextFunction } from 'express';
 import { ApiRequest } from '../../api';
 import { User } from '../../api/user/user.model';
+import { Role } from '../../api/role/role.model';
 import config from '../../config';
 
 const nJwt = require('njwt');
@@ -12,12 +13,13 @@ class ReadOnlyRestController {
   login(req: ApiRequest, res: Response) {
     console.log('ror login()');
 
-    if (req.appUser == null) {
-      throw new Error('req.appUser is not set');
+    if (!req.appRole || !req.appOrg) {
+      throw new Error('Role is not set');
     }
 
-    const rorJwt = buildJWT(req.appUser);
+    const rorJwt = buildJWT(req.appUser, req.appRole);
     console.log('ror jwt', rorJwt);
+    res.cookie('orgId', req.appOrg.id, { httpOnly: true });
     return res.redirect(`${config.kibana.appPath}/login?jwt=${rorJwt}`);
   }
 
@@ -26,20 +28,21 @@ class ReadOnlyRestController {
     console.log('ror logout()');
 
     res.clearCookie('rorCookie');
+    res.clearCookie('orgId');
     next();
   }
 
 }
 
 // Builds ReadOnlyRest JWT token.
-function buildJWT(user: User) {
+function buildJWT(user: User, role: Role) {
   console.log('ror buildJWT()');
 
   const claims = {
     sub: user.edipi,
     iss: 'https://statusengine.mysymptoms.mil',
-    roles: user.getKibanaRoles(),
-    firecares_id: user.getKibanaUserClaim(), // TODO: Rename 'firecares_id'.
+    roles: user.getKibanaRoles(role),
+    firecares_id: user.getKibanaUserClaim(role), // TODO: Rename 'firecares_id'.
   };
 
   console.log('ror claims', claims);

@@ -21,6 +21,18 @@ export default makeStyles((theme: Theme) => createStyles({
       duration: theme.transitions.duration.enteringScreen,
     }),
   },
+  orgSelect: {
+    color: 'white',
+    '&:before': {
+      borderColor: 'white',
+    },
+    '&:after': {
+      borderColor: 'white',
+    },
+  },
+  orgSelectIcon: {
+    fill: 'white',
+  },
   menuButton: {
     marginRight: 36,
   },

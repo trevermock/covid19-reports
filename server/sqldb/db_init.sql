@@ -37,7 +37,10 @@ CREATE TABLE IF NOT EXISTS public.role
     can_manage_roster boolean NOT NULL DEFAULT false,
     can_manage_roles boolean NOT NULL DEFAULT false,
     can_view_roster boolean NOT NULL DEFAULT false,
-    org_id integer,
+    can_view_muster boolean NOT NULL DEFAULT false,
+    can_manage_dashboards boolean NOT NULL DEFAULT false,
+    notify_on_access_request boolean NOT NULL DEFAULT false,
+    org_id integer NOT NULL,
     CONSTRAINT "role_pkey" PRIMARY KEY (id),
     CONSTRAINT "org_fkey" FOREIGN KEY (org_id)
         REFERENCES public.org (id) MATCH SIMPLE
@@ -77,10 +80,13 @@ CREATE TABLE IF NOT EXISTS public.roster
 CREATE TABLE IF NOT EXISTS public."user"
 (
     edipi character varying(10) NOT NULL,
-    first_name character varying,
-    last_name character varying,
+    first_name character varying NOT NULL,
+    last_name character varying NOT NULL,
+    phone character varying NOT NULL,
+    email character varying NOT NULL,
     enabled boolean NOT NULL DEFAULT true,
     root_admin boolean NOT NULL DEFAULT false,
+    is_registered boolean NOT NULL DEFAULT false,
     CONSTRAINT "user_pkey" PRIMARY KEY (edipi)
 );
 

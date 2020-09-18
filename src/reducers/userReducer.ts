@@ -23,18 +23,23 @@ interface UserRole {
   canManageRoster: boolean
   canManageRoles: boolean
   canViewRoster: boolean
+  canManageDashboards: boolean
 }
 
 export interface UserState {
   isLoggedIn: boolean
+  isRegistered: boolean
   roles: UserRole[]
   homeView: HomeView
+  activeRole: UserRole | undefined
 }
 
 export const userInitialState: UserState = {
   isLoggedIn: false,
+  isRegistered: false,
   roles: [],
   homeView: HomeView.Basic,
+  activeRole: undefined,
 };
 
 // TODO: Get action typing working properly.
@@ -42,8 +47,7 @@ export const userInitialState: UserState = {
 export function userReducer(state = userInitialState, action: any): UserState {
   switch (action.type) {
     case User.Actions.Login.type: {
-      const payload = (action as User.Actions.Login).payload;
-      const userData = payload.userData;
+      const userData = (action as User.Actions.Login).payload.userData;
       const roles = userData.roles.map(role => ({
         id: role.id,
         name: role.name,
@@ -53,6 +57,7 @@ export function userReducer(state = userInitialState, action: any): UserState {
         canManageRoster: role.can_manage_roster,
         canManageRoles: role.can_manage_roles,
         canViewRoster: role.can_view_roster,
+        canManageDashboards: role.can_manage_dashboards,
         org: {
           id: role.org.id,
           name: role.org.name,
@@ -61,11 +66,13 @@ export function userReducer(state = userInitialState, action: any): UserState {
         },
       }));
 
+      const activeRole = roles.length > 0 ? roles[0] : undefined;
+
       // HACK: Assign view based on role permissions for now.
       let homeView: HomeView;
       if (userData.root_admin) {
         homeView = HomeView.Leadership;
-      } else if (userData.roles.length > 0 && userData.roles[0].can_manage_roster) {
+      } else if (activeRole && activeRole.canManageRoster) {
         homeView = HomeView.Medical;
       } else {
         homeView = HomeView.Basic;
@@ -74,8 +81,10 @@ export function userReducer(state = userInitialState, action: any): UserState {
       return {
         ...state,
         isLoggedIn: true,
+        isRegistered: userData.is_registered,
         roles,
         homeView,
+        activeRole,
       };
     }
     case User.Actions.Logout.type:
@@ -84,7 +93,16 @@ export function userReducer(state = userInitialState, action: any): UserState {
         isLoggedIn: false,
         roles: [],
         homeView: HomeView.Basic,
+        activeRole: undefined,
       };
+    case User.Actions.ChangeOrg.type: {
+      const orgId = (action as User.Actions.ChangeOrg).payload.orgId;
+      const activeRole = state.roles.find(role => role.org.id === orgId);
+      return {
+        ...state,
+        activeRole,
+      };
+    }
     default:
       return state;
   }

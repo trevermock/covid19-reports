@@ -5,7 +5,7 @@ import {
   Switch, Route, Redirect, Link,
 } from 'react-router-dom';
 import {
-  AppBar, Divider, Drawer, IconButton, List, ListItem, ListItemIcon, ListItemText, Toolbar,
+  AppBar, Divider, Drawer, IconButton, List, ListItem, ListItemIcon, ListItemText, MenuItem, Select, Toolbar,
 } from '@material-ui/core';
 import BarChartIcon from '@material-ui/icons/BarChart';
 import HomeIcon from '@material-ui/icons/Home';
@@ -33,11 +33,24 @@ export const App = () => {
     setDrawerOpen(!drawerOpen);
   }
 
+  function handleOrgChanged(event: React.ChangeEvent<{ value: unknown }>) {
+    dispatch(User.changeOrg(event.target.value as number));
+  }
+
   useEffect(() => {
     dispatch(User.login());
   }, [dispatch]);
 
   if (!user.isLoggedIn) {
+    return (<></>);
+  }
+
+  if (!user.isRegistered) {
+    // TODO: Add user registration form
+    return (<></>);
+  }
+
+  if (!user.activeRole) {
     return (<></>);
   }
 
@@ -59,6 +72,26 @@ export const App = () => {
           >
             <MenuIcon />
           </IconButton>
+          {user.activeRole && user.roles.length > 1
+            && (
+            <Select
+              className={classes.orgSelect}
+              labelId="org-select-label"
+              id="org-select"
+              value={user.activeRole.org.id}
+              onChange={handleOrgChanged}
+              inputProps={{
+                classes: {
+                  icon: classes.orgSelectIcon,
+                },
+              }}
+            >
+              {user.roles.map(role => (
+                <MenuItem value={role.org.id} key={role.org.id}>{role.org.name}</MenuItem>
+              ))}
+            </Select>
+            )}
+
         </Toolbar>
       </AppBar>
 
@@ -87,7 +120,7 @@ export const App = () => {
               <ListItemText primary="Home" />
             </ListItem>
           </Link>
-          <a href="/dashboard">
+          <a href={`/dashboard?orgId=${user.activeRole.org.id}`}>
             <ListItem button key="Analytics">
               <ListItemIcon><BarChartIcon /></ListItemIcon>
               <ListItemText primary="Analytics" />
@@ -96,7 +129,7 @@ export const App = () => {
         </List>
         <Divider />
         <List>
-          {user.roles[0].canManageUsers
+          {user.activeRole.canManageUsers
             && (
             <Link to="/users">
               <ListItem button key="Users">
@@ -106,7 +139,7 @@ export const App = () => {
             </Link>
             )}
 
-          {user.roles[0].canManageRoster
+          {user.activeRole.canManageRoster
             && (
             <Link to="/roster">
               <ListItem button key="Roster">

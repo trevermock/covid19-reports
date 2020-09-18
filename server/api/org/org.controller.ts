@@ -5,20 +5,12 @@ import { BadRequestError, NotFoundError } from '../../util/error-types';
 
 class OrgController {
 
-  async getOrg(req: ApiRequest<OrgParam>, res: Response) {
-    const orgId = parseInt(req.params.orgId);
-
-    const org = await Org.findOne({
-      where: {
-        id: orgId,
-      },
-    });
-
-    if (!org) {
+  async getOrg(req: ApiRequest, res: Response) {
+    if (!req.appOrg) {
       throw new NotFoundError('Organization was not found');
     }
 
-    res.json(org);
+    res.json(req.appOrg);
   }
 
   async addOrg(req: ApiRequest<null, AddOrgBody>, res: Response) {
@@ -38,48 +30,33 @@ class OrgController {
     await res.status(201).json(newOrg);
   }
 
-  async deleteOrg(req: ApiRequest<OrgParam>, res: Response) {
-    const orgId = parseInt(req.params.orgId);
-
-    const org = await Org.findOne({
-      where: {
-        id: orgId,
-      },
-    });
-
-    if (!org) {
+  async deleteOrg(req: ApiRequest, res: Response) {
+    if (!req.appOrg) {
       throw new NotFoundError('Organization could not be found.');
     }
 
-    const removedOrg = await org.remove();
+    const removedOrg = await req.appOrg.remove();
 
     res.json(removedOrg);
   }
 
   async updateOrg(req: ApiRequest<OrgParam, UpdateOrgBody>, res: Response) {
-    const orgId = parseInt(req.params.orgId);
     const name = req.body.name;
     const description = req.body.description;
 
-    const org = await Org.findOne({
-      where: {
-        id: orgId,
-      },
-    });
-
-    if (!org) {
+    if (!req.appOrg) {
       throw new NotFoundError('Organization could not be found.');
     }
 
     if (name) {
-      org.name = name;
+      req.appOrg.name = name;
     }
 
     if (description) {
-      org.description = description;
+      req.appOrg.description = description;
     }
 
-    const updatedOrg = await org.save();
+    const updatedOrg = await req.appOrg.save();
 
     res.json(updatedOrg);
   }

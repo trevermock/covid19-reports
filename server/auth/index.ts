@@ -1,8 +1,11 @@
 import { Request, Response, NextFunction } from 'express';
-import { ApiRequest, OrgParam } from '../api';
+import { ApiRequest } from '../api';
 import { User } from '../api/user/user.model';
 import { Role } from '../api/role/role.model';
-import { ForbiddenError, UnauthorizedError } from '../util/error-types';
+import {
+  BadRequestError, ForbiddenError, NotFoundError, UnauthorizedError,
+} from '../util/error-types';
+import { Org } from '../api/org/org.model';
 
 const sslHeader = 'ssl-client-subject-dn';
 
@@ -23,7 +26,7 @@ export async function requireUserAuth(req: AuthRequest, res: Response, next: Nex
     throw new UnauthorizedError('Client not authorized.', true);
   }
 
-  const user = await User.findOne({
+  let user = await User.findOne({
     relations: ['roles'],
     where: {
       edipi: id,
@@ -38,12 +41,24 @@ export async function requireUserAuth(req: AuthRequest, res: Response, next: Nex
   });
 
   if (!user) {
-    throw new ForbiddenError(`User '${id}' is not registered.`, true);
+    user = new User();
+    user.edipi = id;
+  }
+
+  if (user.root_admin) {
+    user.roles = (await Org.find()).map(org => Role.admin(org));
   }
 
   req.appUser = user;
 
   next();
+}
+
+export async function requireRegisteredUser(req: ApiRequest, res: Response, next: NextFunction) {
+  if (req.appUser.is_registered) {
+    return next();
+  }
+  throw new ForbiddenError('User is not registered.');
 }
 
 export async function requireRootAdmin(req: ApiRequest, res: Response, next: NextFunction) {
@@ -53,15 +68,48 @@ export async function requireRootAdmin(req: ApiRequest, res: Response, next: Nex
   throw new ForbiddenError('User does not have sufficient privileges to perform this action.');
 }
 
-export function requireRolePermission(action: (role: Role) => boolean) {
-  return async (req: ApiRequest<OrgParam>, res: Response, next: NextFunction) => {
-    const org = parseInt(req.params.orgId);
-    const user = req.appUser;
-    if (org && user) {
-      const orgRole = user.roles.find(role => role.org.id === org);
-      if (user.root_admin || (orgRole && action(orgRole))) {
-        return next();
+export async function requireOrgAccess(req: any, res: Response, next: NextFunction) {
+  let orgId = -1;
+  if (req.params.orgId) {
+    orgId = parseInt(req.params.orgId);
+  } else if (req.query.orgId) {
+    orgId = parseInt(req.query.orgId);
+  } else if (req.cookies.hasOwnProperty('orgId')) {
+    orgId = parseInt(req.cookies.orgId);
+  }
+  if (orgId === -1) {
+    throw new BadRequestError('Missing organization id.');
+  }
+  const user: User = req.appUser;
+  if (orgId && user) {
+    const orgRole = user.roles.find(role => role.org.id === orgId);
+    if (orgRole) {
+      req.appOrg = orgRole.org;
+      req.appRole = orgRole;
+    } else if (user.root_admin) {
+      const org = await Org.findOne({
+        where: {
+          id: orgId,
+        },
+      });
+      if (org) {
+        req.appOrg = org;
+        req.appRole = Role.admin(org);
+      } else {
+        throw new NotFoundError('Organization was not found.');
       }
+    }
+  }
+  if (req.appOrg) {
+    return next();
+  }
+  throw new ForbiddenError('User does not have sufficient privileges to perform this action.');
+}
+
+export function requireRolePermission(action: (role: Role) => boolean) {
+  return async (req: ApiRequest, res: Response, next: NextFunction) => {
+    if (req.appRole && action(req.appRole)) {
+      return next();
     }
     throw new ForbiddenError('User does not have sufficient privileges to perform this action.');
   };

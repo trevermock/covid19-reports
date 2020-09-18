@@ -3,6 +3,7 @@ import {
 } from 'typeorm';
 import { Role } from '../role/role.model';
 
+
 @Entity()
 export class User extends BaseEntity {
 
@@ -25,15 +26,17 @@ export class User extends BaseEntity {
   })
   roles: Role[];
 
-  @Column({
-    nullable: true,
-  })
+  @Column()
   first_name: string;
 
-  @Column({
-    nullable: true,
-  })
+  @Column()
   last_name: string;
+
+  @Column()
+  phone: string;
+
+  @Column()
+  email: string;
 
   @Column({
     default: true,
@@ -45,24 +48,28 @@ export class User extends BaseEntity {
   })
   root_admin: boolean;
 
-  getKibanaIndex() {
+  @Column({
+    default: false,
+  })
+  is_registered: boolean;
+
+  getKibanaIndex(role: Role) {
     if (this.root_admin) {
       return '*';
     }
-
-    // HACK: We should figure out which role based on which org they're trying to view.
-    const role = this.roles[0];
     return `${role.org.index_prefix}-${role.index_prefix}`;
   }
 
-  getKibanaUserClaim() {
-    const role = this.roles[0];
+  getKibanaUserClaim(role: Role) {
     return `org${role.org.id}-role${role.id}`;
   }
 
-  getKibanaRoles() {
-    // HACK: This should be based on their permissions somehow.
-    return 'kibana_admin';
+  getKibanaRoles(role: Role) {
+    if (role.can_manage_dashboards) {
+      return 'kibana_admin';
+    }
+    return 'kibana_ro_strict';
+
   }
 
 }

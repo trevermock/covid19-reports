@@ -2,7 +2,7 @@ import express from 'express';
 import multer from 'multer';
 import path from 'path';
 import controller from './roster.controller';
-import { requireRolePermission } from '../../auth';
+import { requireOrgAccess, requireRolePermission } from '../../auth';
 
 const rosterUpload = multer({
   storage: multer.diskStorage({
@@ -21,30 +21,35 @@ const router = express.Router() as any;
 
 router.get(
   '/:orgId/template',
+  requireOrgAccess,
   requireRolePermission(role => role.can_manage_roster),
   controller.getRosterTemplate,
 );
 
 router.get(
   '/:orgId',
+  requireOrgAccess,
   requireRolePermission(role => role.can_manage_roster),
   controller.getRoster,
 );
 
 router.get(
   '/:orgId/count',
+  requireOrgAccess,
   requireRolePermission(role => role.can_manage_roster),
   controller.getRosterCount,
 );
 
 router.post(
   '/:orgId',
+  requireOrgAccess,
   requireRolePermission(role => role.can_manage_roster),
   controller.addRosterEntry,
 );
 
 router.post(
   '/:orgId/bulk',
+  requireOrgAccess,
   requireRolePermission(role => role.can_manage_roster),
   rosterUpload.single('roster_csv'),
   controller.uploadRosterEntries,
@@ -52,18 +57,21 @@ router.post(
 
 router.get(
   '/:orgId/:rosterEDIPI',
+  requireOrgAccess,
   requireRolePermission(role => role.can_manage_roster),
   controller.getRosterEntry,
 );
 
 router.delete(
   '/:orgId/:rosterEDIPI',
+  requireOrgAccess,
   requireRolePermission(role => role.can_manage_roster),
   controller.deleteRosterEntry,
 );
 
 router.put(
   '/:orgId/:rosterEDIPI',
+  requireOrgAccess,
   requireRolePermission(role => role.can_manage_roster),
   controller.updateRosterEntry,
 );

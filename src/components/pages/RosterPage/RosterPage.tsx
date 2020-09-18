@@ -108,7 +108,7 @@ export const RosterPage = () => {
   const [rowsPerPage, setRowsPerPage] = useState(10);
   const [alert, setAlert] = useState({ open: false, message: '', title: '' });
 
-  const orgId = useSelector<AppState, UserState>(state => state.user).roles[0].org.id;
+  const orgId = useSelector<AppState, UserState>(state => state.user).activeRole?.org.id;
 
   const handleChangePage = async (event: React.MouseEvent<HTMLButtonElement> | null, newPage: number) => {
     const response = await fetch(`api/roster/${orgId}?limit=${rowsPerPage}&page=${newPage}`);

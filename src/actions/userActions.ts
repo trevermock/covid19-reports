@@ -5,8 +5,11 @@ interface UserData {
   edipi: string,
   first_name: string,
   last_name: string,
+  phone: string,
+  email: string,
   enabled: boolean,
   root_admin: boolean,
+  is_registered: boolean,
   roles: [{
     id: number,
     name: string,
@@ -16,6 +19,7 @@ interface UserData {
     can_manage_roster: boolean,
     can_manage_roles: boolean,
     can_view_roster: boolean,
+    can_manage_dashboards: boolean,
     org: {
       id: number,
       name: string,
@@ -42,6 +46,13 @@ export namespace User {
       type = Logout.type;
     }
 
+    export class ChangeOrg {
+      static type = 'CHANGE_ORG';
+      type = ChangeOrg.type;
+      constructor(public payload: {
+        orgId: number
+      }) {}
+    }
   }
 
   export const login = () => async (dispatch: Dispatch<Actions.Login>) => {
@@ -58,6 +69,12 @@ export namespace User {
   export const logout = () => (dispatch: Dispatch<Actions.Logout>) => {
     dispatch({
       ...new Actions.Logout(),
+    });
+  };
+
+  export const changeOrg = (orgId: number) => (dispatch: Dispatch<Actions.ChangeOrg>) => {
+    dispatch({
+      ...new Actions.ChangeOrg({ orgId })
     });
   };
 }

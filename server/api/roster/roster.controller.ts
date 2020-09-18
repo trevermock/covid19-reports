@@ -3,7 +3,6 @@ import csv from 'csvtojson';
 import fs from 'fs';
 import { ApiRequest, OrgEdipiParams, OrgParam } from '../index';
 import { Roster } from './roster.model';
-import { Org } from '../org/org.model';
 import { BadRequestError, NotFoundError, UnprocessableEntity } from '../../util/error-types';
 import { getOptionalParam, getRequiredParam } from '../../util/util';
 
@@ -15,7 +14,9 @@ class RosterController {
   }
 
   async getRoster(req: ApiRequest<OrgParam, any, GetRosterQuery>, res: Response) {
-    const orgId = parseInt(req.params.orgId);
+    if (!req.appOrg) {
+      throw new NotFoundError('Organization was not found.');
+    }
 
     const limit = (req.query.limit != null) ? parseInt(req.query.limit) : 100;
     const page = (req.query.page != null) ? parseInt(req.query.page) : 0;
@@ -24,7 +25,7 @@ class RosterController {
       skip: page * limit,
       take: limit,
       where: {
-        org: orgId,
+        org: req.appOrg.id,
       },
       order: {
         edipi: 'ASC',
@@ -35,11 +36,13 @@ class RosterController {
   }
 
   async getRosterCount(req: ApiRequest<OrgParam>, res: Response) {
-    const orgId = parseInt(req.params.orgId);
+    if (!req.appOrg) {
+      throw new NotFoundError('Organization was not found.');
+    }
 
     const count = await Roster.count({
       where: {
-        org: orgId,
+        org: req.appOrg.id,
       },
     });
 
@@ -47,17 +50,11 @@ class RosterController {
   }
 
   async uploadRosterEntries(req: ApiRequest<OrgParam>, res: Response) {
-    const orgId = parseInt(req.params.orgId);
-
-    const org = await Org.findOne({
-      where: {
-        id: orgId,
-      },
-    });
-
-    if (!org) {
-      throw new NotFoundError('Organization for role was not found.');
+    if (!req.appOrg) {
+      throw new NotFoundError('Organization was not found.');
     }
+
+    const org = req.appOrg;
 
     if (!req.file || !req.file.path) {
       throw new BadRequestError('No file to process.');
@@ -100,21 +97,13 @@ class RosterController {
   }
 
   async addRosterEntry(req: ApiRequest<OrgParam, RosterEntryData>, res: Response) {
-    const orgId = parseInt(req.params.orgId);
-
-    const org = await Org.findOne({
-      where: {
-        id: orgId,
-      },
-    });
-
-    if (!org) {
-      throw new NotFoundError('Organization for role was not found.');
+    if (!req.appOrg) {
+      throw new NotFoundError('Organization was not found.');
     }
 
     const entry = new Roster();
     entry.edipi = getRequiredParam('edipi', req.body);
-    entry.org = org;
+    entry.org = req.appOrg;
     setRosterParamsFromBody(entry, req.body);
     const newRosterEntry = await entry.save();
 
@@ -122,13 +111,16 @@ class RosterController {
   }
 
   async getRosterEntry(req: ApiRequest<OrgEdipiParams>, res: Response) {
-    const orgId = parseInt(req.params.orgId);
+    if (!req.appOrg) {
+      throw new NotFoundError('Organization was not found.');
+    }
+
     const userEDIPI = req.params.userEDIPI;
 
     const rosterEntry = await Roster.findOne({
       where: {
         edipi: userEDIPI,
-        org: orgId,
+        org: req.appOrg.id,
       },
     });
 
@@ -140,13 +132,16 @@ class RosterController {
   }
 
   async deleteRosterEntry(req: ApiRequest<OrgEdipiParams>, res: Response) {
-    const orgId = parseInt(req.params.orgId);
+    if (!req.appOrg) {
+      throw new NotFoundError('Organization was not found.');
+    }
+
     const userEDIPI = req.params.userEDIPI;
 
     const rosterEntry = await Roster.findOne({
       where: {
         edipi: userEDIPI,
-        org: orgId,
+        org: req.appOrg.id,
       },
     });
 
@@ -160,13 +155,16 @@ class RosterController {
   }
 
   async updateRosterEntry(req: ApiRequest<OrgEdipiParams, RosterEntryData>, res: Response) {
-    const orgId = parseInt(req.params.orgId);
+    if (!req.appOrg) {
+      throw new NotFoundError('Organization was not found.');
+    }
+
     const userEDIPI = req.params.userEDIPI;
 
     const entry = await Roster.findOne({
       where: {
         edipi: userEDIPI,
-        org: orgId,
+        org: req.appOrg.id,
       },
     });
 

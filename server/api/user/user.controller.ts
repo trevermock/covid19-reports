@@ -10,8 +10,57 @@ class UserController {
     res.json(req.appUser);
   }
 
+  async registerUser(req: ApiRequest<null, RegisterUserBody>, res: Response) {
+    if (req.appUser.is_registered) {
+      throw new BadRequestError('User is already registered.');
+    }
+
+    const firstName = req.body.first_name;
+    const lastName = req.body.last_name;
+    const phone = req.body.phone;
+    const email = req.body.email;
+
+    if (!firstName) {
+      throw new BadRequestError('A first name must be supplied when registering.');
+    }
+    if (!lastName) {
+      throw new BadRequestError('A last name must be supplied when registering.');
+    }
+    if (!phone) {
+      throw new BadRequestError('A phone number must be supplied when registering.');
+    }
+    if (!email) {
+      throw new BadRequestError('An email address must be supplied when registering.');
+    }
+
+    let user = await User.findOne({
+      where: {
+        edipi: req.appUser.edipi,
+      },
+    });
+
+    if (user && user.is_registered) {
+      throw new BadRequestError('User is already registered.');
+    } else {
+      user = req.appUser;
+    }
+    user.first_name = firstName;
+    user.last_name = lastName;
+    user.phone = phone;
+    user.email = email;
+    user.is_registered = true;
+
+    const updatedUser = await user.save();
+
+    await res.status(201).json(updatedUser);
+  }
+
   async addUser(req: ApiRequest<OrgParam, AddUserBody>, res: Response) {
-    const orgId = parseInt(req.params.orgId);
+    if (!req.appOrg) {
+      throw new NotFoundError('Organization was not found.');
+    }
+
+    const org = req.appOrg;
     const roleId = (req.body.role != null) ? parseInt(req.body.role) : undefined;
     const edipi = req.body.edipi;
     const firstName = req.body.first_name;
@@ -28,7 +77,7 @@ class UserController {
     const role = await Role.findOne({
       where: {
         id: roleId,
-        org: orgId,
+        org: org.id,
       },
     });
 
@@ -61,7 +110,7 @@ class UserController {
       user.roles = [];
     }
 
-    const orgRole = user.roles.find(userRole => userRole.org.id === orgId);
+    const orgRole = user.roles.find(userRole => userRole.org.id === org.id);
     if (orgRole) {
       throw new BadRequestError('The user already has a role in the organization.');
     }
@@ -91,11 +140,13 @@ class UserController {
     //   ON user_roles."user" = "user"."EDIPI"
     // WHERE role.org_id=1
 
-    const orgId = parseInt(req.params.orgId);
+    if (!req.appOrg) {
+      throw new NotFoundError('Organization was not found.');
+    }
 
     const roles = await Role.find({
       where: {
-        org: orgId,
+        org: req.appOrg.id,
       },
     });
 
@@ -116,13 +167,16 @@ class UserController {
   }
 
   async deleteUser(req: ApiRequest<OrgEdipiParams>, res: Response) {
-    const orgId = parseInt(req.params.orgId);
+    if (!req.appOrg) {
+      throw new NotFoundError('Organization was not found.');
+    }
+
     const userEDIPI = req.params.userEDIPI;
 
     const user = await User.findOne({
       where: {
         edipi: userEDIPI,
-        org: orgId,
+        org: req.appOrg.id,
       },
     });
 
@@ -147,6 +201,13 @@ type AddUserBody = {
   role: string
   first_name: string
   last_name: string
+};
+
+type RegisterUserBody = {
+  first_name: string
+  last_name: string
+  phone: string
+  email: string
 };
 
 export default new UserController();

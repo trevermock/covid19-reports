@@ -4,6 +4,8 @@ import userRoutes from './user';
 import roleRoutes from './role';
 import rosterRoutes from './roster';
 import { User } from './user/user.model';
+import { Org } from './org/org.model';
+import { Role } from './role/role.model';
 
 const router = express.Router();
 
@@ -13,7 +15,9 @@ router.use('/role', roleRoutes);
 router.use('/roster', rosterRoutes);
 
 export interface ApiRequest<ReqParams = object, ReqBody = object, ReqQuery = object, ResBody = object> extends Request<ReqParams, ResBody, ReqBody, ReqQuery> {
-  appUser: User
+  appUser: User,
+  appOrg?: Org,
+  appRole?: Role,
 }
 
 export type OrgParam = {

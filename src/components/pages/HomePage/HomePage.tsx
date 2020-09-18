@@ -96,7 +96,7 @@ export const HomePage = () => {
           </Grid>
 
           {/* Roster Management */}
-          {user.roles[0].canManageRoster && (
+          {user.activeRole && user.activeRole.canManageRoster && (
             <Grid item xs={6}>
               <Card className={classes.card}>
                 <CardContent>

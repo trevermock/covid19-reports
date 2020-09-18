@@ -1,18 +1,20 @@
 import bodyParser from 'body-parser';
 import express from 'express';
 import controller from './org.controller';
-import { requireRootAdmin } from '../../auth';
+import { requireOrgAccess, requireRootAdmin } from '../../auth';
 
 const router = express.Router() as any;
 
 router.get(
   '/:orgId',
+  requireOrgAccess,
   requireRootAdmin,
   controller.getOrg,
 );
 
 router.delete(
   '/:orgId',
+  requireOrgAccess,
   requireRootAdmin,
   controller.deleteOrg,
 );
@@ -20,6 +22,7 @@ router.delete(
 router.put(
   '/:orgId',
   bodyParser.json(),
+  requireOrgAccess,
   requireRootAdmin,
   controller.updateOrg,
 );

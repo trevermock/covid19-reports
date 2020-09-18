@@ -10,7 +10,7 @@ import kibanaProxy from './kibana';
 import kibanaDashboard from './kibana/dashboard';
 import database from './sqldb';
 import config from './config';
-import { requireUserAuth } from './auth';
+import { requireOrgAccess, requireUserAuth } from './auth';
 import { errorHandler } from './util/error-handler';
 
 database.then(() => {
@@ -45,8 +45,12 @@ app.get('/heartbeat', (req: Request, res: Response) => {
 });
 
 app.use('/api', apiRoutes);
-app.use('/dashboard', kibanaDashboard);
-app.use(config.kibana.appPath, kibanaProxy);
+app.use('/dashboard',
+  requireOrgAccess,
+  kibanaDashboard);
+app.use(config.kibana.appPath,
+  requireOrgAccess,
+  kibanaProxy);
 
 app.get('/*', (req: Request, res: Response) => {
   res.sendFile(path.join(__dirname, 'public', 'index.html'));

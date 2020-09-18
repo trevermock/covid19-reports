@@ -50,4 +50,33 @@ export class Role extends BaseEntity {
   })
   can_view_roster: boolean;
 
+  @Column({
+    default: false,
+  })
+  can_view_muster: boolean;
+
+  @Column({
+    default: false,
+  })
+  can_manage_dashboards: boolean;
+
+  @Column({
+    default: false,
+  })
+  notify_on_access_request: boolean;
+
+  static admin(org: Org): Role {
+    const adminRole = new Role();
+    adminRole.id = 0;
+    adminRole.name = 'Admin';
+    adminRole.description = 'Site Administrator';
+    adminRole.org = org;
+    adminRole.index_prefix = '';
+    adminRole.can_manage_users = true;
+    adminRole.can_manage_roster = true;
+    adminRole.can_manage_roles = true;
+    adminRole.can_view_roster = true;
+    adminRole.can_manage_dashboards = true;
+    return adminRole;
+  }
 }

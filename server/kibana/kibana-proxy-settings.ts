@@ -10,16 +10,18 @@ const kibanaProxyConfig: Config = {
   logLevel: 'debug',
 
   // Strip out the appPath, so kibana sees requested path
-  pathRewrite: (path: string, req: IncomingMessage) => {
+  pathRewrite: (path: string) => {
     return path.replace(`${config.kibana.appPath}`, '');
   },
 
   // add custom headers to request
   onProxyReq: (proxyReq: ClientRequest, req: ProxyRequest) => {
-    proxyReq.setHeader('x-se-fire-department-all', req.appUser.getKibanaIndex());
+    if (req.appRole) {
+      proxyReq.setHeader('x-se-fire-department-all', req.appUser.getKibanaIndex(req.appRole));
+    }
   },
 
-  router: (req: any) => {
+  router: () => {
     return config.kibana.uri;
   },
 };
