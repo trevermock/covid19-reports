@@ -15,6 +15,8 @@ import { errorHandler } from './util/error-handler';
 
 database.then(() => {
   console.log('Database ready');
+}).catch(err => {
+  console.log('Database connection failed: ', err);
 });
 
 if (process.env.NODE_ENV === 'development') {
