@@ -1,6 +1,6 @@
 # Makefile for building se-ingest-router
 
-ORG ?= prominentedgestatengine
+ORG ?= 508654928277.dkr.ecr.us-east-1.amazonaws.com
 REPO ?= dds-covid19-reports
 ENVIRONMENT ?= development
 
