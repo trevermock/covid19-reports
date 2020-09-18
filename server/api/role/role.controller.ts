@@ -1,12 +1,12 @@
 import { Response } from 'express';
 import { ApiRequest, OrgParam, OrgRoleParams } from '../index';
 import { Role } from './role.model';
-import { BadRequestError, NotFoundError } from '../../util/error-types';
+import { BadRequestError, NotFoundError, UnauthorizedError } from '../../util/error-types';
 
 class RoleController {
 
   async getOrgRoles(req: ApiRequest, res: Response) {
-    if (!req.appOrg) {
+    if (!req.appOrg || !req.appRole) {
       throw new NotFoundError('Organization was not found.');
     }
 
@@ -16,10 +16,10 @@ class RoleController {
       },
     });
 
-    res.json(roles);
+    res.json(filterVisibleRoles(req.appRole, roles));
   }
 
-  async addRole(req: ApiRequest<OrgParam, AddRoleBody>, res: Response) {
+  async addRole(req: ApiRequest<OrgParam, RoleBody>, res: Response) {
     if (!req.appOrg) {
       throw new NotFoundError('Organization was not found.');
     }
@@ -32,11 +32,18 @@ class RoleController {
       throw new BadRequestError('A description must be supplied when adding a role.');
     }
 
+    if (!req.body.index_prefix) {
+      throw new BadRequestError('An index prefix must be supplied when adding a role.');
+    }
+
     const role = new Role();
-    role.name = req.body.name;
-    role.description = req.body.description;
     role.org = req.appOrg;
-    setRolePermissionsFromBody(role, req.body);
+    setRoleFromBody(role, req.body);
+
+    if (!req.appRole || !req.appRole.isSupersetOf(role)) {
+      throw new UnauthorizedError('Unable to create a role with greater permissions than your current role.');
+    }
+
     const newRole = await role.save();
 
     await res.status(201).json(newRole);
@@ -60,6 +67,10 @@ class RoleController {
       throw new NotFoundError('Role could not be found.');
     }
 
+    if (!req.appRole || !req.appRole.isSupersetOf(role)) {
+      throw new UnauthorizedError('Insufficient privileges to view this role.');
+    }
+
     res.json(role);
   }
 
@@ -81,18 +92,20 @@ class RoleController {
       throw new NotFoundError('Role could not be found.');
     }
 
+    if (!req.appRole || !req.appRole.isSupersetOf(role)) {
+      throw new UnauthorizedError('Insufficient privileges to delete this role.');
+    }
+
     const removedRole = await role.remove();
 
     res.json(removedRole);
   }
 
-  async updateRole(req: ApiRequest<OrgRoleParams, UpdateRoleBody>, res: Response) {
+  async updateRole(req: ApiRequest<OrgRoleParams, RoleBody>, res: Response) {
     if (!req.appOrg) {
       throw new NotFoundError('Organization was not found.');
     }
     const roleId = parseInt(req.params.roleId);
-    const name = req.body.name;
-    const description = req.body.description;
 
     const role = await Role.findOne({
       where: {
@@ -105,15 +118,12 @@ class RoleController {
       throw new NotFoundError('Role could not be found.');
     }
 
-    if (name != null) {
-      role.name = name;
+    setRoleFromBody(role, req.body);
+
+    if (!req.appRole || !req.appRole.isSupersetOf(role)) {
+      throw new UnauthorizedError('Unable to update a role with greater permissions than your current role.');
     }
 
-    if (description != null) {
-      role.description = description;
-    }
-
-    setRolePermissionsFromBody(role, req.body);
     const updatedRole = await role.save();
 
     res.json(updatedRole);
@@ -121,7 +131,20 @@ class RoleController {
 
 }
 
-function setRolePermissionsFromBody(role: Role, body: RolePermissionsBody) {
+function filterVisibleRoles(currentRole: Role, roles: Role[]) {
+  return roles.filter(role => currentRole.isSupersetOf(role));
+}
+
+function setRoleFromBody(role: Role, body: RoleBody) {
+  if (body.name != null) {
+    role.name = body.name;
+  }
+  if (body.description != null) {
+    role.description = body.description;
+  }
+  if (body.index_prefix != null) {
+    role.index_prefix = body.index_prefix;
+  }
   if (body.can_manage_users != null) {
     role.can_manage_users = body.can_manage_users;
   }
@@ -131,23 +154,31 @@ function setRolePermissionsFromBody(role: Role, body: RolePermissionsBody) {
   if (body.can_manage_roster != null) {
     role.can_manage_roster = body.can_manage_roster;
   }
+  if (body.can_manage_dashboards != null) {
+    role.can_manage_dashboards = body.can_manage_dashboards;
+  }
   if (body.can_view_roster != null) {
     role.can_view_roster = body.can_view_roster;
   }
+  if (body.can_view_muster != null) {
+    role.can_view_muster = body.can_view_muster;
+  }
+  if (body.notify_on_access_request != null) {
+    role.notify_on_access_request = body.notify_on_access_request;
+  }
 }
 
-type RolePermissionsBody = {
+type RoleBody = {
+  name?: string
+  description?: string
+  index_prefix?: string
   can_manage_users?: boolean
   can_manage_roles?: boolean
   can_manage_roster?: boolean
+  can_manage_dashboards?: boolean
   can_view_roster?: boolean
+  can_view_muster?: boolean
+  notify_on_access_request?: boolean
 };
-
-type AddRoleBody = {
-  name: string
-  description: string
-} & RolePermissionsBody;
-
-type UpdateRoleBody = AddRoleBody;
 
 export default new RoleController();

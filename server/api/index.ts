@@ -3,6 +3,7 @@ import orgRoutes from './org';
 import userRoutes from './user';
 import roleRoutes from './role';
 import rosterRoutes from './roster';
+import accessRequestRoutes from './access-request';
 import { User } from './user/user.model';
 import { Org } from './org/org.model';
 import { Role } from './role/role.model';
@@ -13,6 +14,7 @@ router.use('/org', orgRoutes);
 router.use('/user', userRoutes);
 router.use('/role', roleRoutes);
 router.use('/roster', rosterRoutes);
+router.use('/access-request', accessRequestRoutes);
 
 export interface ApiRequest<ReqParams = object, ReqBody = object, ReqQuery = object, ResBody = object> extends Request<ReqParams, ResBody, ReqBody, ReqQuery> {
   appUser: User,

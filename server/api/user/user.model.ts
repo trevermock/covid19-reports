@@ -72,7 +72,6 @@ export class User extends BaseEntity {
       return 'kibana_admin';
     }
     return 'kibana_ro_strict';
-
   }
 
 }

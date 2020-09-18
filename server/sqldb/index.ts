@@ -4,6 +4,7 @@ import { User } from '../api/user/user.model';
 import { Role } from '../api/role/role.model';
 import { Org } from '../api/org/org.model';
 import { Roster } from '../api/roster/roster.model';
+import { AccessRequest } from '../api/access-request/access-request.model';
 
 let ssl: TlsOptions | undefined;
 
@@ -21,8 +22,8 @@ const config: ConnectionOptions = {
   username: process.env.SQL_USER || 'postgres',
   password: process.env.SQL_PASSWORD || 'postgres',
   database: process.env.SQL_DATABASE || 'dds',
-  entities: [User, Role, Org, Roster],
-  synchronize: false,
+  entities: [User, Role, Org, Roster, AccessRequest],
+  synchronize: true,
   logging: false,
   ssl,
 };
