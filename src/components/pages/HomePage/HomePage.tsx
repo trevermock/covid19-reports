@@ -72,28 +72,30 @@ export const HomePage = () => {
           </Grid>
 
           {/* Analytics & Reporting */}
-          <Grid item xs={6}>
-            <Card className={classes.card}>
-              <CardContent>
-                <Typography variant="h5" gutterBottom>
-                  Analytics & Reporting
-                </Typography>
+          {user.activeRole && (
+            <Grid item xs={6}>
+              <Card className={classes.card}>
+                <CardContent>
+                  <Typography variant="h5" gutterBottom>
+                    Analytics & Reporting
+                  </Typography>
 
-                <Typography>
-                  Lorem ipsum dolor sit amet, consectetuer adipiscing elit. Donec odque volutpat mm malesuada erat ut
-                  tupendisse nibh, viverra non, semper suscipit, posuere a, pede.
-                </Typography>
-              </CardContent>
+                  <Typography>
+                    Lorem ipsum dolor sit amet, consectetuer adipiscing elit. Donec odque volutpat mm malesuada erat ut
+                    tupendisse nibh, viverra non, semper suscipit, posuere a, pede.
+                  </Typography>
+                </CardContent>
 
-              <CardActions>
-                <a href="/dashboard">
-                  <Button variant="contained" color="primary">
-                    View Analytics
-                  </Button>
-                </a>
-              </CardActions>
-            </Card>
-          </Grid>
+                <CardActions>
+                  <a href={`/dashboard?orgId=${user.activeRole.org.id}`}>
+                    <Button variant="contained" color="primary">
+                      View Analytics
+                    </Button>
+                  </a>
+                </CardActions>
+              </Card>
+            </Grid>
+          )}
 
           {/* Roster Management */}
           {user.activeRole && user.activeRole.canManageRoster && (
