@@ -74,8 +74,10 @@ export async function requireOrgAccess(req: any, res: Response, next: NextFuncti
     orgId = parseInt(req.params.orgId);
   } else if (req.query.orgId) {
     orgId = parseInt(req.query.orgId);
-  } else if (req.cookies.hasOwnProperty('orgId')) {
+  } else if (req.cookies.orgId) {
     orgId = parseInt(req.cookies.orgId);
+  } else {
+    console.log('REQUEST COOKIES: ', req.cookies);
   }
   if (orgId == null) {
     throw new BadRequestError('Missing organization id.');
