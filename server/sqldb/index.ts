@@ -9,6 +9,7 @@ let ssl: TlsOptions | undefined;
 
 if (process.env.SQL_CERT) {
   ssl = {
+    rejectUnauthorized: false,
     ca: process.env.SQL_CERT,
   };
 }
