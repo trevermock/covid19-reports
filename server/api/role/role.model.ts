@@ -65,7 +65,7 @@ export class Role extends BaseEntity {
   })
   notify_on_access_request: boolean;
 
-  static admin(org: Org): Role {
+  static admin(org: Org) {
     const adminRole = new Role();
     adminRole.id = 0;
     adminRole.name = 'Admin';

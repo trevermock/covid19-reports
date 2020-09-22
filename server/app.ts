@@ -45,12 +45,17 @@ app.get('/heartbeat', (req: Request, res: Response) => {
 });
 
 app.use('/api', apiRoutes);
-app.use('/dashboard',
+app.use(
+  '/dashboard',
   requireOrgAccess,
-  kibanaDashboard);
-app.use(config.kibana.appPath,
+  kibanaDashboard,
+);
+
+app.use(
+  config.kibana.appPath,
   requireOrgAccess,
-  kibanaProxy);
+  kibanaProxy,
+);
 
 app.get('/*', (req: Request, res: Response) => {
   res.sendFile(path.join(__dirname, 'public', 'index.html'));

@@ -47,7 +47,7 @@ export namespace User {
     }
 
     export class ChangeOrg {
-      static type = 'CHANGE_ORG';
+      static type = 'USER_CHANGE_ORG';
       type = ChangeOrg.type;
       constructor(public payload: {
         orgId: number
@@ -74,7 +74,7 @@ export namespace User {
 
   export const changeOrg = (orgId: number) => (dispatch: Dispatch<Actions.ChangeOrg>) => {
     dispatch({
-      ...new Actions.ChangeOrg({ orgId })
+      ...new Actions.ChangeOrg({ orgId }),
     });
   };
 }

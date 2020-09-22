@@ -122,16 +122,16 @@ class RoleController {
 }
 
 function setRolePermissionsFromBody(role: Role, body: RolePermissionsBody) {
-  if (body.can_manage_users !== undefined) {
+  if (body.can_manage_users != null) {
     role.can_manage_users = body.can_manage_users;
   }
-  if (body.can_manage_roles !== undefined) {
+  if (body.can_manage_roles != null) {
     role.can_manage_roles = body.can_manage_roles;
   }
-  if (body.can_manage_roster !== undefined) {
+  if (body.can_manage_roster != null) {
     role.can_manage_roster = body.can_manage_roster;
   }
-  if (body.can_view_roster !== undefined) {
+  if (body.can_view_roster != null) {
     role.can_view_roster = body.can_view_roster;
   }
 }

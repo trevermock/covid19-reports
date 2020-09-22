@@ -69,7 +69,7 @@ export async function requireRootAdmin(req: ApiRequest, res: Response, next: Nex
 }
 
 export async function requireOrgAccess(req: any, res: Response, next: NextFunction) {
-  let orgId = -1;
+  let orgId: number | undefined;
   if (req.params.orgId) {
     orgId = parseInt(req.params.orgId);
   } else if (req.query.orgId) {
@@ -77,8 +77,11 @@ export async function requireOrgAccess(req: any, res: Response, next: NextFuncti
   } else if (req.cookies.hasOwnProperty('orgId')) {
     orgId = parseInt(req.cookies.orgId);
   }
-  if (orgId === -1) {
+  if (orgId == null) {
     throw new BadRequestError('Missing organization id.');
+  }
+  if (Number.isNaN(orgId) || orgId < 0) {
+    throw new BadRequestError(`Invalid organization id: ${orgId}`);
   }
   const user: User = req.appUser;
   if (orgId && user) {
