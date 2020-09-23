@@ -8,6 +8,7 @@ const kibanaProxyConfig: Config = {
   target: config.kibana.uri,
   changeOrigin: true,
   logLevel: 'debug',
+  secure: false,
 
   // Strip out the appPath, so kibana sees requested path
   pathRewrite: (path: string) => {
