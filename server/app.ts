@@ -2,6 +2,7 @@ import express, { Request, Response } from 'express';
 import 'express-async-errors';
 import process from 'process';
 import passport from 'passport';
+import https from 'https';
 import cookieParser from 'cookie-parser';
 import morgan from 'morgan';
 import path from 'path';
@@ -78,10 +79,23 @@ app.use(errorHandler);
 // Start the server
 //
 const PORT = process.env.PORT || 4000;
-app.listen(PORT, () => {
-  if (process.env.NODE_ENV !== 'test') {
-    console.log(`🚀 Server ready at http://127.0.0.1:${PORT}`);
-  }
-});
+
+if (process.env.SERVER_KEY && process.env.SERVER_CERT) {
+  const opts = {
+    key: process.env.SERVER_KEY,
+    cert: process.env.SERVER_CERT,
+  };
+  https.createServer(opts, app).listen(PORT, () => {
+    if (process.env.NODE_ENV !== 'test') {
+      console.log(`🚀 Server ready at https://127.0.0.1:${PORT}`);
+    }
+  });
+} else {
+  app.listen(PORT, () => {
+    if (process.env.NODE_ENV !== 'test') {
+      console.log(`🚀 Server ready at http://127.0.0.1:${PORT}`);
+    }
+  });
+}
 
 export default app;
