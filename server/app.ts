@@ -81,6 +81,7 @@ app.use(errorHandler);
 const PORT = process.env.PORT || 4000;
 
 if (process.env.SERVER_KEY && process.env.SERVER_CERT) {
+  console.log(`DEBUG SERVER CERT "${process.env.SERVER_CERT}"`);
   const opts = {
     key: process.env.SERVER_KEY,
     cert: process.env.SERVER_CERT,
