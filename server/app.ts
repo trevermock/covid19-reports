@@ -3,6 +3,7 @@ import 'express-async-errors';
 import process from 'process';
 import passport from 'passport';
 import https from 'https';
+import fs from 'fs';
 import cookieParser from 'cookie-parser';
 import morgan from 'morgan';
 import path from 'path';
@@ -81,10 +82,9 @@ app.use(errorHandler);
 const PORT = process.env.PORT || 4000;
 
 if (process.env.SERVER_KEY && process.env.SERVER_CERT) {
-  console.log(`DEBUG SERVER CERT "${process.env.SERVER_CERT}"`);
   const opts = {
-    key: process.env.SERVER_KEY,
-    cert: process.env.SERVER_CERT,
+    key: fs.readFileSync(process.env.SERVER_KEY),
+    cert: fs.readFileSync(process.env.SERVER_CERT),
   };
   https.createServer(opts, app).listen(PORT, () => {
     if (process.env.NODE_ENV !== 'test') {
