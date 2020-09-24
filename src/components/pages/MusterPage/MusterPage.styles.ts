@@ -1,0 +1,35 @@
+import { createStyles, Theme } from "@material-ui/core";
+import { makeStyles } from "@material-ui/styles";
+
+export default makeStyles((theme: Theme) =>
+  createStyles({
+    root: {
+      textAlign: "center",
+      flexGrow: 1,
+      padding: theme.spacing(3),
+    },
+    buttons: {
+      display: "flex",
+      marginBottom: theme.spacing(3),
+
+      "& .MuiButtonBase-root": {
+        marginRight: theme.spacing(3),
+      },
+    },
+    tableFooter: {
+      flexShrink: 0,
+      padding: "10px 20px",
+      marginLeft: theme.spacing(3),
+    },
+    card: {
+      flex: "1",
+      width: "543px",
+      height: "503px",
+    },
+    cardContent: {
+      width: "100%",
+      height: "100%",
+      display: "flex",
+    },
+  })
+);

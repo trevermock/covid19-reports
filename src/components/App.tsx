@@ -10,6 +10,7 @@ import HomeIcon from '@material-ui/icons/Home';
 import ListAltIcon from '@material-ui/icons/ListAlt';
 import MenuIcon from '@material-ui/icons/Menu';
 import PeopleIcon from '@material-ui/icons/People';
+import PersonIcon from '@material-ui/icons/Person';
 
 import { User } from '../actions/userActions';
 import { UserState } from '../reducers/userReducer';
@@ -17,6 +18,7 @@ import { AppState } from '../store';
 import { HomePage } from './pages/HomePage/HomePage';
 import useStyles from './App.styles';
 import { RosterPage } from './pages/RosterPage/RosterPage';
+import { MusterPage } from './pages/MusterPage/MusterPage';
 import {NotFoundPage} from "./pages/NotFoundPage/NotFoundPage";
 import {UsersPage} from "./pages/UsersPage/UsersPage";
 
@@ -89,6 +91,12 @@ export const App = () => {
               <ListItemText primary="Home"/>
             </ListItem>
           </Link>
+          <Link to="/muster">
+            <ListItem button key="Muster">
+              <ListItemIcon><PersonIcon/></ListItemIcon>
+              <ListItemText primary="Muster"/>
+            </ListItem>
+          </Link>
           <a href="/dashboard">
             <ListItem button key="Dashboard">
               <ListItemIcon><BarChartIcon/></ListItemIcon>
@@ -127,6 +135,9 @@ export const App = () => {
       <Switch>
         <Route path="/home">
           <HomePage/>
+        </Route>
+        <Route path="/muster">
+          <MusterPage/>
         </Route>
         <Route path="/roster">
           <RosterPage/>
