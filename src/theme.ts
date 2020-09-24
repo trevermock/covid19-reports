@@ -21,6 +21,13 @@ const theme = createMuiTheme({
 });
 
 theme.overrides = {
+  MuiCssBaseline: {
+    '@global': {
+      body: {
+        backgroundColor: 'rgb(240, 240, 240)',
+      },
+    },
+  },
   MuiCardContent: {
     root: {
       padding: theme.spacing(3),

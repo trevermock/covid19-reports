@@ -5,6 +5,12 @@ export const sidenavWidthExpanded = 240;
 export const sidenavWidthCollapsed = 58;
 
 export default makeStyles((theme: Theme) => createStyles({
+  root: {
+    '& a': {
+      textDecoration: 'none',
+      color: 'inherit',
+    },
+  },
   appBar: {
     backgroundColor: '#162e51',
     zIndex: theme.zIndex.drawer + 1,

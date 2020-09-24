@@ -34,7 +34,7 @@ export const AppFrame = () => {
   }
 
   return (
-    <>
+    <div className={classes.root}>
       <AppBar
         position="fixed"
         className={clsx(classes.appBar, {
@@ -129,6 +129,6 @@ export const AppFrame = () => {
       </Drawer>
 
       <div className={classes.toolbar} />
-    </>
+    </div>
   );
 };
