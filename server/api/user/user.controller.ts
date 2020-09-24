@@ -1,31 +1,85 @@
-import express from 'express';
-import {User} from "./user.model";
-import {Role} from "../role/role.model";
-import {BadRequestError, NotFoundError} from "../../util/error";
-import {Org} from "../org/org.model";
+import { Response } from 'express';
+import { ApiRequest, OrgEdipiParams, OrgParam } from '../index';
+import { User } from './user.model';
+import { Role } from '../role/role.model';
+import { BadRequestError, NotFoundError } from '../../util/error-types';
 
-export namespace UserController {
+class UserController {
 
-  export async function current(req: any, res: express.Response) {
-    res.json(req['DDSUser']);
+  async current(req: ApiRequest, res: Response) {
+    res.json(req.appUser);
   }
 
-  export async function addUser(req: any, res: express.Response) {
-    const orgId = parseInt(req.params['orgId']);
+  async registerUser(req: ApiRequest<null, RegisterUserBody>, res: Response) {
+    if (req.appUser.is_registered) {
+      throw new BadRequestError('User is already registered.');
+    }
 
-    if (!req.body.hasOwnProperty('role')) {
+    if (!req.body.first_name) {
+      throw new BadRequestError('A first name must be supplied when registering.');
+    }
+    if (!req.body.last_name) {
+      throw new BadRequestError('A last name must be supplied when registering.');
+    }
+    if (!req.body.phone) {
+      throw new BadRequestError('A phone number must be supplied when registering.');
+    }
+    if (!req.body.email) {
+      throw new BadRequestError('An email address must be supplied when registering.');
+    }
+    if (!req.body.service) {
+      throw new BadRequestError('A service must be supplied when registering.');
+    }
+
+    let user = await User.findOne({
+      where: {
+        edipi: req.appUser.edipi,
+      },
+    });
+
+    if (user && user.is_registered) {
+      throw new BadRequestError('User is already registered.');
+    } else {
+      user = req.appUser;
+    }
+    user.first_name = req.body.first_name;
+    user.last_name = req.body.last_name;
+    user.phone = req.body.phone;
+    user.email = req.body.email;
+    user.service = req.body.service;
+    user.is_registered = true;
+
+    const updatedUser = await user.save();
+
+    await res.status(201).json(updatedUser);
+  }
+
+  async addUser(req: ApiRequest<OrgParam, AddUserBody>, res: Response) {
+    if (!req.appOrg) {
+      throw new NotFoundError('Organization was not found.');
+    }
+
+    const org = req.appOrg;
+    const roleId = (req.body.role != null) ? parseInt(req.body.role) : undefined;
+    const edipi = req.body.edipi;
+    const firstName = req.body.first_name;
+    const lastName = req.body.last_name;
+
+    if (roleId == null) {
       throw new BadRequestError('A role id must be supplied when adding a user.');
     }
-    if (!req.body.hasOwnProperty('edipi')) {
+
+    if (edipi == null) {
       throw new BadRequestError('An EDIPI must be supplied when adding a user.');
     }
 
     const role = await Role.findOne({
       where: {
-        id: parseInt(req.body.role),
-        org: orgId
-      }
+        id: roleId,
+        org: org.id,
+      },
     });
+
     if (!role) {
       throw new NotFoundError('The role was not found in the organization.');
     }
@@ -34,20 +88,20 @@ export namespace UserController {
     let user = await User.findOne({
       relations: ['roles'],
       where: {
-        edipi: req.body.edipi
+        edipi,
       },
       join: {
         alias: 'user',
         leftJoinAndSelect: {
-          'roles': 'user.roles',
-          'org': 'roles.org'
-        }
-      }
+          roles: 'user.roles',
+          org: 'roles.org',
+        },
+      },
     });
 
     if (!user) {
       user = new User();
-      user.edipi = req.body.edipi;
+      user.edipi = edipi;
       newUser = true;
     }
 
@@ -55,28 +109,27 @@ export namespace UserController {
       user.roles = [];
     }
 
-    const orgRole = user.roles.find((role) => role.org.id == orgId);
+    const orgRole = user.roles.find(userRole => userRole.org.id === org.id);
     if (orgRole) {
       throw new BadRequestError('The user already has a role in the organization.');
     }
 
     user.roles.push(role);
 
-    if (req.body.hasOwnProperty('first_name')) {
-      user.first_name = req.body.first_name;
+    if (firstName) {
+      user.first_name = firstName;
     }
 
-    if (req.body.hasOwnProperty('last_name')) {
-      user.last_name = req.body.last_name;
+    if (lastName) {
+      user.last_name = lastName;
     }
 
     const updatedUser = await user.save();
-    res.status(newUser ? 201 : 200);
-    res.json(updatedUser);
-    res.send();
+
+    await res.status(newUser ? 201 : 200).json(updatedUser);
   }
 
-  export async function getOrgUsers(req: any, res: express.Response) {
+  async getOrgUsers(req: ApiRequest<OrgParam>, res: Response) {
     // TODO: This could potentially be optimized with something like this:
     // SELECT "user".*
     //   FROM role
@@ -85,51 +138,76 @@ export namespace UserController {
     // INNER JOIN "user"
     //   ON user_roles."user" = "user"."EDIPI"
     // WHERE role.org_id=1
-    const orgId = req.params['orgId'];
+
+    if (!req.appOrg) {
+      throw new NotFoundError('Organization was not found.');
+    }
+
     const roles = await Role.find({
       where: {
-        org: parseInt(orgId)
-      }
+        org: req.appOrg.id,
+      },
     });
+
     const users: User[] = [];
-    for (let i = 0; i < roles.length; i++) {
+    for (const role of roles) {
       const roleUsers = await User.createQueryBuilder('user')
         .innerJoin('user.roles', 'role')
-        .where('role.id = :id', { id: roles[i].id })
+        .where('role.id = :id', { id: role.id })
         .getMany();
-      roleUsers.forEach((user) => {
-        user.roles = [roles[i]];
+
+      roleUsers.forEach(user => {
+        user.roles = [role];
         users.push(user);
       });
     }
+
     res.json(users);
-    res.send();
   }
 
-  export async function deleteUser(req: any, res: express.Response) {
-    const orgId = req.params['orgId'];
-    const userEDIPI = req.params['userEDIPI'];
+  async deleteUser(req: ApiRequest<OrgEdipiParams>, res: Response) {
+    if (!req.appOrg) {
+      throw new NotFoundError('Organization was not found.');
+    }
+
+    const userEDIPI = req.params.userEDIPI;
+
     const user = await User.findOne({
       where: {
         edipi: userEDIPI,
-        org: parseInt(orgId)
-      }
+        org: req.appOrg.id,
+      },
     });
+
     if (!user) {
       throw new NotFoundError('User could not be found.');
     }
+
     const removedUser = await user.remove();
+
     res.json(removedUser);
-    res.send();
   }
 
-  export async function updateUser(req: any, res: express.Response) {
-    const org = req.params['orgId'];
-    const userEDIPI = req.params['userEDIPI'];
-    // TODO: Implement
-  }
-
-
-
-
+  // async updateUser(req: any, res: Response) {
+  //   const org = req.params.orgId;
+  //   const userEDIPI = req.params.userEDIPI;
+  //   // TODO: Implement
+  // }
 }
+
+type AddUserBody = {
+  edipi: string
+  role: string
+  first_name: string
+  last_name: string
+};
+
+type RegisterUserBody = {
+  first_name: string
+  last_name: string
+  phone: string
+  email: string
+  service: string
+};
+
+export default new UserController();

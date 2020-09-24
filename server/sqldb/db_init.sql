@@ -37,12 +37,15 @@ CREATE TABLE IF NOT EXISTS public.role
     can_manage_roster boolean NOT NULL DEFAULT false,
     can_manage_roles boolean NOT NULL DEFAULT false,
     can_view_roster boolean NOT NULL DEFAULT false,
-    org_id integer,
+    can_view_muster boolean NOT NULL DEFAULT false,
+    can_manage_dashboards boolean NOT NULL DEFAULT false,
+    notify_on_access_request boolean NOT NULL DEFAULT false,
+    org_id integer NOT NULL,
     CONSTRAINT "role_pkey" PRIMARY KEY (id),
     CONSTRAINT "org_fkey" FOREIGN KEY (org_id)
         REFERENCES public.org (id) MATCH SIMPLE
         ON UPDATE NO ACTION
-        ON DELETE NO ACTION
+        ON DELETE CASCADE
 );
 
 -- Roster Table
@@ -70,17 +73,20 @@ CREATE TABLE IF NOT EXISTS public.roster
     CONSTRAINT "org_fkey" FOREIGN KEY (org_id)
         REFERENCES public.org (id) MATCH SIMPLE
         ON UPDATE NO ACTION
-        ON DELETE NO ACTION
+        ON DELETE CASCADE
 );
 
 -- User Table
 CREATE TABLE IF NOT EXISTS public."user"
 (
     edipi character varying(10) NOT NULL,
-    first_name character varying,
-    last_name character varying,
+    first_name character varying NOT NULL,
+    last_name character varying NOT NULL,
+    phone character varying NOT NULL,
+    email character varying NOT NULL,
     enabled boolean NOT NULL DEFAULT true,
     root_admin boolean NOT NULL DEFAULT false,
+    is_registered boolean NOT NULL DEFAULT false,
     CONSTRAINT "user_pkey" PRIMARY KEY (edipi)
 );
 
@@ -96,6 +102,32 @@ CREATE TABLE IF NOT EXISTS public.user_roles
         ON DELETE CASCADE,
     CONSTRAINT "user_fkey" FOREIGN KEY ("user")
         REFERENCES public."user" (edipi) MATCH SIMPLE
+        ON UPDATE NO ACTION
+        ON DELETE CASCADE
+);
+
+-- Access Request ID Sequence
+CREATE SEQUENCE IF NOT EXISTS public.access_request_id_seq
+    INCREMENT 1
+    START 1
+    MINVALUE 1
+    MAXVALUE 2147483647
+    CACHE 1;
+
+-- Access Request Table
+CREATE TABLE IF NOT EXISTS public.access_request
+(
+    id integer NOT NULL DEFAULT nextval('access_request_id_seq'::regclass),
+    request_date timestamp without time zone NOT NULL DEFAULT now(),
+    user_edipi character varying(10) NOT NULL,
+    org_id integer NOT NULL,
+    CONSTRAINT "access_request_pkey" PRIMARY KEY (id),
+    CONSTRAINT "user_fkey" FOREIGN KEY (user_edipi)
+        REFERENCES public."user" (edipi) MATCH SIMPLE
+        ON UPDATE NO ACTION
+        ON DELETE CASCADE,
+    CONSTRAINT "org_fkey" FOREIGN KEY (org_id)
+        REFERENCES public.org (id) MATCH SIMPLE
         ON UPDATE NO ACTION
         ON DELETE CASCADE
 );

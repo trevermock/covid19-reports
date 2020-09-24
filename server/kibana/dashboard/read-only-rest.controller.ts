@@ -1,18 +1,48 @@
-//import nJwt from 'njwt';
+import { Response, NextFunction } from 'express';
+import { ApiRequest } from '../../api';
 import { User } from '../../api/user/user.model';
-import config from '../../config/environment';
+import { Role } from '../../api/role/role.model';
+import config from '../../config';
+
 const nJwt = require('njwt');
 
+class ReadOnlyRestController {
+
+  // Redirects user to Kibana login page. By attaching the rorJWT this will affectively login in the user seamlessly,
+  // and store rorCookie in the browser.
+  login(req: ApiRequest, res: Response) {
+    console.log('ror login()');
+
+    if (!req.appRole || !req.appOrg) {
+      throw new Error('Role is not set');
+    }
+
+    const rorJwt = buildJWT(req.appUser, req.appRole);
+    console.log('ror jwt', rorJwt);
+    res.cookie('orgId', req.appOrg.id, { httpOnly: true });
+    return res.redirect(`${config.kibana.appPath}/login?jwt=${rorJwt}`);
+  }
+
+  // Logs out of a Kibana session by clearing the rorCookie.
+  logout(req: ApiRequest, res: Response, next: NextFunction) {
+    console.log('ror logout()');
+
+    res.clearCookie('rorCookie');
+    res.clearCookie('orgId');
+    next();
+  }
+
+}
+
 // Builds ReadOnlyRest JWT token.
-export function buildJWT(user: User) {
+function buildJWT(user: User, role: Role) {
   console.log('ror buildJWT()');
-  // console.log('ror user.getKibanaIndex()', user.getKibanaIndex());
 
   const claims = {
     sub: user.edipi,
     iss: 'https://statusengine.mysymptoms.mil',
-    roles: user.getKibanaRoles(),
-    firecares_id: user.edipi, // TODO: firecares_id is acting as tenant until renamed in ROR settings
+    roles: user.getKibanaRoles(role),
+    firecares_id: user.getKibanaUserClaim(role), // TODO: Rename 'firecares_id'.
   };
 
   console.log('ror claims', claims);
@@ -23,24 +53,4 @@ export function buildJWT(user: User) {
   return jwt.compact();
 }
 
-// Redirects user to Kibana login page. By attaching the rorJWT this will affectively login in the user seamlessly,
-// and store rorCookie in the browser.
-export function login(req: any, res: any) {
-  console.log('ror login()');
-
-  if (req.DDSUser == null) {
-    throw new Error('req.DDSUser is not set');
-  }
-
-  const rorJwt = buildJWT(req.DDSUser);
-  console.log('ror jwt', rorJwt);
-  return res.redirect(`${config.kibana.appPath}/login?jwt=${rorJwt}`);
-}
-
-// Logs out of a Kibana session by clearing the rorCookie.
-export function logout(req: any, res: any, next: any) {
-  console.log('ror logout()');
-
-  res.clearCookie('rorCookie');
-  next();
-}
+export default new ReadOnlyRestController();

@@ -1,21 +1,24 @@
-import express from 'express';
+import express, { Request, Response } from 'express';
 import 'express-async-errors';
 import process from 'process';
 import passport from 'passport';
+import https from 'https';
+import fs from 'fs';
 import cookieParser from 'cookie-parser';
-// import expressSession from 'express-session';
 import morgan from 'morgan';
 import path from 'path';
 import apiRoutes from './api';
 import kibanaProxy from './kibana';
 import kibanaDashboard from './kibana/dashboard';
 import database from './sqldb';
-import config from './config/environment';
-import { requireUserAuth } from "./auth";
-import { errorHandler } from "./util/error";
+import config from './config';
+import { requireOrgAccess, requireUserAuth } from './auth';
+import { errorHandler } from './util/error-handler';
 
 database.then(() => {
   console.log('Database ready');
+}).catch(err => {
+  console.log('Database connection failed: ', err);
 });
 
 if (process.env.NODE_ENV === 'development') {
@@ -31,46 +34,37 @@ const app = express();
 app.use(requireUserAuth);
 app.use(cookieParser());
 app.use(express.static(path.join(__dirname, 'public')));
-// app.use(expressSession({
-//   resave: false,
-//   saveUninitialized: false,
-//   store: new TypeormStore({
-//     cleanupLimit: 2,
-//     ttl: 86400
-//   }).connect(Session.repo),
-//   secret: process.env.SESSION_SECRET,
-// }))
 app.use(passport.initialize());
-app.use(passport.session())
 if (process.env.NODE_ENV !== 'test') {
   app.use(morgan('tiny'));
 }
 
-// passport.serializeUser((user: User, done) => {
-//   done(null, user.serialize())
-// })
-//
-// passport.deserializeUser((userData: UserSerialized, done) => {
-//   done(null, new User().deserialize(userData))
-// })
-
 //
 // Routes
 //
-app.get('/heartbeat', (req: express.Request, res: express.Response) => {
+app.get('/heartbeat', (req: Request, res: Response) => {
   res.status(204).send();
 });
 
 app.use('/api', apiRoutes);
-app.use('/dashboard', kibanaDashboard)
-app.use(config.kibana.appPath, kibanaProxy);
+app.use(
+  '/dashboard',
+  requireOrgAccess,
+  kibanaDashboard,
+);
 
-app.get('/*', (req: express.Request, res: express.Response) => {
+app.use(
+  config.kibana.appPath,
+  requireOrgAccess,
+  kibanaProxy,
+);
+
+app.get('/*', (req: Request, res: Response) => {
   res.sendFile(path.join(__dirname, 'public', 'index.html'));
 });
 
 // Not found
-app.all('*', (req: express.Request, res: express.Response) => {
+app.all('*', (req: Request, res: Response) => {
   res.status(404).send({
     error: {
       message: 'Not found.',
@@ -86,10 +80,23 @@ app.use(errorHandler);
 // Start the server
 //
 const PORT = process.env.PORT || 4000;
-app.listen(PORT, () => {
-  if (process.env.NODE_ENV !== 'test') {
-    console.log(`🚀 Server ready at http://127.0.0.1:${PORT}`);
-  }
-});
+
+if (process.env.SERVER_KEY && process.env.SERVER_CERT) {
+  const opts = {
+    key: fs.readFileSync(process.env.SERVER_KEY),
+    cert: fs.readFileSync(process.env.SERVER_CERT),
+  };
+  https.createServer(opts, app).listen(PORT, () => {
+    if (process.env.NODE_ENV !== 'test') {
+      console.log(`🚀 Server ready at https://127.0.0.1:${PORT}`);
+    }
+  });
+} else {
+  app.listen(PORT, () => {
+    if (process.env.NODE_ENV !== 'test') {
+      console.log(`🚀 Server ready at http://127.0.0.1:${PORT}`);
+    }
+  });
+}
 
 export default app;

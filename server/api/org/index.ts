@@ -1,34 +1,37 @@
 import bodyParser from 'body-parser';
 import express from 'express';
-import {OrgController} from './org.controller';
-import {requireRootAdmin} from "../../auth";
+import controller from './org.controller';
+import { requireOrgAccess, requireRootAdmin } from '../../auth';
 
-const router = express.Router();
+const router = express.Router() as any;
 
 router.get(
   '/:orgId',
+  requireOrgAccess,
   requireRootAdmin,
-  OrgController.getOrg
+  controller.getOrg,
 );
 
 router.delete(
   '/:orgId',
+  requireOrgAccess,
   requireRootAdmin,
-  OrgController.deleteOrg
+  controller.deleteOrg,
 );
 
 router.put(
   '/:orgId',
   bodyParser.json(),
+  requireOrgAccess,
   requireRootAdmin,
-  OrgController.updateOrg
+  controller.updateOrg,
 );
 
 router.post(
   '/',
   bodyParser.json(),
   requireRootAdmin,
-  OrgController.addOrg
+  controller.addOrg,
 );
 
 export default router;

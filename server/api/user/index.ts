@@ -1,39 +1,49 @@
 import express from 'express';
 import bodyParser from 'body-parser';
-import { UserController } from './user.controller';
-import {requireRolePermission} from "../../auth";
+import controller from './user.controller';
+import { requireOrgAccess, requireRolePermission } from '../../auth';
 
-const router = express.Router();
+const router = express.Router() as any;
 
 router.get(
   '/current',
-  UserController.current,
+  controller.current,
+);
+
+router.post(
+  '/',
+  bodyParser.json(),
+  controller.registerUser,
 );
 
 router.post(
   '/:orgId',
   bodyParser.json(),
-  requireRolePermission((role) => role.can_manage_users),
-  UserController.addUser
+  requireOrgAccess,
+  requireRolePermission(role => role.can_manage_users),
+  controller.addUser,
 );
 
 router.get(
   '/:orgId',
-  requireRolePermission((role) => role.can_manage_users),
-  UserController.getOrgUsers
-)
+  requireOrgAccess,
+  requireRolePermission(role => role.can_manage_users),
+  controller.getOrgUsers,
+);
 
 router.delete(
   '/:orgId/:userEDIPI',
-  requireRolePermission((role) => role.can_manage_users),
-  UserController.deleteUser
+  requireOrgAccess,
+  requireRolePermission(role => role.can_manage_users),
+  controller.deleteUser,
 );
 
-router.put(
-  '/:orgId/:userEDIPI',
-  bodyParser.json(),
-  requireRolePermission((role) => role.can_manage_users),
-  UserController.updateUser
-);
+// router.put(
+//   '/:orgId/:userEDIPI',
+//   bodyParser.json(),
+//   requireOrgAccess,
+//   requireRolePermission((role) => role.can_manage_users),
+//   controller.updateUser
+// );
 
 export default router;

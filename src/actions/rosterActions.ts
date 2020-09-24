@@ -1,13 +1,16 @@
 import { Dispatch } from 'redux';
 import axios from 'axios';
-import {AppState} from "../store";
+import { AppState } from '../store';
 
 export namespace Roster {
+
   export namespace Actions {
+
     export class Upload {
       static type = 'ROSTER_UPLOAD';
       type = Upload.type;
     }
+
   }
 
   export const upload = (file: File, onComplete: (count: number) => void) => async (dispatch: Dispatch<Actions.Upload>, getState: () => AppState) => {
@@ -16,16 +19,21 @@ export namespace Roster {
 
     const appState = getState();
 
-    var formData = new FormData();
+    if (!appState.user.activeRole) {
+      console.log('User has no active role, cannot upload roster.');
+      return;
+    }
+
+    const formData = new FormData();
     // var imagefile = document.querySelector('#file');
     // formData.append("image", imagefile.files[0]);
     formData.append('roster_csv', file);
     // TODO: Don't hardcode role.
     try {
-      const response = await axios.post(`api/roster/${appState.user.roles[0].org.id}/bulk`, formData, {
+      const response = await axios.post(`api/roster/${appState.user.activeRole.org.id}/bulk`, formData, {
         headers: {
-          'Content-Type': 'multipart/form-data'
-        }
+          'Content-Type': 'multipart/form-data',
+        },
       });
 
       onComplete(response.data.count);
@@ -33,12 +41,11 @@ export namespace Roster {
       onComplete(-1);
     }
 
-
     console.log('upload complete!');
 
     dispatch({
-      ...new Actions.Upload()
+      ...new Actions.Upload(),
     });
-  }
+  };
 }
 

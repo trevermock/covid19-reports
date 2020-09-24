@@ -1,101 +1,103 @@
-import {Entity, Column, BaseEntity, JoinColumn, ManyToOne, PrimaryColumn} from "typeorm";
-import {Org} from "../org/org.model";
+import {
+  Entity, Column, BaseEntity, JoinColumn, ManyToOne, PrimaryColumn,
+} from 'typeorm';
+import { Org } from '../org/org.model';
 
 @Entity()
 export class Roster extends BaseEntity {
 
   @PrimaryColumn({
-    length: 10
+    length: 10,
   })
   edipi: string;
 
-  @ManyToOne(() => Org, (org) => org.id, { primary: true })
+  @ManyToOne(() => Org, org => org.id, { primary: true, cascade: true })
   @JoinColumn({
-    name: 'org_id'
+    name: 'org_id',
   })
   org: Org;
 
   @Column({
     length: 100,
-    nullable: true
-  })
-  rate_rank: string;
-
-  @Column({
-    length: 100
   })
   first_name: string;
 
   @Column({
-    length: 100
+    length: 100,
   })
   last_name: string;
 
   @Column({
-    length: 50
+    length: 50,
   })
   unit: string;
 
   @Column({
-    length: 50
+    length: 50,
   })
   billet_workcenter: string;
 
   @Column({
-    length: 100
+    length: 100,
   })
   contract_number: string;
 
   @Column({
-    default: false
+    length: 100,
+    nullable: true,
   })
-  pilot: boolean;
+  rate_rank?: string;
 
   @Column({
-    default: false
+    default: false,
   })
-  aircrew: boolean;
+  pilot?: boolean;
 
   @Column({
-    default: false
+    default: false,
   })
-  cdi: boolean;
+  aircrew?: boolean;
 
   @Column({
-    default: false
+    default: false,
   })
-  cdqar: boolean;
+  cdi?: boolean;
 
   @Column({
-    default: false
+    default: false,
   })
-  dscacrew: boolean;
+  cdqar?: boolean;
 
   @Column({
-    default: false
+    default: false,
   })
-  advanced_party: boolean;
+  dscacrew?: boolean;
 
   @Column({
-    default: false
+    default: false,
   })
-  pui: boolean;
+  advanced_party?: boolean;
 
   @Column({
-    nullable: true
+    default: false,
   })
-  covid19_test_return_date: Date;
+  pui?: boolean;
+
+  @Column({
+    nullable: true,
+  })
+  covid19_test_return_date?: Date;
 
   @Column({
     length: 50,
-    nullable: true
+    nullable: true,
   })
-  rom: string
+  rom?: string;
 
   @Column({
     length: 100,
-    nullable: true
+    nullable: true,
   })
-  rom_release: string
+  rom_release?: string;
 
 }

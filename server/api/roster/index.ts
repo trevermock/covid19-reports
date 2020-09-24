@@ -1,8 +1,8 @@
 import express from 'express';
 import multer from 'multer';
 import path from 'path';
-import { RosterController } from './roster.controller';
-import { requireRolePermission } from "../../auth";
+import controller from './roster.controller';
+import { requireOrgAccess, requireRolePermission } from '../../auth';
 
 const rosterUpload = multer({
   storage: multer.diskStorage({
@@ -17,55 +17,63 @@ const rosterUpload = multer({
   }),
 });
 
-const router = express.Router();
+const router = express.Router() as any;
 
 router.get(
   '/:orgId/template',
-  requireRolePermission((role) => role.can_manage_roster),
-  RosterController.getRosterTemplate,
+  requireOrgAccess,
+  requireRolePermission(role => role.can_manage_roster),
+  controller.getRosterTemplate,
 );
 
 router.get(
   '/:orgId',
-  requireRolePermission((role) => role.can_manage_roster),
-  RosterController.getRoster,
+  requireOrgAccess,
+  requireRolePermission(role => role.can_manage_roster),
+  controller.getRoster,
 );
 
 router.get(
   '/:orgId/count',
-  requireRolePermission((role) => role.can_manage_roster),
-  RosterController.getRosterCount,
+  requireOrgAccess,
+  requireRolePermission(role => role.can_manage_roster),
+  controller.getRosterCount,
 );
 
 router.post(
   '/:orgId',
-  requireRolePermission((role) => role.can_manage_roster),
-  RosterController.addRosterEntry
+  requireOrgAccess,
+  requireRolePermission(role => role.can_manage_roster),
+  controller.addRosterEntry,
 );
 
 router.post(
   '/:orgId/bulk',
-  requireRolePermission((role) => role.can_manage_roster),
+  requireOrgAccess,
+  requireRolePermission(role => role.can_manage_roster),
   rosterUpload.single('roster_csv'),
-  RosterController.uploadRosterEntries
-)
+  controller.uploadRosterEntries,
+);
 
 router.get(
   '/:orgId/:rosterEDIPI',
-  requireRolePermission((role) => role.can_manage_roster),
-  RosterController.getRosterEntry,
+  requireOrgAccess,
+  requireRolePermission(role => role.can_manage_roster),
+  controller.getRosterEntry,
 );
 
 router.delete(
   '/:orgId/:rosterEDIPI',
-  requireRolePermission((role) => role.can_manage_roster),
-  RosterController.deleteRosterEntry,
+  requireOrgAccess,
+  requireRolePermission(role => role.can_manage_roster),
+  controller.deleteRosterEntry,
 );
 
 router.put(
   '/:orgId/:rosterEDIPI',
-  requireRolePermission((role) => role.can_manage_roster),
-  RosterController.updateRosterEntry
+  requireOrgAccess,
+  requireRolePermission(role => role.can_manage_roster),
+  controller.updateRosterEntry,
 );
 
 export default router;

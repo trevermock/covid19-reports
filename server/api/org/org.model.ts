@@ -1,4 +1,6 @@
-import {Entity, PrimaryGeneratedColumn, Column, BaseEntity} from "typeorm";
+import {
+  Entity, PrimaryGeneratedColumn, Column, BaseEntity,
+} from 'typeorm';
 
 @Entity()
 export class Org extends BaseEntity {
@@ -7,17 +9,17 @@ export class Org extends BaseEntity {
   id: number;
 
   @Column({
-    length: 200
+    length: 200,
   })
   name: string;
 
   @Column({
-    length: 2048
+    length: 2048,
   })
   description: string;
 
   @Column({
-    default: ""
+    default: '',
   })
   index_prefix: string;
 

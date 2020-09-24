@@ -1,28 +1,17 @@
 import {
-  Button,
-  Container,
-  Paper,
-  Table,
-  TableBody,
-  TableCell,
-  TableContainer,
-  TablePagination,
-  TableHead,
-  TableRow,
-  IconButton,
-  TableFooter, DialogActions, Dialog, DialogTitle, DialogContent, DialogContentText
+  Button, Container, Paper, Table, TableBody, TableCell, TableContainer, TablePagination, TableHead, TableRow,
+  IconButton, TableFooter, DialogActions, Dialog, DialogTitle, DialogContent, DialogContentText,
 } from '@material-ui/core';
 import FirstPageIcon from '@material-ui/icons/FirstPage';
 import KeyboardArrowLeft from '@material-ui/icons/KeyboardArrowLeft';
 import KeyboardArrowRight from '@material-ui/icons/KeyboardArrowRight';
 import LastPageIcon from '@material-ui/icons/LastPage';
-import React, {ChangeEvent, useEffect, useState} from 'react';
-import {useDispatch, useSelector} from 'react-redux';
+import React, { ChangeEvent, useEffect, useState } from 'react';
+import { useDispatch, useSelector } from 'react-redux';
 import { Roster } from '../../../actions/rosterActions';
-
 import useStyles from './RosterPage.styles';
-import {UserState} from "../../../reducers/userReducer";
-import {AppState} from "../../../store";
+import { UserState } from '../../../reducers/userReducer';
+import { AppState } from '../../../store';
 
 interface RosterEntry {
   edipi: string,
@@ -57,7 +46,9 @@ interface TablePaginationActionsProps {
 
 function TablePaginationActions(props: TablePaginationActionsProps) {
   const classes = useStyles();
-  const { count, page, rowsPerPage, onChangePage } = props;
+  const {
+    count, page, rowsPerPage, onChangePage,
+  } = props;
 
   const handleFirstPageButtonClick = (event: React.MouseEvent<HTMLButtonElement>) => {
     onChangePage(event, 0);
@@ -115,32 +106,9 @@ export const RosterPage = () => {
   const [page, setPage] = useState(0);
   const [rosterSize, setRosterSize] = useState(0);
   const [rowsPerPage, setRowsPerPage] = useState(10);
-  const [alert, setAlert] = useState({open: false, message: '', title: ''});
+  const [alert, setAlert] = useState({ open: false, message: '', title: '' });
 
-  const orgId = useSelector<AppState, UserState>(state => state.user).roles[0].org.id;
-
-  function initializeTable() {
-    fetch(`api/roster/${orgId}/count`).then(async response => {
-      const countResponse = (await response.json()) as CountResponse;
-      setRosterSize(countResponse.count);
-      await handleChangePage(null, 0);
-    });
-  };
-
-  function handleFileInputChange(e: ChangeEvent<HTMLInputElement>) {
-    if (!e.target.files || e.target.files[0] == null) {
-      return;
-    }
-
-    dispatch(Roster.upload(e.target.files[0], async (count) => {
-      if (count < 0) {
-        setAlert({open: true, message:`An error occurred while uploading roster. Please verify the roster data.`, title: `Upload Error`});
-      } else {
-        setAlert({open: true, message:`Successfully uploaded ${count} roster entries.`, title: 'Upload Successful'});
-        initializeTable();
-      }
-    }));
-  };
+  const orgId = useSelector<AppState, UserState>(state => state.user).activeRole?.org.id;
 
   const handleChangePage = async (event: React.MouseEvent<HTMLButtonElement> | null, newPage: number) => {
     const response = await fetch(`api/roster/${orgId}?limit=${rowsPerPage}&page=${newPage}`);
@@ -148,6 +116,33 @@ export const RosterPage = () => {
     setPage(newPage);
     setRows(rosterResponse);
   };
+
+  function initializeTable() {
+    fetch(`api/roster/${orgId}/count`).then(async response => {
+      const countResponse = (await response.json()) as CountResponse;
+      setRosterSize(countResponse.count);
+      await handleChangePage(null, 0);
+    });
+  }
+
+  function handleFileInputChange(e: ChangeEvent<HTMLInputElement>) {
+    if (!e.target.files || e.target.files[0] == null) {
+      return;
+    }
+
+    dispatch(Roster.upload(e.target.files[0], async count => {
+      if (count < 0) {
+        setAlert({
+          open: true,
+          message: 'An error occurred while uploading roster. Please verify the roster data.',
+          title: 'Upload Error',
+        });
+      } else {
+        setAlert({ open: true, message: `Successfully uploaded ${count} roster entries.`, title: 'Upload Successful' });
+        initializeTable();
+      }
+    }));
+  }
 
   const handleChangeRowsPerPage = async (
     event: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>,
@@ -161,7 +156,7 @@ export const RosterPage = () => {
   };
 
   const handleAlertClose = () => {
-    setAlert({open: false, message: '', title: ''});
+    setAlert({ open: false, message: '', title: '' });
   };
 
   useEffect(initializeTable, []);
@@ -174,15 +169,12 @@ export const RosterPage = () => {
             accept="text/csv"
             id="raised-button-file"
             type="file"
-            style={{display: 'none'}}
+            style={{ display: 'none' }}
             ref={fileInputRef}
             onChange={handleFileInputChange}
           />
           <label htmlFor="raised-button-file">
             <Button
-              // type="button"
-              variant="contained"
-              color="primary"
               size="large"
               component="span"
             >
@@ -190,24 +182,8 @@ export const RosterPage = () => {
             </Button>
           </label>
 
-          {/*<Button*/}
-          {/*  type="button"*/}
-          {/*  variant="contained"*/}
-          {/*  color="primary"*/}
-          {/*  size="large"*/}
-          {/*  // onClick={handleUploadClick}*/}
-          {/*>*/}
-          {/*  Upload*/}
-          {/*  <input*/}
-          {/*    type="file"*/}
-          {/*    style={{ display: "none" }}*/}
-          {/*  />*/}
-          {/*</Button>*/}
-
           <Button
             type="button"
-            variant="contained"
-            color="primary"
             size="large"
             href={`api/roster/${orgId}/template`}
           >
@@ -227,7 +203,7 @@ export const RosterPage = () => {
               </TableRow>
             </TableHead>
             <TableBody>
-              {rows.map((row) => (
+              {rows.map(row => (
                 <TableRow key={row.edipi}>
                   <TableCell component="th" scope="row">
                     {row.edipi}
@@ -273,11 +249,11 @@ export const RosterPage = () => {
           </DialogContentText>
         </DialogContent>
         <DialogActions>
-          <Button onClick={handleAlertClose} color="primary" autoFocus>
+          <Button onClick={handleAlertClose} autoFocus>
             OK
           </Button>
         </DialogActions>
       </Dialog>
     </main>
-  )
-}
+  );
+};

@@ -1,6 +1,6 @@
 # Makefile for building se-ingest-router
 
-ORG ?= prominentedgestatengine
+ORG ?= 508654928277.dkr.ecr.us-east-1.amazonaws.com
 REPO ?= dds-covid19-reports
 ENVIRONMENT ?= development
 
@@ -8,6 +8,9 @@ SHA=$(shell git rev-parse --short HEAD)
 BRANCH=$(shell git rev-parse --symbolic-full-name --abbrev-ref HEAD)
 
 TAG=${BRANCH}-${SHA}-${ENVIRONMENT}
+
+login:  
+	$$(aws ecr get-login --no-include-email --region us-east-1)
 
 build:
 	docker build \

@@ -1,76 +1,72 @@
-import express from 'express';
-import {Org} from "./org.model";
-import {BadRequestError, NotFoundError} from "../../util/error";
+import { Response } from 'express';
+import { ApiRequest, OrgParam } from '../index';
+import { Org } from './org.model';
+import { BadRequestError, NotFoundError } from '../../util/error-types';
 
-export namespace OrgController {
+class OrgController {
 
-  export async function getOrg(req: any, res: express.Response) {
-    const orgId = req.params['orgId'];
-    const org = await Org.findOne({
-      where: {
-        id: parseInt(orgId)
-      }
-    });
-    if (!org) {
+  async getOrg(req: ApiRequest, res: Response) {
+    if (!req.appOrg) {
       throw new NotFoundError('Organization was not found');
     }
-    res.json(org);
-    res.send();
+
+    res.json(req.appOrg);
   }
 
-  export async function addOrg(req: any, res: express.Response) {
-    let name:string = req.body['name'];
-    let description:string = req.body['description'];
-    if (!name) {
+  async addOrg(req: ApiRequest<null, AddOrgBody>, res: Response) {
+    if (!req.body.name) {
       throw new BadRequestError('An organization name must be supplied when adding an organization.');
     }
-    if (!description) {
+
+    if (!req.body.description) {
       throw new BadRequestError('An organization description must be supplied when adding an organization.');
     }
+
     const org = new Org();
-    org.name = name;
-    org.description = description;
+    org.name = req.body.name;
+    org.description = req.body.description;
     const newOrg = await org.save();
-    res.status(201);
-    res.json(newOrg);
-    res.send();
+
+    await res.status(201).json(newOrg);
   }
 
-  export async function deleteOrg(req: any, res: express.Response) {
-    const orgId = req.params['orgId'];
-    const org = await Org.findOne({
-      where: {
-        id: parseInt(orgId)
-      }
-    });
-    if (!org) {
+  async deleteOrg(req: ApiRequest, res: Response) {
+    if (!req.appOrg) {
       throw new NotFoundError('Organization could not be found.');
     }
-    const removedOrg = await org.remove();
+
+    const removedOrg = await req.appOrg.remove();
+
     res.json(removedOrg);
-    res.send();
   }
 
-  export async function updateOrg(req: any, res: express.Response) {
-    const orgId = req.params['orgId'];
-    const org = await Org.findOne({
-      where: {
-        id: parseInt(orgId)
-      }
-    });
-    if (!org) {
+  async updateOrg(req: ApiRequest<OrgParam, UpdateOrgBody>, res: Response) {
+    const name = req.body.name;
+    const description = req.body.description;
+
+    if (!req.appOrg) {
       throw new NotFoundError('Organization could not be found.');
     }
-    let name:string = req.body['name'];
+
     if (name) {
-      org.name = name;
+      req.appOrg.name = name;
     }
-    let description:string = req.body['description'];
+
     if (description) {
-      org.description = description;
+      req.appOrg.description = description;
     }
-    const updatedOrg = await org.save();
+
+    const updatedOrg = await req.appOrg.save();
+
     res.json(updatedOrg);
-    res.send();
   }
 }
+
+type AddOrgBody = {
+  name: string
+  description: string
+};
+
+type UpdateOrgBody = AddOrgBody;
+
+export default new OrgController();

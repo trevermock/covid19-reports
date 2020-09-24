@@ -1,75 +1,68 @@
-import express from 'express';
+import { Response } from 'express';
 import csv from 'csvtojson';
 import fs from 'fs';
-import * as path from 'path';
-import { Roster } from "./roster.model";
-import { Org } from "../org/org.model";
-import {BadRequestError, NotFoundError} from "../../util/error";
-import { getOptionalParam, getRequiredParam } from "../../util/util";
+import { ApiRequest, OrgEdipiParams, OrgParam } from '../index';
+import { Roster } from './roster.model';
+import { BadRequestError, NotFoundError, UnprocessableEntity } from '../../util/error-types';
+import { getOptionalParam, getRequiredParam } from '../../util/util';
 
-export namespace RosterController {
+class RosterController {
 
-  export async function getRosterTemplate(req: any, res: express.Response) {
+  async getRosterTemplate(req: ApiRequest, res: Response) {
     const file = `${__dirname}/uploads/roster_template.csv`;
     res.download(file);
   }
 
-  export async function getRoster(req: any, res: express.Response) {
-    const orgId = req.params['orgId'];
+  async getRoster(req: ApiRequest<OrgParam, any, GetRosterQuery>, res: Response) {
+    if (!req.appOrg) {
+      throw new NotFoundError('Organization was not found.');
+    }
 
-    let limit = req.query.hasOwnProperty('limit') ? parseInt(req.query['limit']) : 100;
-    let page = req.query.hasOwnProperty('page') ? parseInt(req.query['page']) : 0;
+    const limit = (req.query.limit != null) ? parseInt(req.query.limit) : 100;
+    const page = (req.query.page != null) ? parseInt(req.query.page) : 0;
 
     const roster = await Roster.find({
       skip: page * limit,
       take: limit,
       where: {
-        org: parseInt(orgId)
+        org: req.appOrg.id,
       },
       order: {
-        edipi: 'ASC'
-      }
+        edipi: 'ASC',
+      },
     });
 
     res.json(roster);
-    res.send();
   }
 
-  export async function getRosterCount(req: any, res: express.Response) {
-    const orgId = req.params['orgId'];
+  async getRosterCount(req: ApiRequest<OrgParam>, res: Response) {
+    if (!req.appOrg) {
+      throw new NotFoundError('Organization was not found.');
+    }
 
     const count = await Roster.count({
       where: {
-        org: parseInt(orgId)
-      }
+        org: req.appOrg.id,
+      },
     });
 
-    let result = {
-      count
-    }
-    res.json(result);
-    res.send();
+    res.json({ count });
   }
 
-
-  export async function uploadRosterEntries(req: any, res: express.Response) {
-    const orgId = req.params['orgId'];
-    const org = await Org.findOne({
-      where: {
-        id: parseInt(orgId)
-      }
-    });
-    if (!org) {
-      throw new NotFoundError('Organization for role was not found.');
+  async uploadRosterEntries(req: ApiRequest<OrgParam>, res: Response) {
+    if (!req.appOrg) {
+      throw new NotFoundError('Organization was not found.');
     }
 
-    if (!req.hasOwnProperty('file') || !req['file'].path) {
+    const org = req.appOrg;
+
+    if (!req.file || !req.file.path) {
       throw new BadRequestError('No file to process.');
     }
 
+    const rosterEntries: Roster[] = [];
     try {
-      const roster = await csv().fromFile(req['file'].path);
-      const rosterEntries: Roster[] = [];
+      const roster = await csv().fromFile(req.file.path) as RosterFileRow[];
       roster.forEach(row => {
         const entry = new Roster();
         entry.edipi = getRequiredParam('edipi', row);
@@ -92,111 +85,166 @@ export namespace RosterController {
         rosterEntries.push(entry);
       });
       await Roster.save(rosterEntries);
-      res.json({
-        count: rosterEntries.length
-      });
+    } catch (err) {
+      throw new UnprocessableEntity('Roster file was unable to be processed. Check that it is formatted correctly.');
+    } finally {
+      fs.unlinkSync(req.file.path);
     }
-    finally {
-      fs.unlinkSync(req['file'].path);
-    }
+
+    res.json({
+      count: rosterEntries.length,
+    });
   }
 
-  export async function addRosterEntry(req: any, res: express.Response) {
-    const orgId = req.params['orgId'];
+  async addRosterEntry(req: ApiRequest<OrgParam, RosterEntryData>, res: Response) {
+    if (!req.appOrg) {
+      throw new NotFoundError('Organization was not found.');
+    }
 
     const entry = new Roster();
     entry.edipi = getRequiredParam('edipi', req.body);
-
-    const org = await Org.findOne({
-      where: {
-        id: parseInt(orgId)
-      }
-    });
-    if (!org) {
-      throw new NotFoundError('Organization for role was not found.');
-    }
-    entry.org = org;
-
-    getRosterParamsFromBody(entry, req.body);
-
+    entry.org = req.appOrg;
+    setRosterParamsFromBody(entry, req.body);
     const newRosterEntry = await entry.save();
-    res.status(201);
-    res.json(newRosterEntry);
-    res.send();
+
+    await res.status(201).json(newRosterEntry);
   }
 
-  export async function getRosterEntry(req: any, res: express.Response) {
-    const orgId = req.params['orgId'];
-    const userEDIPI = req.params['userEDIPI'];
+  async getRosterEntry(req: ApiRequest<OrgEdipiParams>, res: Response) {
+    if (!req.appOrg) {
+      throw new NotFoundError('Organization was not found.');
+    }
+
+    const userEDIPI = req.params.userEDIPI;
+
     const rosterEntry = await Roster.findOne({
       where: {
         edipi: userEDIPI,
-        org: parseInt(orgId)
-      }
+        org: req.appOrg.id,
+      },
     });
+
     if (!rosterEntry) {
       throw new NotFoundError('User could not be found.');
     }
+
     res.json(rosterEntry);
-    res.send();
   }
 
-  export async function deleteRosterEntry(req: any, res: express.Response) {
-    const orgId = req.params['orgId'];
-    const userEDIPI = req.params['userEDIPI'];
+  async deleteRosterEntry(req: ApiRequest<OrgEdipiParams>, res: Response) {
+    if (!req.appOrg) {
+      throw new NotFoundError('Organization was not found.');
+    }
+
+    const userEDIPI = req.params.userEDIPI;
+
     const rosterEntry = await Roster.findOne({
       where: {
         edipi: userEDIPI,
-        org: parseInt(orgId)
-      }
+        org: req.appOrg.id,
+      },
     });
+
     if (!rosterEntry) {
       throw new NotFoundError('User could not be found.');
     }
+
     const deletedEntry = await rosterEntry.remove();
+
     res.json(deletedEntry);
-    res.send();
   }
 
-  export async function updateRosterEntry(req: any, res: express.Response) {
-    const orgId = req.params['orgId'];
-    const userEDIPI = req.params['userEDIPI'];
+  async updateRosterEntry(req: ApiRequest<OrgEdipiParams, RosterEntryData>, res: Response) {
+    if (!req.appOrg) {
+      throw new NotFoundError('Organization was not found.');
+    }
+
+    const userEDIPI = req.params.userEDIPI;
+
     const entry = await Roster.findOne({
       where: {
         edipi: userEDIPI,
-        org: parseInt(orgId)
-      }
+        org: req.appOrg.id,
+      },
     });
+
     if (!entry) {
       throw new NotFoundError('User could not be found.');
     }
 
-    getRosterParamsFromBody(entry, req.body);
-
+    setRosterParamsFromBody(entry, req.body);
     const updatedRosterEntry = await entry.save();
+
     res.json(updatedRosterEntry);
-    res.send();
   }
 
-  function getRosterParamsFromBody(entry: Roster, body: any) {
-    entry.rate_rank = getOptionalParam('rate_rank', body);
-    entry.first_name = getRequiredParam('first_name', body);
-    entry.last_name = getRequiredParam('last_name', body);
-    entry.unit = getRequiredParam('unit', body);
-    entry.billet_workcenter = getRequiredParam('billet_workcenter', body);
-    entry.contract_number = getRequiredParam('contract_number', body);
-    entry.pilot = getOptionalParam('pilot', body, 'boolean');
-    entry.aircrew = getOptionalParam('aircrew', body, 'boolean');
-    entry.cdi = getOptionalParam('cdi', body, 'boolean');
-    entry.cdqar = getOptionalParam('cdqar', body, 'boolean');
-    entry.dscacrew = getOptionalParam('dscacrew', body, 'boolean');
-    entry.advanced_party = getOptionalParam('advanced_party', body, 'boolean');
-    entry.pui = getOptionalParam('pui', body, 'boolean');
-    const date = getOptionalParam('covid19_test_return_date', body);
-    if (date) {
-      entry.covid19_test_return_date = new Date(date);
-    }
-    entry.rom = getOptionalParam('rom', body);
-    entry.rom_release = getOptionalParam('rom_release', body);
-  }
 }
+
+function setRosterParamsFromBody(entry: Roster, body: RosterEntryData) {
+  entry.first_name = getRequiredParam('first_name', body);
+  entry.last_name = getRequiredParam('last_name', body);
+  entry.unit = getRequiredParam('unit', body);
+  entry.billet_workcenter = getRequiredParam('billet_workcenter', body);
+  entry.contract_number = getRequiredParam('contract_number', body);
+  entry.rate_rank = getOptionalParam('rate_rank', body);
+  entry.pilot = getOptionalParam('pilot', body, 'boolean');
+  entry.aircrew = getOptionalParam('aircrew', body, 'boolean');
+  entry.cdi = getOptionalParam('cdi', body, 'boolean');
+  entry.cdqar = getOptionalParam('cdqar', body, 'boolean');
+  entry.dscacrew = getOptionalParam('dscacrew', body, 'boolean');
+  entry.advanced_party = getOptionalParam('advanced_party', body, 'boolean');
+  entry.pui = getOptionalParam('pui', body, 'boolean');
+  const date = getOptionalParam('covid19_test_return_date', body);
+  if (date) {
+    entry.covid19_test_return_date = new Date(date);
+  }
+  entry.rom = getOptionalParam('rom', body);
+  entry.rom_release = getOptionalParam('rom_release', body);
+}
+
+type GetRosterQuery = {
+  limit: string
+  page: string
+};
+
+type RosterFileRow = {
+  edipi: string
+  first_name: string
+  last_name: string
+  unit: string
+  billet_workcenter: string
+  contract_number: string
+  rate_rank?: string
+  pilot?: string
+  aircrew?: string
+  cdi?: string
+  cdqar?: string
+  dscacrew?: string
+  advanced_party?: string
+  pui?: string
+  covid19_test_return_date?: string
+  rom?: string
+  rom_release?: string
+};
+
+type RosterEntryData = {
+  edipi: Roster['edipi']
+  first_name: Roster['first_name']
+  last_name: Roster['last_name']
+  unit: Roster['unit']
+  billet_workcenter: Roster['billet_workcenter']
+  contract_number: Roster['contract_number']
+  rate_rank?: Roster['rate_rank']
+  pilot?: Roster['pilot']
+  aircrew?: Roster['aircrew']
+  cdi?: Roster['cdi']
+  cdqar?: Roster['cdqar']
+  dscacrew?: Roster['dscacrew']
+  advanced_party?: Roster['advanced_party']
+  pui?: Roster['pui']
+  covid19_test_return_date?: Roster['covid19_test_return_date']
+  rom?: Roster['rom']
+  rom_release?: Roster['rom_release']
+};
+
+export default new RosterController();
