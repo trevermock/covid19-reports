@@ -45,7 +45,7 @@ CREATE TABLE IF NOT EXISTS public.role
     CONSTRAINT "org_fkey" FOREIGN KEY (org_id)
         REFERENCES public.org (id) MATCH SIMPLE
         ON UPDATE NO ACTION
-        ON DELETE NO ACTION
+        ON DELETE CASCADE
 );
 
 -- Roster Table
@@ -73,7 +73,7 @@ CREATE TABLE IF NOT EXISTS public.roster
     CONSTRAINT "org_fkey" FOREIGN KEY (org_id)
         REFERENCES public.org (id) MATCH SIMPLE
         ON UPDATE NO ACTION
-        ON DELETE NO ACTION
+        ON DELETE CASCADE
 );
 
 -- User Table
@@ -102,6 +102,32 @@ CREATE TABLE IF NOT EXISTS public.user_roles
         ON DELETE CASCADE,
     CONSTRAINT "user_fkey" FOREIGN KEY ("user")
         REFERENCES public."user" (edipi) MATCH SIMPLE
+        ON UPDATE NO ACTION
+        ON DELETE CASCADE
+);
+
+-- Access Request ID Sequence
+CREATE SEQUENCE IF NOT EXISTS public.access_request_id_seq
+    INCREMENT 1
+    START 1
+    MINVALUE 1
+    MAXVALUE 2147483647
+    CACHE 1;
+
+-- Access Request Table
+CREATE TABLE IF NOT EXISTS public.access_request
+(
+    id integer NOT NULL DEFAULT nextval('access_request_id_seq'::regclass),
+    request_date timestamp without time zone NOT NULL DEFAULT now(),
+    user_edipi character varying(10) NOT NULL,
+    org_id integer NOT NULL,
+    CONSTRAINT "access_request_pkey" PRIMARY KEY (id),
+    CONSTRAINT "user_fkey" FOREIGN KEY (user_edipi)
+        REFERENCES public."user" (edipi) MATCH SIMPLE
+        ON UPDATE NO ACTION
+        ON DELETE CASCADE,
+    CONSTRAINT "org_fkey" FOREIGN KEY (org_id)
+        REFERENCES public.org (id) MATCH SIMPLE
         ON UPDATE NO ACTION
         ON DELETE CASCADE
 );

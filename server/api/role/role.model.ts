@@ -19,7 +19,7 @@ export class Role extends BaseEntity {
   })
   description: string;
 
-  @ManyToOne(() => Org)
+  @ManyToOne(() => Org, { cascade: true })
   @JoinColumn({
     name: 'org_id',
   })

@@ -12,7 +12,7 @@ export class User extends BaseEntity {
   })
   edipi: string;
 
-  @ManyToMany(() => Role)
+  @ManyToMany(() => Role, { cascade: true })
   @JoinTable({
     name: 'user_roles',
     joinColumn: {

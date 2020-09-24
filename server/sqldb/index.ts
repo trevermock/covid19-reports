@@ -23,7 +23,7 @@ const config: ConnectionOptions = {
   password: process.env.SQL_PASSWORD || 'postgres',
   database: process.env.SQL_DATABASE || 'dds',
   entities: [User, Role, Org, Roster, AccessRequest],
-  synchronize: true,
+  synchronize: false,
   logging: false,
   ssl,
 };
