@@ -15,22 +15,20 @@ class UserController {
       throw new BadRequestError('User is already registered.');
     }
 
-    const firstName = req.body.first_name;
-    const lastName = req.body.last_name;
-    const phone = req.body.phone;
-    const email = req.body.email;
-
-    if (!firstName) {
+    if (!req.body.first_name) {
       throw new BadRequestError('A first name must be supplied when registering.');
     }
-    if (!lastName) {
+    if (!req.body.last_name) {
       throw new BadRequestError('A last name must be supplied when registering.');
     }
-    if (!phone) {
+    if (!req.body.phone) {
       throw new BadRequestError('A phone number must be supplied when registering.');
     }
-    if (!email) {
+    if (!req.body.email) {
       throw new BadRequestError('An email address must be supplied when registering.');
+    }
+    if (!req.body.service) {
+      throw new BadRequestError('A service must be supplied when registering.');
     }
 
     let user = await User.findOne({
@@ -44,10 +42,11 @@ class UserController {
     } else {
       user = req.appUser;
     }
-    user.first_name = firstName;
-    user.last_name = lastName;
-    user.phone = phone;
-    user.email = email;
+    user.first_name = req.body.first_name;
+    user.last_name = req.body.last_name;
+    user.phone = req.body.phone;
+    user.email = req.body.email;
+    user.service = req.body.service;
     user.is_registered = true;
 
     const updatedUser = await user.save();
@@ -208,6 +207,7 @@ type RegisterUserBody = {
   last_name: string
   phone: string
   email: string
+  service: string
 };
 
 export default new UserController();

@@ -88,7 +88,7 @@ export const HomePage = () => {
 
                 <CardActions>
                   <a href={`/dashboard?orgId=${user.activeRole.org.id}`}>
-                    <Button variant="contained" color="primary">
+                    <Button>
                       View Analytics
                     </Button>
                   </a>
@@ -114,7 +114,7 @@ export const HomePage = () => {
 
                 <CardActions>
                   <Link to="/roster">
-                    <Button variant="contained" color="primary">
+                    <Button>
                       View Roster
                     </Button>
                   </Link>

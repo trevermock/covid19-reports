@@ -38,6 +38,9 @@ export class User extends BaseEntity {
   @Column()
   email: string;
 
+  @Column()
+  service: string;
+
   @Column({
     default: true,
   })

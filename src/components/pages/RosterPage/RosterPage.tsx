@@ -175,9 +175,6 @@ export const RosterPage = () => {
           />
           <label htmlFor="raised-button-file">
             <Button
-              // type="button"
-              variant="contained"
-              color="primary"
               size="large"
               component="span"
             >
@@ -187,8 +184,6 @@ export const RosterPage = () => {
 
           <Button
             type="button"
-            variant="contained"
-            color="primary"
             size="large"
             href={`api/roster/${orgId}/template`}
           >
@@ -254,7 +249,7 @@ export const RosterPage = () => {
           </DialogContentText>
         </DialogContent>
         <DialogActions>
-          <Button onClick={handleAlertClose} color="primary" autoFocus>
+          <Button onClick={handleAlertClose} autoFocus>
             OK
           </Button>
         </DialogActions>
