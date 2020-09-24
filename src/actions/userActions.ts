@@ -79,6 +79,7 @@ export interface UserData {
   first_name: string,
   last_name: string,
   phone: string,
+  service: string,
   email: string,
   enabled: boolean,
   root_admin: boolean,

@@ -115,8 +115,8 @@ export const UserRegistrationPage = () => {
             </div>
             <div>
               <TextField
-                id="organization"
-                label="Organization"
+                id="service"
+                label="Service"
                 select
                 value={inputData.service}
                 required
