@@ -42,32 +42,32 @@ export class Role extends BaseEntity {
   @Column({
     default: false,
   })
-  can_manage_users: boolean;
+  can_manage_users: boolean = false;
 
   @Column({
     default: false,
   })
-  can_manage_roster: boolean;
+  can_manage_roster: boolean = false;
 
   @Column({
     default: false,
   })
-  can_manage_roles: boolean;
+  can_manage_roles: boolean = false;
 
   @Column({
     default: false,
   })
-  can_view_roster: boolean;
+  can_view_roster: boolean = false;
 
   @Column({
     default: false,
   })
-  can_view_muster: boolean;
+  can_view_muster: boolean = false;
 
   @Column({
     default: false,
   })
-  can_manage_dashboards: boolean;
+  can_manage_dashboards: boolean = false;
 
   isSupersetOf(role: Role) {
     // Loop through all permission properties and return false if the input role has
