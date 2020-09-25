@@ -257,7 +257,7 @@ export const UsersPage = () => {
                 onChange={selectedRoleChanged}
               >
                 {availableRoles.map((role, index) => (
-                  <MenuItem value={index}>{role.name}</MenuItem>
+                  <MenuItem key={role.id} value={index}>{role.name}</MenuItem>
                 ))}
               </Select>
             </FormControl>

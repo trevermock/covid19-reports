@@ -2,6 +2,9 @@ import { createMuiTheme } from '@material-ui/core';
 
 const theme = createMuiTheme({
   palette: {
+    text: {
+      primary: '#3D4551',
+    },
     primary: {
       main: '#005ea2',
       light: '#73B3E7',
@@ -25,6 +28,20 @@ theme.overrides = {
     '@global': {
       body: {
         backgroundColor: 'rgb(240, 240, 240)',
+      },
+    },
+  },
+  MuiAppBar: {
+    root: {
+      boxShadow: 'none',
+    },
+  },
+  MuiDrawer: {
+    root: {
+      '& .MuiDrawer-paper': {
+        top: 'unset',
+        bottom: 0,
+        height: `calc(100% - ${64}px)`,
       },
     },
   },
@@ -73,12 +90,23 @@ theme.overrides = {
       padding: '8px 12px',
     },
   },
+  MuiPaper: {
+    root: {
+      '& .MuiToolbar-root': {
+        paddingLeft: theme.spacing(2),
+        paddingRight: theme.spacing(2),
+      },
+    },
+  },
 };
 
 theme.props = {
   MuiButton: {
     color: 'primary',
     variant: 'contained',
+  },
+  MuiIconButton: {
+    color: 'primary',
   },
   MuiTextField: {
     InputLabelProps: {

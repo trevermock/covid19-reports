@@ -4,11 +4,15 @@ import {
   ManyToOne,
   JoinColumn,
   PrimaryGeneratedColumn,
-  CreateDateColumn,
+  CreateDateColumn, Column,
 } from 'typeorm';
 import { Org } from '../org/org.model';
 import { User } from '../user/user.model';
 
+export enum AccessRequestStatus {
+  Pending = 'pending',
+  Rejected = 'rejected',
+}
 
 @Entity()
 export class AccessRequest extends BaseEntity {
@@ -32,5 +36,12 @@ export class AccessRequest extends BaseEntity {
     type: 'timestamp',
   })
   request_date: Date;
+
+  @Column({
+    type: 'enum',
+    enum: AccessRequestStatus,
+    default: AccessRequestStatus.Pending,
+  })
+  status: AccessRequestStatus;
 
 }

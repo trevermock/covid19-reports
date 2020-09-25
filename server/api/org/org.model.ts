@@ -1,6 +1,7 @@
 import {
-  Entity, PrimaryGeneratedColumn, Column, BaseEntity,
+  Entity, PrimaryGeneratedColumn, Column, BaseEntity, ManyToOne, JoinColumn, ManyToMany,
 } from 'typeorm';
+import { User } from '../user/user.model';
 
 @Entity()
 export class Org extends BaseEntity {
@@ -22,5 +23,11 @@ export class Org extends BaseEntity {
     default: '',
   })
   index_prefix: string;
+
+  @ManyToOne(() => User, user => user.edipi, { onDelete: 'RESTRICT' })
+  @JoinColumn({
+    name: 'contact_id',
+  })
+  contact: User;
 
 }

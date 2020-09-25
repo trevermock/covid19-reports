@@ -1,6 +1,6 @@
 import { createStyles, Theme } from '@material-ui/core';
 import { makeStyles } from '@material-ui/styles';
-import { sidenavWidthCollapsed, sidenavWidthExpanded } from './AppFrame/AppFrame.styles';
+import { sidenavWidthCollapsed, sidenavWidthExpanded } from './AppSidenav/AppSidenav.styles';
 
 export default makeStyles((theme: Theme) => createStyles({
   content: {

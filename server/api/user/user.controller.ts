@@ -1,5 +1,7 @@
 import { Response } from 'express';
+import { AccessRequest } from '../access-request/access-request.model';
 import { ApiRequest, OrgEdipiParams, OrgParam } from '../index';
+import { Org } from '../org/org.model';
 import { User } from './user.model';
 import { Role } from '../role/role.model';
 import { BadRequestError, NotFoundError } from '../../util/error-types';
@@ -188,11 +190,21 @@ class UserController {
     res.json(removedUser);
   }
 
-  // async updateUser(req: any, res: Response) {
-  //   const org = req.params.orgId;
-  //   const userEDIPI = req.params.userEDIPI;
-  //   // TODO: Implement
-  // }
+  async getAccessRequests(req: ApiRequest, res: Response) {
+    if (!req.appUser.is_registered) {
+      throw new BadRequestError('User is not registered');
+    }
+
+    const accessRequests = await AccessRequest.find({
+      where: {
+        user: req.appUser,
+      },
+      relations: ['org', 'org.contact'],
+    });
+
+    res.json(accessRequests);
+  }
+
 }
 
 type AddUserBody = {

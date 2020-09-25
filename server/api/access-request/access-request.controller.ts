@@ -1,10 +1,10 @@
 import { Response } from 'express';
-import { ApiRequest, OrgParam } from '../index';
-import { AccessRequest } from './access-request.model';
 import { BadRequestError, NotFoundError, UnauthorizedError } from '../../util/error-types';
+import { ApiRequest, OrgParam } from '../index';
 import { Org } from '../org/org.model';
 import { Role } from '../role/role.model';
 import { User } from '../user/user.model';
+import { AccessRequest, AccessRequestStatus } from './access-request.model';
 
 class AccessRequestController {
 
@@ -17,6 +17,7 @@ class AccessRequestController {
       relations: ['user'],
       where: {
         org: req.appOrg.id,
+        status: AccessRequestStatus.Pending,
       },
     });
 
@@ -37,6 +38,7 @@ class AccessRequestController {
       where: {
         id: orgId,
       },
+      relations: ['contact'],
     });
 
     if (!org) {
@@ -164,7 +166,8 @@ class AccessRequestController {
       throw new NotFoundError('Access request was not found.');
     }
 
-    const rejectedRequest = await request.remove();
+    request.status = AccessRequestStatus.Rejected;
+    const rejectedRequest = request.save();
 
     res.json(rejectedRequest);
   }

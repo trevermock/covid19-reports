@@ -8,7 +8,8 @@ import { User } from '../actions/userActions';
 import { AppFrameState } from '../reducers/appFrameReducer';
 import { UserState } from '../reducers/userReducer';
 import { AppState } from '../store';
-import { AppFrame } from './AppFrame/AppFrame';
+import { AppSidenav } from './AppSidenav/AppSidenav';
+import { AppToolbar } from './AppToolbar/AppToolbar';
 import { HomePage } from './pages/HomePage/HomePage';
 import useStyles from './App.styles';
 import { RequestAccessPage } from './pages/RequestAccessPage/RequestAccessPage';
@@ -45,18 +46,23 @@ export const App = () => {
 
     if (!user.activeRole) {
       return (
-        <Switch>
-          <Route path="/request-access">
-            <RequestAccessPage />
-          </Route>
-          <Redirect to="/request-access" />
-        </Switch>
+        <>
+          <AppToolbar />
+
+          <Switch>
+            <Route path="/request-access">
+              <RequestAccessPage />
+            </Route>
+            <Redirect to="/request-access" />
+          </Switch>
+        </>
       );
     }
 
     return (
       <>
-        <AppFrame />
+        <AppToolbar />
+        <AppSidenav />
 
         <div
           className={clsx(classes.content, {

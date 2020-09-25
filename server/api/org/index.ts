@@ -6,6 +6,11 @@ import { requireOrgAccess, requireRootAdmin } from '../../auth';
 const router = express.Router() as any;
 
 router.get(
+  '/',
+  controller.getOrgList,
+);
+
+router.get(
   '/:orgId',
   requireOrgAccess,
   requireRootAdmin,

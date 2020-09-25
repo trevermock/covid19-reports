@@ -1,9 +1,21 @@
 import { Response } from 'express';
 import { ApiRequest, OrgParam } from '../index';
 import { Org } from './org.model';
-import { BadRequestError, NotFoundError } from '../../util/error-types';
+import { BadRequestError, ForbiddenError, NotFoundError } from '../../util/error-types';
 
 class OrgController {
+
+  async getOrgList(req: ApiRequest, res: Response) {
+    if (!req.appUser.is_registered) {
+      throw new BadRequestError('User is not registered');
+    }
+
+    const orgs = await Org.find({
+      relations: ['contact'],
+    });
+
+    res.json(orgs);
+  }
 
   async getOrg(req: ApiRequest, res: Response) {
     if (!req.appOrg) {

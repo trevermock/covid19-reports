@@ -16,6 +16,11 @@ router.post(
   controller.registerUser,
 );
 
+router.get(
+  '/access-requests',
+  controller.getAccessRequests,
+);
+
 router.post(
   '/:orgId',
   bodyParser.json(),
