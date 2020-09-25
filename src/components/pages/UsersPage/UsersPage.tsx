@@ -13,11 +13,12 @@ import {
   DialogTitle,
   DialogContent,
   DialogContentText,
-  IconButton, FormControl, InputLabel, Select, MenuItem,
+  IconButton, FormControl, InputLabel, Select,
 } from '@material-ui/core';
 import React, { useEffect, useState } from 'react';
 import { useSelector } from 'react-redux';
 import MailOutlineIcon from '@material-ui/icons/MailOutline';
+import CheckIcon from '@material-ui/icons/Check';
 import axios from 'axios';
 import useStyles from './UsersPage.styles';
 import { UserState } from '../../../reducers/userReducer';
@@ -243,27 +244,95 @@ export const UsersPage = () => {
         </TableContainer>
       </Container>
       <Dialog onClose={cancelRoleSelection} open={activeAccessRequest != null}>
-        <DialogContent className={classes.roleDialog}>
-          <DialogContentText>
+        <DialogContent>
+          <DialogContentText align="center" color="textPrimary">
             Please assign <b>{`${activeAccessRequest?.user.first_name} ${activeAccessRequest?.user.last_name}`}</b> a role:
           </DialogContentText>
-          <form noValidate>
-            <FormControl>
-              <InputLabel htmlFor="max-width">Role</InputLabel>
-              <Select
-                disabled={formDisabled}
-                autoFocus
-                value={selectedRole}
-                onChange={selectedRoleChanged}
-              >
-                {availableRoles.map((role, index) => (
-                  <MenuItem key={role.id} value={index}>{role.name}</MenuItem>
-                ))}
-              </Select>
-            </FormControl>
-          </form>
+          <FormControl className={classes.roleSelect}>
+            <InputLabel htmlFor="role-select">Role</InputLabel>
+            <Select
+              native
+              disabled={formDisabled}
+              autoFocus
+              value={selectedRole}
+              onChange={selectedRoleChanged}
+              inputProps={{
+                name: 'role',
+                id: 'role-select',
+              }}
+            >
+              {availableRoles.map((role, index) => (
+                <option key={role.id} value={index}>{role.name}</option>
+              ))}
+            </Select>
+          </FormControl>
+          {availableRoles.length > selectedRole && (
+            <>
+              <DialogContentText color="textPrimary" className={classes.roleDescription}>
+                {availableRoles[selectedRole].description}
+              </DialogContentText>
+              <Table aria-label="Permissions">
+                <TableHead>
+                  <TableRow>
+                    <TableCell className={classes.rolePermissionHeader}>Permission</TableCell>
+                    <TableCell className={classes.rolePermissionHeader}>Allowed</TableCell>
+                  </TableRow>
+                </TableHead>
+                <TableBody>
+                  <TableRow>
+                    <TableCell className={classes.rolePermissionCell}>Manage Users</TableCell>
+                    <TableCell className={classes.rolePermissionIconCell}>
+                      {availableRoles[selectedRole].can_manage_users && (
+                        <CheckIcon />
+                      )}
+                    </TableCell>
+                  </TableRow>
+                  <TableRow>
+                    <TableCell className={classes.rolePermissionCell}>Manage Roles</TableCell>
+                    <TableCell className={classes.rolePermissionIconCell}>
+                      {availableRoles[selectedRole].can_manage_roles && (
+                        <CheckIcon />
+                      )}
+                    </TableCell>
+                  </TableRow>
+                  <TableRow>
+                    <TableCell className={classes.rolePermissionCell}>Manage Roster</TableCell>
+                    <TableCell className={classes.rolePermissionIconCell}>
+                      {availableRoles[selectedRole].can_manage_roster && (
+                        <CheckIcon />
+                      )}
+                    </TableCell>
+                  </TableRow>
+                  <TableRow>
+                    <TableCell className={classes.rolePermissionCell}>Manage Dashboards</TableCell>
+                    <TableCell className={classes.rolePermissionIconCell}>
+                      {availableRoles[selectedRole].can_manage_dashboards && (
+                        <CheckIcon />
+                      )}
+                    </TableCell>
+                  </TableRow>
+                  <TableRow>
+                    <TableCell className={classes.rolePermissionCell}>View Roster</TableCell>
+                    <TableCell className={classes.rolePermissionIconCell}>
+                      {availableRoles[selectedRole].can_view_roster && (
+                        <CheckIcon />
+                      )}
+                    </TableCell>
+                  </TableRow>
+                  <TableRow>
+                    <TableCell className={classes.rolePermissionCell}>View Muster Reports</TableCell>
+                    <TableCell className={classes.rolePermissionIconCell}>
+                      {availableRoles[selectedRole].can_view_muster && (
+                        <CheckIcon />
+                      )}
+                    </TableCell>
+                  </TableRow>
+                </TableBody>
+              </Table>
+            </>
+          )}
         </DialogContent>
-        <DialogActions>
+        <DialogActions className={classes.roleDialogActions}>
           <Button disabled={formDisabled} variant="outlined" onClick={cancelRoleSelection} color="primary">
             Cancel
           </Button>

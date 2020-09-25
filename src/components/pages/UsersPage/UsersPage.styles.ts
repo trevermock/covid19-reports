@@ -35,6 +35,37 @@ export default makeStyles((theme: Theme) => createStyles({
       backgroundColor: '#B6001D',
     },
   },
-  roleDialog: {
+  roleSelect: {
+    minWidth: '150px',
+    marginTop: '15px',
+    width: '100%',
+  },
+  roleDescription: {
+    marginTop: '12px',
+  },
+  rolePermissionHeader: {
+    padding: '3px 16px',
+    backgroundColor: '#DEDEDE',
+  },
+  rolePermissionCell: {
+    padding: '0px 16px',
+    height: '32px',
+    backgroundColor: '#F0F1F1',
+  },
+  rolePermissionIconCell: {
+    padding: '0px 16px',
+    height: '32px',
+    textAlign: 'center',
+    backgroundColor: '#EAEAEA',
+    '& svg': {
+      position: 'relative',
+      top: '3px',
+      color: theme.palette.primary.light,
+    },
+  },
+  roleDialogActions: {
+    justifyContent: 'center',
+    backgroundColor: '#F0F1F1',
+    padding: '15px 35px',
   },
 }));
