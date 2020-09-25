@@ -1,7 +1,7 @@
 export const musterDataMock = {
   data: [
     {
-      last_observation: "2020-11-19, 06:31",
+      last_observation: "2020-11-19 06:31",
       unit: "Unit 1",
       phone: "540-123-1421",
       rate_rank: "PO2/E-5",
@@ -10,7 +10,7 @@ export const musterDataMock = {
       non_muster_rate: "12%",
     },
     {
-      last_observation: "2020-11-19, 06:50",
+      last_observation: "2020-11-19 06:50",
       unit: "Unit 2",
       phone: "202-443-8122",
       rate_rank: "MCPO/E-9",
@@ -19,7 +19,7 @@ export const musterDataMock = {
       non_muster_rate: "0.5%",
     },
     {
-      last_observation: "2020-11-19, 07:02",
+      last_observation: "2020-11-19 07:02",
       unit: "Unit 2",
       phone: "414-773-5189",
       rate_rank: "EAC",
@@ -28,7 +28,7 @@ export const musterDataMock = {
       non_muster_rate: "1.2%",
     },
     {
-      last_observation: "2020-11-19, 07:34",
+      last_observation: "2020-11-19 07:34",
       unit: "Unit 2",
       phone: "730-173-1103",
       rate_rank: "CWO-1",
@@ -37,7 +37,7 @@ export const musterDataMock = {
       non_muster_rate: "44%",
     },
     {
-      last_observation: "2020-11-19, 07:35",
+      last_observation: "2020-11-19 07:35",
       unit: "Unit 5",
       phone: "540-333-6212",
       rate_rank: "ENS/O-1",
@@ -46,7 +46,7 @@ export const musterDataMock = {
       non_muster_rate: "21.6%",
     },
     {
-      last_observation: "2020-11-19, 08:04",
+      last_observation: "2020-11-19 08:04",
       unit: "Unit 6",
       phone: "240-753-1451",
       rate_rank: "LTJG/O-2",
@@ -55,7 +55,7 @@ export const musterDataMock = {
       non_muster_rate: "18.6%",
     },
     {
-      last_observation: "2020-11-19, 08:05",
+      last_observation: "2020-11-19 08:05",
       unit: "Unit 7",
       phone: "540-613-1511",
       rate_rank: "CAPT/1",
@@ -64,7 +64,7 @@ export const musterDataMock = {
       non_muster_rate: "1.7%",
     },
     {
-      last_observation: "2020-11-19, 08:06",
+      last_observation: "2020-11-19 08:06",
       unit: "Unit 7",
       phone: "550-153-1495",
       rate_rank: "CPO/E-7",
@@ -73,7 +73,7 @@ export const musterDataMock = {
       non_muster_rate: "3%",
     },
     {
-      last_observation: "2020-11-19, 08:07",
+      last_observation: "2020-11-19 08:07",
       unit: "Unit 8",
       phone: "420-123-1444",
       rate_rank: "CAPT/5",

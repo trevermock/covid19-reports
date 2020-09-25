@@ -14,16 +14,11 @@ import {
   TableRow,
   IconButton,
   TableFooter,
-  DialogActions,
-  Dialog,
-  DialogTitle,
-  DialogContent,
-  DialogContentText,
   FormControl,
   Select,
   MenuItem,
 } from "@material-ui/core";
-//import { CSVLink } from "react-csv";
+import CsvDownloader from 'react-csv-downloader';
 import { Chart } from "react-charts";
 import FirstPageIcon from "@material-ui/icons/FirstPage";
 import KeyboardArrowLeft from "@material-ui/icons/KeyboardArrowLeft";
@@ -31,7 +26,6 @@ import KeyboardArrowRight from "@material-ui/icons/KeyboardArrowRight";
 import LastPageIcon from "@material-ui/icons/LastPage";
 import React, { ChangeEvent, useEffect, useState } from "react";
 import { useDispatch, useSelector } from "react-redux";
-import { Roster } from "../../../actions/rosterActions";
 import { chartsDataMock } from "../../../mocks/chartsDataMock";
 import { musterDataMock } from "../../../mocks/musterDataMock";
 import SystemUpdateAltIcon from "@material-ui/icons/SystemUpdateAlt";
@@ -111,26 +105,14 @@ export const MusterPage = () => {
   const classes = useStyles();
   const dispatch = useDispatch();
 
-  const fileInputRef = React.createRef<HTMLInputElement>();
-
   const [unit, setUnit] = useState("All Units");
   const [rows, setRows] = useState<MusterEntry[]>([]);
   const [page, setPage] = useState(0);
   const [musterSize, setMusterSize] = useState(0);
   const [rowsPerPage, setRowsPerPage] = useState(10);
-  const [alert, setAlert] = useState({ open: false, message: "", title: "" });
+  const user = useSelector<AppState, UserState>((state) => state.user);
 
-  const orgId = useSelector<AppState, UserState>((state) => state.user).roles[0].org.id;
-
-  function createUnitMenuItems() {
-    const unitNames = rows ? Array.from(new Set(rows.map((r) => r.unit))) : [];
-
-    return unitNames.map((name, index) => {
-      return <MenuItem value={name}>{name}</MenuItem>;
-    });
-  }
-
-  function initializeTable() {
+  const initializeTable = () => {
     setPage(0);
     setRows(musterDataMock.data as MusterEntry[]);
     setMusterSize(musterDataMock.data.length);
@@ -138,64 +120,91 @@ export const MusterPage = () => {
   }
 
   function handleUnitChange(event: React.ChangeEvent<{ value: unknown }>) {
-    console.dir(event.target.value);
     setUnit(event.target.value as string);
   }
 
-  function handleFileInputChange(e: ChangeEvent<HTMLInputElement>) {
-    if (!e.target.files || e.target.files[0] == null) {
-      return;
-    }
-
-    dispatch(
-      Roster.upload(e.target.files[0], async (count) => {
-        if (count < 0) {
-          setAlert({
-            open: true,
-            message: `An error occurred while uploading roster. Please verify the roster data.`,
-            title: `Upload Error`,
-          });
-        } else {
-          setAlert({
-            open: true,
-            message: `Successfully uploaded ${count} roster entries.`,
-            title: "Upload Successful",
-          });
-          initializeTable();
-        }
-      })
-    );
-  }
-
   const handleChangePage = async (event: React.MouseEvent<HTMLButtonElement> | null, newPage: number) => {
-    const response = await fetch(`api/roster/${orgId}?limit=${rowsPerPage}&page=${newPage}`);
+    /*const response = await fetch(`api/roster/${orgId}?limit=${rowsPerPage}&page=${newPage}`);
     const rosterResponse = (await response.json()) as MusterEntry[];
     setPage(newPage);
-    setRows(rosterResponse);
+    setRows(rosterResponse);*/
   };
 
   const handleChangeRowsPerPage = async (event: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
-    const newRowsPerPage = parseInt(event.target.value, 10);
+    /*const newRowsPerPage = parseInt(event.target.value, 10);
     const response = await fetch(`api/roster/${orgId}?limit=${newRowsPerPage}&page=0`);
     const rosterResponse = (await response.json()) as MusterEntry[];
     setPage(0);
     setRows(rosterResponse);
-    setRowsPerPage(newRowsPerPage);
-  };
-
-  const handleAlertClose = () => {
-    setAlert({ open: false, message: "", title: "" });
+    setRowsPerPage(newRowsPerPage);*/
   };
 
   const filterByUnit = () => {
     const filteredRows =
       rows && unit != "All Units"
         ? rows.filter((r) => {
-            return r.unit === unit;
-          })
+          return r.unit === unit;
+        })
         : rows;
 
     return filteredRows;
+  };
+
+  const createUnitMenuItems = () => {
+    const unitNames = rows ? Array.from(new Set(rows.map((r) => r.unit))) : [];
+
+    return unitNames.map((name, index) => {
+      return <MenuItem key={index} value={name}>{name}</MenuItem>;
+    });
+  };
+
+  const getCsvData = () => {
+    const columns = [{
+      id: "last_observation",
+      displayName: "LAST OBSERVATION"
+    }, {
+      id: "unit",
+      displayName: "UNIT"
+    },
+    {
+      id: "phone",
+      displayName: "PHONE"
+    },
+    {
+      id: "rate_rank",
+      displayName: "RATE/RANK"
+    },
+    {
+      id: "name",
+      displayName: "NAME"
+    },
+    {
+      id: "edipi",
+      displayName: "EDIPI"
+    },
+    {
+      id: "non_muster_rate",
+      displayName: "NON-MUSTER RATE"
+    }];
+    let data: { last_observation: string; unit: string; phone: string; rate_rank: string; name: string; edipi: string; non_muster_rate: string; }[] = [];
+    const musters = filterByUnit()
+    musters.forEach(row => {
+      const muster = {
+        last_observation: row.last_observation,
+        unit: row.unit,
+        phone: row.phone,
+        rate_rank: row.rate_rank,
+        name: row.name,
+        edipi: row.edipi,
+        non_muster_rate: row.non_muster_rate
+      }
+      data.push(muster);
+    })
+
+    return {
+      columns: columns,
+      rows: data
+    };
   };
 
   useEffect(initializeTable, []);
@@ -216,30 +225,25 @@ export const MusterPage = () => {
             Muster Non-compliance
           </div>
           <div className={classes.buttons} style={{ flex: "auto", justifyContent: "flex-end" }}>
-            <input
-              accept="text/csv"
-              id="raised-button-file"
-              type="file"
-              style={{ display: "none" }}
-              ref={fileInputRef}
-              onChange={handleFileInputChange}
-            />
+
             <label htmlFor="raised-button-file">
-              <Button
-                // type="button"
-                variant="contained"
-                color="primary"
-                size="large"
-                component="span"
-                startIcon={<SystemUpdateAltIcon />}
-              >
-                Export Data
+              <CsvDownloader filename={"muster"} columns={getCsvData().columns} datas={getCsvData().rows}>
+                <Button
+                  // type="button"
+                  variant="contained"
+                  color="primary"
+                  size="large"
+                  component="span"
+                  startIcon={<SystemUpdateAltIcon />}
+                >
+                  Export Data
               </Button>
+              </CsvDownloader>
             </label>
           </div>
         </div>
 
-        <Container style={{ flexDirection: "row", display: "flex", justifyContent: "flex-start", background: "white" }}>
+        <Container style={{ flexDirection: "row", display: "flex", justifyContent: "flex-start", background: "white", textAlign: "left" }}>
           <ButtonGroup style={{ marginBottom: 16, marginTop: 16 }} aria-label="outlined primary button group">
             <Button>12 HR</Button>
             <Button>1 Day</Button>
@@ -333,22 +337,6 @@ export const MusterPage = () => {
           </Card>
         </div>
       </Container>
-      <Dialog
-        open={alert.open}
-        onClose={handleAlertClose}
-        aria-labelledby="alert-dialog-title"
-        aria-describedby="alert-dialog-description"
-      >
-        <DialogTitle id="alert-dialog-title">{alert.title}</DialogTitle>
-        <DialogContent>
-          <DialogContentText id="alert-dialog-description">{alert.message}</DialogContentText>
-        </DialogContent>
-        <DialogActions>
-          <Button onClick={handleAlertClose} color="primary" autoFocus>
-            OK
-          </Button>
-        </DialogActions>
-      </Dialog>
     </main>
   );
 };

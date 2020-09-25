@@ -36,7 +36,7 @@
     "process": "^0.11.10",
     "react": "^16.13.1",
     "react-charts": "^2.0.0-beta.7",
-    "react-csv": "2.0.3",
+    "react-csv-downloader": "2.1.0",
     "react-dom": "^16.13.1",
     "react-redux": "^7.2.1",
     "react-router-dom": "^5.2.0",
