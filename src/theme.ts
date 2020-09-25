@@ -28,6 +28,11 @@ theme.overrides = {
       },
     },
   },
+  MuiTableCell: {
+    head: {
+      textTransform: 'uppercase',
+    },
+  },
   MuiCardContent: {
     root: {
       padding: theme.spacing(3),

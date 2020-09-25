@@ -14,6 +14,7 @@ class AccessRequestController {
     }
 
     const requests = await AccessRequest.find({
+      relations: ['user'],
       where: {
         org: req.appOrg.id,
       },

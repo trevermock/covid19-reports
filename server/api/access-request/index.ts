@@ -1,4 +1,5 @@
 import express from 'express';
+import bodyParser from 'body-parser';
 import controller from './access-request.controller';
 import { requireOrgAccess, requireRolePermission } from '../../auth';
 
@@ -13,6 +14,7 @@ router.get(
 
 router.post(
   '/:orgId',
+  bodyParser.json(),
   controller.issueAccessRequest,
 );
 
@@ -20,6 +22,7 @@ router.post(
   '/:orgId/approve',
   requireOrgAccess,
   requireRolePermission(role => role.can_manage_users),
+  bodyParser.json(),
   controller.approveAccessRequest,
 );
 
@@ -27,6 +30,7 @@ router.post(
   '/:orgId/reject',
   requireOrgAccess,
   requireRolePermission(role => role.can_manage_users),
+  bodyParser.json(),
   controller.rejectAccessRequest,
 );
 
