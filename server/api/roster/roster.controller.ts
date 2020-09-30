@@ -194,12 +194,16 @@ function setRosterParamsFromBody(entry: Roster, body: RosterEntryData) {
   entry.dscacrew = getOptionalParam('dscacrew', body, 'boolean');
   entry.advanced_party = getOptionalParam('advanced_party', body, 'boolean');
   entry.pui = getOptionalParam('pui', body, 'boolean');
-  const date = getOptionalParam('covid19_test_return_date', body);
-  if (date) {
-    entry.covid19_test_return_date = new Date(date);
+  const covid19TestReturnDate = getOptionalParam('covid19_test_return_date', body);
+  if (covid19TestReturnDate) {
+    entry.covid19_test_return_date = new Date(covid19TestReturnDate);
   }
   entry.rom = getOptionalParam('rom', body);
   entry.rom_release = getOptionalParam('rom_release', body);
+  const lastReported = getOptionalParam('last_reported', body);
+  if (lastReported) {
+    entry.last_reported = new Date(lastReported);
+  }
 }
 
 type GetRosterQuery = {
@@ -222,9 +226,12 @@ type RosterFileRow = {
   dscacrew?: string
   advanced_party?: string
   pui?: string
-  covid19_test_return_date?: string
   rom?: string
   rom_release?: string
+
+  // NOTE
+  // `covid19_test_return_date` and `last_reported` are intentionally excluded since they'll be updated by the ingest
+  // process instead of through a file upload.
 };
 
 type RosterEntryData = {
@@ -234,17 +241,18 @@ type RosterEntryData = {
   unit: Roster['unit']
   billet_workcenter: Roster['billet_workcenter']
   contract_number: Roster['contract_number']
-  rate_rank?: Roster['rate_rank']
-  pilot?: Roster['pilot']
-  aircrew?: Roster['aircrew']
-  cdi?: Roster['cdi']
-  cdqar?: Roster['cdqar']
-  dscacrew?: Roster['dscacrew']
-  advanced_party?: Roster['advanced_party']
-  pui?: Roster['pui']
-  covid19_test_return_date?: Roster['covid19_test_return_date']
-  rom?: Roster['rom']
-  rom_release?: Roster['rom_release']
+  rate_rank: Roster['rate_rank']
+  pilot: Roster['pilot']
+  aircrew: Roster['aircrew']
+  cdi: Roster['cdi']
+  cdqar: Roster['cdqar']
+  dscacrew: Roster['dscacrew']
+  advanced_party: Roster['advanced_party']
+  pui: Roster['pui']
+  covid19_test_return_date: Roster['covid19_test_return_date']
+  rom: Roster['rom']
+  rom_release: Roster['rom_release']
+  last_reported: Roster['last_reported']
 };
 
 export default new RosterController();

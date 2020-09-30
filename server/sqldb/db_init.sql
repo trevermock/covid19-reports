@@ -172,6 +172,7 @@ CREATE TABLE public.roster (
     covid19_test_return_date timestamp without time zone,
     rom character varying(50),
     rom_release character varying(100),
+    last_reported timestamp without time zone,
     org_id integer NOT NULL
 );
 
@@ -258,7 +259,7 @@ COPY public.role (id, name, description, index_prefix, notify_on_access_request,
 -- Data for Name: roster; Type: TABLE DATA; Schema: public; Owner: postgres
 --
 
-COPY public.roster (edipi, first_name, last_name, unit, billet_workcenter, contract_number, rate_rank, pilot, aircrew, cdi, cdqar, dscacrew, advanced_party, pui, covid19_test_return_date, rom, rom_release, org_id) FROM stdin;
+COPY public.roster (edipi, first_name, last_name, unit, billet_workcenter, contract_number, rate_rank, pilot, aircrew, cdi, cdqar, dscacrew, advanced_party, pui, covid19_test_return_date, rom, rom_release, last_reported, org_id) FROM stdin;
 \.
 
 

@@ -1,5 +1,5 @@
 import {
-  Entity, Column, BaseEntity, JoinColumn, ManyToOne, PrimaryColumn,
+  Entity, Column, BaseEntity, JoinColumn, ManyToOne, PrimaryColumn, CreateDateColumn,
 } from 'typeorm';
 import { Org } from '../org/org.model';
 
@@ -99,5 +99,12 @@ export class Roster extends BaseEntity {
     nullable: true,
   })
   rom_release?: string;
+
+  @CreateDateColumn({
+    type: 'timestamp',
+    nullable: true,
+    default: () => 'null',
+  })
+  last_reported?: Date;
 
 }
