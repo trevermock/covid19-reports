@@ -1,16 +1,14 @@
 import {
-  AppBar, IconButton, MenuItem, Select, Toolbar,
+  AppBar, MenuItem, Select, Toolbar,
 } from '@material-ui/core';
-import MenuIcon from '@material-ui/icons/Menu';
-import clsx from 'clsx';
 import React from 'react';
 import { useDispatch, useSelector } from 'react-redux';
-import { AppFrame as AppFrameActions } from '../../actions/appFrameActions';
-import { User } from '../../actions/userActions';
-import { AppFrameState } from '../../reducers/appFrameReducer';
-import { UserState } from '../../reducers/userReducer';
+import { AppFrame as AppFrameActions } from '../../actions/app-frame.actions';
+import { User } from '../../actions/user.actions';
+import { AppFrameState } from '../../reducers/app-frame.reducer';
+import { UserState } from '../../reducers/user.reducer';
 import { AppState } from '../../store';
-import useStyles from './AppToolbar.styles';
+import useStyles from './app-toolbar.styles';
 import logoImage from '../../media/images/logo.png';
 
 export const AppToolbar = () => {
@@ -57,7 +55,7 @@ export const AppToolbar = () => {
         </Toolbar>
       </AppBar>
 
-      {/*<div className={classes.toolbar} />*/}
+      {/* Extra empty toolbar to provide proper padding */}
       <Toolbar />
     </>
   );

@@ -35,7 +35,7 @@ export class AccessRequest extends BaseEntity {
   @CreateDateColumn({
     type: 'timestamp',
   })
-  request_date: Date;
+  requestDate: Date;
 
   @Column({
     type: 'enum',

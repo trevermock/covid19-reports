@@ -32,7 +32,7 @@ class RoleController {
       throw new BadRequestError('A description must be supplied when adding a role.');
     }
 
-    if (!req.body.index_prefix) {
+    if (!req.body.indexPrefix) {
       throw new BadRequestError('An index prefix must be supplied when adding a role.');
     }
 
@@ -142,43 +142,43 @@ function setRoleFromBody(role: Role, body: RoleBody) {
   if (body.description != null) {
     role.description = body.description;
   }
-  if (body.index_prefix != null) {
-    role.index_prefix = body.index_prefix;
+  if (body.indexPrefix != null) {
+    role.indexPrefix = body.indexPrefix;
   }
-  if (body.can_manage_users != null) {
-    role.can_manage_users = body.can_manage_users;
+  if (body.canManageUsers != null) {
+    role.canManageUsers = body.canManageUsers;
   }
-  if (body.can_manage_roles != null) {
-    role.can_manage_roles = body.can_manage_roles;
+  if (body.canManageRoles != null) {
+    role.canManageRoles = body.canManageRoles;
   }
-  if (body.can_manage_roster != null) {
-    role.can_manage_roster = body.can_manage_roster;
+  if (body.canManageRoster != null) {
+    role.canManageRoster = body.canManageRoster;
   }
-  if (body.can_manage_dashboards != null) {
-    role.can_manage_dashboards = body.can_manage_dashboards;
+  if (body.canManageDashboards != null) {
+    role.canManageDashboards = body.canManageDashboards;
   }
-  if (body.can_view_roster != null) {
-    role.can_view_roster = body.can_view_roster;
+  if (body.canViewRoster != null) {
+    role.canViewRoster = body.canViewRoster;
   }
-  if (body.can_view_muster != null) {
-    role.can_view_muster = body.can_view_muster;
+  if (body.canViewMuster != null) {
+    role.canViewMuster = body.canViewMuster;
   }
-  if (body.notify_on_access_request != null) {
-    role.notify_on_access_request = body.notify_on_access_request;
+  if (body.notifyOnAccessRequest != null) {
+    role.notifyOnAccessRequest = body.notifyOnAccessRequest;
   }
 }
 
 type RoleBody = {
   name?: string
   description?: string
-  index_prefix?: string
-  can_manage_users?: boolean
-  can_manage_roles?: boolean
-  can_manage_roster?: boolean
-  can_manage_dashboards?: boolean
-  can_view_roster?: boolean
-  can_view_muster?: boolean
-  notify_on_access_request?: boolean
+  indexPrefix?: string
+  canManageUsers?: boolean
+  canManageRoles?: boolean
+  canManageRoster?: boolean
+  canManageDashboards?: boolean
+  canViewRoster?: boolean
+  canViewMuster?: boolean
+  notifyOnAccessRequest?: boolean
 };
 
 export default new RoleController();

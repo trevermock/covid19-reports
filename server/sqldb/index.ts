@@ -1,4 +1,5 @@
 import { createConnection, ConnectionOptions } from 'typeorm';
+import { SnakeNamingStrategy } from 'typeorm-naming-strategies';
 import { TlsOptions } from 'tls';
 import { User } from '../api/user/user.model';
 import { Role } from '../api/role/role.model';
@@ -23,6 +24,7 @@ const config: ConnectionOptions = {
   password: process.env.SQL_PASSWORD || 'postgres',
   database: process.env.SQL_DATABASE || 'dds',
   entities: [User, Role, Org, Roster, AccessRequest],
+  namingStrategy: new SnakeNamingStrategy(),
   synchronize: false,
   logging: false,
   ssl,

@@ -6,7 +6,7 @@ import { BadRequestError, ForbiddenError, NotFoundError } from '../../util/error
 class OrgController {
 
   async getOrgList(req: ApiRequest, res: Response) {
-    if (!req.appUser.is_registered) {
+    if (!req.appUser.isRegistered) {
       throw new BadRequestError('User is not registered');
     }
 

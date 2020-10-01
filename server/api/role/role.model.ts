@@ -28,12 +28,12 @@ export class Role extends BaseEntity {
   @Column({
     default: '',
   })
-  index_prefix: string;
+  indexPrefix: string;
 
   @Column({
     default: false,
   })
-  notify_on_access_request: boolean;
+  notifyOnAccessRequest: boolean;
 
   //
   // ROLE PERMISSIONS - Must be prefixed with "can_"
@@ -42,32 +42,32 @@ export class Role extends BaseEntity {
   @Column({
     default: false,
   })
-  can_manage_users: boolean = false;
+  canManageUsers: boolean = false;
 
   @Column({
     default: false,
   })
-  can_manage_roster: boolean = false;
+  canManageRoster: boolean = false;
 
   @Column({
     default: false,
   })
-  can_manage_roles: boolean = false;
+  canManageRoles: boolean = false;
 
   @Column({
     default: false,
   })
-  can_view_roster: boolean = false;
+  canViewRoster: boolean = false;
 
   @Column({
     default: false,
   })
-  can_view_muster: boolean = false;
+  canViewMuster: boolean = false;
 
   @Column({
     default: false,
   })
-  can_manage_dashboards: boolean = false;
+  canManageDashboards: boolean = false;
 
   isSupersetOf(role: Role) {
     // Loop through all permission properties and return false if the input role has
@@ -86,8 +86,8 @@ export class Role extends BaseEntity {
     adminRole.name = 'Admin';
     adminRole.description = 'Site Administrator';
     adminRole.org = org;
-    adminRole.index_prefix = '';
-    adminRole.notify_on_access_request = false;
+    adminRole.indexPrefix = '';
+    adminRole.notifyOnAccessRequest = false;
 
     // Allow all permissions
     for (const key of Object.keys(adminRole)) {

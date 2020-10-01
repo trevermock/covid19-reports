@@ -2,5 +2,5 @@
 
 export NODE_ENV=development
 
-./build_dev.sh
+./build-dev.sh
 node ./build/app.js

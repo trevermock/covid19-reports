@@ -6,10 +6,10 @@ import {
 } from '@material-ui/icons';
 import React, { useState } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
-import { User, UserRegisterData } from '../../../actions/userActions';
-import { UserState } from '../../../reducers/userReducer';
+import { User, UserRegisterData } from '../../../actions/user.actions';
+import { UserState } from '../../../reducers/user.reducer';
 import { AppState } from '../../../store';
-import useStyles from './UserRegistrationPage.styles';
+import useStyles from './user-registration-page.styles';
 import services from '../../../data/services';
 
 export const UserRegistrationPage = () => {

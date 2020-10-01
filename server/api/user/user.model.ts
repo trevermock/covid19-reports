@@ -27,10 +27,10 @@ export class User extends BaseEntity {
   roles: Role[];
 
   @Column()
-  first_name: string;
+  firstName: string;
 
   @Column()
-  last_name: string;
+  lastName: string;
 
   @Column()
   phone: string;
@@ -49,18 +49,18 @@ export class User extends BaseEntity {
   @Column({
     default: false,
   })
-  root_admin: boolean;
+  rootAdmin: boolean;
 
   @Column({
     default: false,
   })
-  is_registered: boolean;
+  isRegistered: boolean;
 
   getKibanaIndex(role: Role) {
-    if (this.root_admin) {
+    if (this.rootAdmin) {
       return '*';
     }
-    return `${role.org.index_prefix}-${role.index_prefix}`;
+    return `${role.org.indexPrefix}-${role.indexPrefix}`;
   }
 
   getKibanaUserClaim(role: Role) {
@@ -68,7 +68,7 @@ export class User extends BaseEntity {
   }
 
   getKibanaRoles(role: Role) {
-    if (role.can_manage_dashboards) {
+    if (role.canManageDashboards) {
       return 'kibana_admin';
     }
     return 'kibana_ro_strict';

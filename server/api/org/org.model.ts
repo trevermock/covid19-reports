@@ -22,7 +22,7 @@ export class Org extends BaseEntity {
   @Column({
     default: '',
   })
-  index_prefix: string;
+  indexPrefix: string;
 
   @ManyToOne(() => User, user => user.edipi, { onDelete: 'RESTRICT' })
   @JoinColumn({

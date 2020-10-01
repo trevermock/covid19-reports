@@ -25,7 +25,7 @@ class AccessRequestController {
   }
 
   async issueAccessRequest(req: ApiRequest<OrgParam>, res: Response) {
-    if (!req.appUser.is_registered) {
+    if (!req.appUser.isRegistered) {
       throw new BadRequestError('User is not registered');
     }
 
@@ -59,7 +59,7 @@ class AccessRequestController {
     request = new AccessRequest();
     request.user = req.appUser;
     request.org = org;
-    request.request_date = new Date();
+    request.requestDate = new Date();
 
     const saved = await request.save();
 

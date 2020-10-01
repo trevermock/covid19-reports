@@ -9,7 +9,7 @@ import { getOptionalParam, getRequiredParam } from '../../util/util';
 class RosterController {
 
   async getRosterTemplate(req: ApiRequest, res: Response) {
-    const file = `${__dirname}/uploads/roster_template.csv`;
+    const file = `${__dirname}/uploads/roster-template.csv`;
     res.download(file);
   }
 
@@ -67,21 +67,21 @@ class RosterController {
         const entry = new Roster();
         entry.edipi = getRequiredParam('edipi', row);
         entry.org = org;
-        entry.first_name = getRequiredParam('first_name', row);
-        entry.last_name = getRequiredParam('last_name', row);
-        entry.rate_rank = getOptionalParam('rate_rank', row);
+        entry.firstName = getRequiredParam('firstName', row);
+        entry.lastName = getRequiredParam('lastName', row);
+        entry.rateRank = getOptionalParam('rateRank', row);
         entry.unit = getRequiredParam('unit', row);
-        entry.billet_workcenter = getRequiredParam('billet_workcenter', row);
-        entry.contract_number = getRequiredParam('contract_number', row);
+        entry.billetWorkcenter = getRequiredParam('billetWorkcenter', row);
+        entry.contractNumber = getRequiredParam('contractNumber', row);
         entry.pilot = getOptionalParam('pilot', row) === 'true';
         entry.aircrew = getOptionalParam('aircrew', row) === 'true';
         entry.cdi = getOptionalParam('cdi', row) === 'true';
         entry.cdqar = getOptionalParam('cdqar', row) === 'true';
         entry.dscacrew = getOptionalParam('dscacrew', row) === 'true';
-        entry.advanced_party = getOptionalParam('advanced_party', row) === 'true';
+        entry.advancedParty = getOptionalParam('advancedParty', row) === 'true';
         entry.pui = getOptionalParam('pui', row) === 'true';
         entry.rom = getOptionalParam('rom', row);
-        entry.rom_release = getOptionalParam('rom_release', row);
+        entry.romRelease = getOptionalParam('romRelease', row);
         rosterEntries.push(entry);
       });
       await Roster.save(rosterEntries);
@@ -181,28 +181,28 @@ class RosterController {
 }
 
 function setRosterParamsFromBody(entry: Roster, body: RosterEntryData) {
-  entry.first_name = getRequiredParam('first_name', body);
-  entry.last_name = getRequiredParam('last_name', body);
+  entry.firstName = getRequiredParam('firstName', body);
+  entry.lastName = getRequiredParam('lastName', body);
   entry.unit = getRequiredParam('unit', body);
-  entry.billet_workcenter = getRequiredParam('billet_workcenter', body);
-  entry.contract_number = getRequiredParam('contract_number', body);
-  entry.rate_rank = getOptionalParam('rate_rank', body);
+  entry.billetWorkcenter = getRequiredParam('billetWorkcenter', body);
+  entry.contractNumber = getRequiredParam('contractNumber', body);
+  entry.rateRank = getOptionalParam('rateRank', body);
   entry.pilot = getOptionalParam('pilot', body, 'boolean');
   entry.aircrew = getOptionalParam('aircrew', body, 'boolean');
   entry.cdi = getOptionalParam('cdi', body, 'boolean');
   entry.cdqar = getOptionalParam('cdqar', body, 'boolean');
   entry.dscacrew = getOptionalParam('dscacrew', body, 'boolean');
-  entry.advanced_party = getOptionalParam('advanced_party', body, 'boolean');
+  entry.advancedParty = getOptionalParam('advancedParty', body, 'boolean');
   entry.pui = getOptionalParam('pui', body, 'boolean');
-  const covid19TestReturnDate = getOptionalParam('covid19_test_return_date', body);
+  const covid19TestReturnDate = getOptionalParam('covid19TestReturnDate', body);
   if (covid19TestReturnDate) {
-    entry.covid19_test_return_date = new Date(covid19TestReturnDate);
+    entry.covid19TestReturnDate = new Date(covid19TestReturnDate);
   }
   entry.rom = getOptionalParam('rom', body);
-  entry.rom_release = getOptionalParam('rom_release', body);
-  const lastReported = getOptionalParam('last_reported', body);
+  entry.romRelease = getOptionalParam('romRelease', body);
+  const lastReported = getOptionalParam('lastReported', body);
   if (lastReported) {
-    entry.last_reported = new Date(lastReported);
+    entry.lastReported = new Date(lastReported);
   }
 }
 
@@ -213,46 +213,46 @@ type GetRosterQuery = {
 
 type RosterFileRow = {
   edipi: string
-  first_name: string
-  last_name: string
+  firstName: string
+  lastName: string
   unit: string
-  billet_workcenter: string
-  contract_number: string
-  rate_rank?: string
+  billetWorkcenter: string
+  contractNumber: string
+  rateRank?: string
   pilot?: string
   aircrew?: string
   cdi?: string
   cdqar?: string
   dscacrew?: string
-  advanced_party?: string
+  advancedParty?: string
   pui?: string
   rom?: string
-  rom_release?: string
+  romRelease?: string
 
   // NOTE
-  // `covid19_test_return_date` and `last_reported` are intentionally excluded since they'll be updated by the ingest
+  // `covid19TestReturnDate` and `lastReported` are intentionally excluded since they'll be updated by the ingest
   // process instead of through a file upload.
 };
 
 type RosterEntryData = {
   edipi: Roster['edipi']
-  first_name: Roster['first_name']
-  last_name: Roster['last_name']
+  firstName: Roster['firstName']
+  lastName: Roster['lastName']
   unit: Roster['unit']
-  billet_workcenter: Roster['billet_workcenter']
-  contract_number: Roster['contract_number']
-  rate_rank: Roster['rate_rank']
+  billetWorkcenter: Roster['billetWorkcenter']
+  contractNumber: Roster['contractNumber']
+  rateRank: Roster['rateRank']
   pilot: Roster['pilot']
   aircrew: Roster['aircrew']
   cdi: Roster['cdi']
   cdqar: Roster['cdqar']
   dscacrew: Roster['dscacrew']
-  advanced_party: Roster['advanced_party']
+  advancedParty: Roster['advancedParty']
   pui: Roster['pui']
-  covid19_test_return_date: Roster['covid19_test_return_date']
+  covid19TestReturnDate: Roster['covid19TestReturnDate']
   rom: Roster['rom']
-  rom_release: Roster['rom_release']
-  last_reported: Roster['last_reported']
+  romRelease: Roster['romRelease']
+  lastReported: Roster['lastReported']
 };
 
 export default new RosterController();

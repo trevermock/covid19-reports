@@ -4,8 +4,8 @@ import { Provider } from 'react-redux';
 import { BrowserRouter as Router } from 'react-router-dom';
 import { CssBaseline } from '@material-ui/core';
 import { ThemeProvider } from '@material-ui/styles';
-import { App } from './components/App';
-import * as serviceWorker from './serviceWorker';
+import { App } from './components/app';
+import * as serviceWorker from './service-worker';
 import store from './store';
 import theme from './theme';
 

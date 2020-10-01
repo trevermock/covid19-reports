@@ -13,14 +13,14 @@ class UserController {
   }
 
   async registerUser(req: ApiRequest<null, RegisterUserBody>, res: Response) {
-    if (req.appUser.is_registered) {
+    if (req.appUser.isRegistered) {
       throw new BadRequestError('User is already registered.');
     }
 
-    if (!req.body.first_name) {
+    if (!req.body.firstName) {
       throw new BadRequestError('A first name must be supplied when registering.');
     }
-    if (!req.body.last_name) {
+    if (!req.body.lastName) {
       throw new BadRequestError('A last name must be supplied when registering.');
     }
     if (!req.body.phone) {
@@ -39,17 +39,17 @@ class UserController {
       },
     });
 
-    if (user && user.is_registered) {
+    if (user && user.isRegistered) {
       throw new BadRequestError('User is already registered.');
     } else {
       user = req.appUser;
     }
-    user.first_name = req.body.first_name;
-    user.last_name = req.body.last_name;
+    user.firstName = req.body.firstName;
+    user.lastName = req.body.lastName;
     user.phone = req.body.phone;
     user.email = req.body.email;
     user.service = req.body.service;
-    user.is_registered = true;
+    user.isRegistered = true;
 
     const updatedUser = await user.save();
 
@@ -64,8 +64,8 @@ class UserController {
     const org = req.appOrg;
     const roleId = (req.body.role != null) ? parseInt(req.body.role) : undefined;
     const edipi = req.body.edipi;
-    const firstName = req.body.first_name;
-    const lastName = req.body.last_name;
+    const firstName = req.body.firstName;
+    const lastName = req.body.lastName;
 
     if (roleId == null) {
       throw new BadRequestError('A role id must be supplied when adding a user.');
@@ -119,11 +119,11 @@ class UserController {
     user.roles.push(role);
 
     if (firstName) {
-      user.first_name = firstName;
+      user.firstName = firstName;
     }
 
     if (lastName) {
-      user.last_name = lastName;
+      user.lastName = lastName;
     }
 
     const updatedUser = await user.save();
@@ -191,7 +191,7 @@ class UserController {
   }
 
   async getAccessRequests(req: ApiRequest, res: Response) {
-    if (!req.appUser.is_registered) {
+    if (!req.appUser.isRegistered) {
       throw new BadRequestError('User is not registered');
     }
 
@@ -210,13 +210,13 @@ class UserController {
 type AddUserBody = {
   edipi: string
   role: string
-  first_name: string
-  last_name: string
+  firstName: string
+  lastName: string
 };
 
 type RegisterUserBody = {
-  first_name: string
-  last_name: string
+  firstName: string
+  lastName: string
   phone: string
   email: string
   service: string

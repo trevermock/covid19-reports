@@ -2,8 +2,8 @@ import {
   createStore, combineReducers, applyMiddleware, compose,
 } from 'redux';
 import thunk from 'redux-thunk';
-import { appFrameInitialState, appFrameReducer, AppFrameState } from './reducers/appFrameReducer';
-import { UserState, userInitialState, userReducer } from './reducers/userReducer';
+import { appFrameInitialState, appFrameReducer, AppFrameState } from './reducers/app-frame.reducer';
+import { UserState, userInitialState, userReducer } from './reducers/user.reducer';
 
 export interface AppState {
   user: UserState

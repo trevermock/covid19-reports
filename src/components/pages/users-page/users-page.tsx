@@ -20,8 +20,8 @@ import { useSelector } from 'react-redux';
 import MailOutlineIcon from '@material-ui/icons/MailOutline';
 import CheckIcon from '@material-ui/icons/Check';
 import axios from 'axios';
-import useStyles from './UsersPage.styles';
-import { UserState } from '../../../reducers/userReducer';
+import useStyles from './users-page.styles';
+import { UserState } from '../../../reducers/user.reducer';
 import { AppState } from '../../../store';
 
 interface UserRole {
@@ -30,8 +30,8 @@ interface UserRole {
 
 interface UserRow {
   edipi: string,
-  first_name: string,
-  last_name: string,
+  firstName: string,
+  lastName: string,
   service: string,
   phone: string,
   email: string,
@@ -42,19 +42,19 @@ interface Role {
   id: number,
   name: string,
   description: string,
-  index_prefix: string,
-  can_manage_users: boolean,
-  can_manage_roster: boolean,
-  can_manage_roles: boolean,
-  can_manage_dashboards: boolean,
-  can_view_roster: boolean,
-  can_view_muster: boolean,
-  notify_on_access_request: boolean,
+  indexPrefix: string,
+  canManageUsers: boolean,
+  canManageRoster: boolean,
+  canManageRoles: boolean,
+  canManageDashboards: boolean,
+  canViewRoster: boolean,
+  canViewMuster: boolean,
+  notifyOnAccessRequest: boolean,
 }
 
 interface AccessRequestRow {
   id: number,
-  request_date: Date,
+  requestDate: Date,
   user: UserRow,
   waiting?: boolean,
 }
@@ -171,7 +171,7 @@ export const UsersPage = () => {
                 {accessRequests.map(row => (
                   <TableRow key={row.id}>
                     <TableCell component="th" scope="row">
-                      {`${row.user.first_name} ${row.user.last_name}`}
+                      {`${row.user.firstName} ${row.user.lastName}`}
                     </TableCell>
                     <TableCell>{row.user.edipi}</TableCell>
                     <TableCell>{row.user.service}</TableCell>
@@ -226,7 +226,7 @@ export const UsersPage = () => {
               {userRows.map(row => (
                 <TableRow key={row.edipi}>
                   <TableCell component="th" scope="row">
-                    {`${row.first_name} ${row.last_name}`}
+                    {`${row.firstName} ${row.lastName}`}
                   </TableCell>
                   <TableCell>{row.edipi}</TableCell>
                   <TableCell>{row.service}</TableCell>
@@ -246,7 +246,7 @@ export const UsersPage = () => {
       <Dialog onClose={cancelRoleSelection} open={activeAccessRequest != null}>
         <DialogContent>
           <DialogContentText align="center" color="textPrimary">
-            Please assign <b>{`${activeAccessRequest?.user.first_name} ${activeAccessRequest?.user.last_name}`}</b> a role:
+            Please assign <b>{`${activeAccessRequest?.user.firstName} ${activeAccessRequest?.user.lastName}`}</b> a role:
           </DialogContentText>
           <FormControl className={classes.roleSelect}>
             <InputLabel htmlFor="role-select">Role</InputLabel>
@@ -282,7 +282,7 @@ export const UsersPage = () => {
                   <TableRow>
                     <TableCell className={classes.rolePermissionCell}>Manage Users</TableCell>
                     <TableCell className={classes.rolePermissionIconCell}>
-                      {availableRoles[selectedRole].can_manage_users && (
+                      {availableRoles[selectedRole].canManageUsers && (
                         <CheckIcon />
                       )}
                     </TableCell>
@@ -290,7 +290,7 @@ export const UsersPage = () => {
                   <TableRow>
                     <TableCell className={classes.rolePermissionCell}>Manage Roles</TableCell>
                     <TableCell className={classes.rolePermissionIconCell}>
-                      {availableRoles[selectedRole].can_manage_roles && (
+                      {availableRoles[selectedRole].canManageRoles && (
                         <CheckIcon />
                       )}
                     </TableCell>
@@ -298,7 +298,7 @@ export const UsersPage = () => {
                   <TableRow>
                     <TableCell className={classes.rolePermissionCell}>Manage Roster</TableCell>
                     <TableCell className={classes.rolePermissionIconCell}>
-                      {availableRoles[selectedRole].can_manage_roster && (
+                      {availableRoles[selectedRole].canManageRoster && (
                         <CheckIcon />
                       )}
                     </TableCell>
@@ -306,7 +306,7 @@ export const UsersPage = () => {
                   <TableRow>
                     <TableCell className={classes.rolePermissionCell}>Manage Dashboards</TableCell>
                     <TableCell className={classes.rolePermissionIconCell}>
-                      {availableRoles[selectedRole].can_manage_dashboards && (
+                      {availableRoles[selectedRole].canManageDashboards && (
                         <CheckIcon />
                       )}
                     </TableCell>
@@ -314,7 +314,7 @@ export const UsersPage = () => {
                   <TableRow>
                     <TableCell className={classes.rolePermissionCell}>View Roster</TableCell>
                     <TableCell className={classes.rolePermissionIconCell}>
-                      {availableRoles[selectedRole].can_view_roster && (
+                      {availableRoles[selectedRole].canViewRoster && (
                         <CheckIcon />
                       )}
                     </TableCell>
@@ -322,7 +322,7 @@ export const UsersPage = () => {
                   <TableRow>
                     <TableCell className={classes.rolePermissionCell}>View Muster Reports</TableCell>
                     <TableCell className={classes.rolePermissionIconCell}>
-                      {availableRoles[selectedRole].can_view_muster && (
+                      {availableRoles[selectedRole].canViewMuster && (
                         <CheckIcon />
                       )}
                     </TableCell>

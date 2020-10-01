@@ -20,12 +20,12 @@ export class Roster extends BaseEntity {
   @Column({
     length: 100,
   })
-  first_name: string;
+  firstName: string;
 
   @Column({
     length: 100,
   })
-  last_name: string;
+  lastName: string;
 
   @Column({
     length: 50,
@@ -35,18 +35,18 @@ export class Roster extends BaseEntity {
   @Column({
     length: 50,
   })
-  billet_workcenter: string;
+  billetWorkcenter: string;
 
   @Column({
     length: 100,
   })
-  contract_number: string;
+  contractNumber: string;
 
   @Column({
     length: 100,
     nullable: true,
   })
-  rate_rank?: string;
+  rateRank?: string;
 
   @Column({
     default: false,
@@ -76,7 +76,7 @@ export class Roster extends BaseEntity {
   @Column({
     default: false,
   })
-  advanced_party?: boolean;
+  advancedParty?: boolean;
 
   @Column({
     default: false,
@@ -86,7 +86,7 @@ export class Roster extends BaseEntity {
   @Column({
     nullable: true,
   })
-  covid19_test_return_date?: Date;
+  covid19TestReturnDate?: Date;
 
   @Column({
     length: 50,
@@ -98,13 +98,13 @@ export class Roster extends BaseEntity {
     length: 100,
     nullable: true,
   })
-  rom_release?: string;
+  romRelease?: string;
 
   @CreateDateColumn({
     type: 'timestamp',
     nullable: true,
     default: () => 'null',
   })
-  last_reported?: Date;
+  lastReported?: Date;
 
 }

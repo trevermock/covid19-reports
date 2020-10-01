@@ -1,4 +1,4 @@
-import { User, UserData } from '../actions/userActions';
+import { User, UserData } from '../actions/user.actions';
 
 export const userInitialState: UserState = {
   edipi: '',
@@ -53,13 +53,13 @@ function loggedInState(userData: UserData): Partial<UserState> {
 
   return {
     edipi: userData.edipi,
-    firstName: userData.first_name,
-    lastName: userData.last_name,
+    firstName: userData.firstName,
+    lastName: userData.lastName,
     phone: userData.phone,
     email: userData.email,
     enabled: userData.enabled,
-    rootAdmin: userData.root_admin,
-    isRegistered: userData.is_registered,
+    rootAdmin: userData.rootAdmin,
+    isRegistered: userData.isRegistered,
     roles,
     activeRole: getDefaultActiveRole(roles),
     isLoggedIn: true,
@@ -75,17 +75,17 @@ function getRoles(userData: UserData): UserRole[] {
     id: role.id,
     name: role.name,
     description: role.description,
-    indexPrefix: role.index_prefix,
-    canManageUsers: role.can_manage_users,
-    canManageRoster: role.can_manage_roster,
-    canManageRoles: role.can_manage_roles,
-    canViewRoster: role.can_view_roster,
-    canManageDashboards: role.can_manage_dashboards,
+    indexPrefix: role.indexPrefix,
+    canManageUsers: role.canManageUsers,
+    canManageRoster: role.canManageRoster,
+    canManageRoles: role.canManageRoles,
+    canViewRoster: role.canViewRoster,
+    canManageDashboards: role.canManageDashboards,
     org: {
       id: role.org.id,
       name: role.org.name,
       description: role.org.description,
-      indexPrefix: role.org.index_prefix,
+      indexPrefix: role.org.indexPrefix,
     },
   }));
 }

@@ -1,4 +1,4 @@
-import { AppFrame } from '../actions/appFrameActions';
+import { AppFrame } from '../actions/app-frame.actions';
 
 export interface AppFrameState {
   sidenavExpanded: boolean

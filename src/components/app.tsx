@@ -4,18 +4,18 @@ import { useDispatch, useSelector } from 'react-redux';
 import {
   Switch, Route, Redirect,
 } from 'react-router-dom';
-import { User } from '../actions/userActions';
-import { AppFrameState } from '../reducers/appFrameReducer';
-import { UserState } from '../reducers/userReducer';
+import { User } from '../actions/user.actions';
+import { AppFrameState } from '../reducers/app-frame.reducer';
+import { UserState } from '../reducers/user.reducer';
 import { AppState } from '../store';
-import { AppSidenav } from './AppSidenav/AppSidenav';
-import { AppToolbar } from './AppToolbar/AppToolbar';
-import { HomePage } from './pages/HomePage/HomePage';
-import useStyles from './App.styles';
-import { RequestAccessPage } from './pages/RequestAccessPage/RequestAccessPage';
-import { RosterPage } from './pages/RosterPage/RosterPage';
-import { UserRegistrationPage } from './pages/UserRegistrationPage/UserRegistrationPage';
-import { UsersPage } from './pages/UsersPage/UsersPage';
+import { AppSidenav } from './app-sidenav/app-sidenav';
+import { AppToolbar } from './app-toolbar/app-toolbar';
+import { HomePage } from './pages/home-page/home-page';
+import useStyles from './app.styles';
+import { RequestAccessPage } from './pages/request-access-page/request-access-page';
+import { RosterPage } from './pages/roster-page/roster-page';
+import { UserRegistrationPage } from './pages/user-registration-page/user-registration-page';
+import { UsersPage } from './pages/users-page/users-page';
 
 export const App = () => {
   const user = useSelector<AppState, UserState>(state => state.user);

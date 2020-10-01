@@ -4,9 +4,9 @@ import {
   Button, Card, CardActions, CardContent, Container, Grid, Typography,
 } from '@material-ui/core';
 import { Link } from 'react-router-dom';
-import { UserState } from '../../../reducers/userReducer';
+import { UserState } from '../../../reducers/user.reducer';
 import { AppState } from '../../../store';
-import useStyles from './HomePage.styles';
+import useStyles from './home-page.styles';
 import welcomeImage from '../../../media/images/welcome-image.png';
 
 export const HomePage = () => {

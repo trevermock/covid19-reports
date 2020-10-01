@@ -61,8 +61,8 @@ export namespace User {
     console.log('register', data);
 
     const response = await axios.post('api/user', {
-      first_name: data.firstName,
-      last_name: data.lastName,
+      firstName: data.firstName,
+      lastName: data.lastName,
       phone: data.phone,
       email: data.email,
       service: data.service,
@@ -76,29 +76,29 @@ export namespace User {
 
 export interface UserData {
   edipi: string,
-  first_name: string,
-  last_name: string,
+  firstName: string,
+  lastName: string,
   phone: string,
   service: string,
   email: string,
   enabled: boolean,
-  root_admin: boolean,
-  is_registered: boolean,
+  rootAdmin: boolean,
+  isRegistered: boolean,
   roles: [{
     id: number,
     name: string,
     description: string,
-    index_prefix: string,
-    can_manage_users: boolean,
-    can_manage_roster: boolean,
-    can_manage_roles: boolean,
-    can_view_roster: boolean,
-    can_manage_dashboards: boolean,
+    indexPrefix: string,
+    canManageUsers: boolean,
+    canManageRoster: boolean,
+    canManageRoles: boolean,
+    canViewRoster: boolean,
+    canManageDashboards: boolean,
     org: {
       id: number,
       name: string,
       description: string,
-      index_prefix: string
+      indexPrefix: string
     }
   }]
 }

@@ -43,7 +43,8 @@
     "redux-devtools-extension": "^2.13.8",
     "redux-thunk": "^2.3.0",
     "reflect-metadata": "^0.1.13",
-    "typeorm": "^0.2.25"
+    "typeorm": "^0.2.25",
+    "typeorm-naming-strategies": "^2.0.0"
   },
   "devDependencies": {
     "@testing-library/jest-dom": "^4.2.4",
@@ -76,9 +77,9 @@
     "typescript": "^3.7.5"
   },
   "scripts": {
-    "start": "./run_prod.sh",
-    "dev": "./run_dev.sh",
-    "build": "./build_prod.sh",
+    "start": "./run-prod.sh",
+    "dev": "./run-dev.sh",
+    "build": "./build-prod.sh",
     "test": "./test.sh"
   },
   "eslintConfig": {

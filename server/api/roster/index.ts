@@ -22,35 +22,35 @@ const router = express.Router() as any;
 router.get(
   '/:orgId/template',
   requireOrgAccess,
-  requireRolePermission(role => role.can_manage_roster),
+  requireRolePermission(role => role.canManageRoster),
   controller.getRosterTemplate,
 );
 
 router.get(
   '/:orgId',
   requireOrgAccess,
-  requireRolePermission(role => role.can_manage_roster),
+  requireRolePermission(role => role.canManageRoster),
   controller.getRoster,
 );
 
 router.get(
   '/:orgId/count',
   requireOrgAccess,
-  requireRolePermission(role => role.can_manage_roster),
+  requireRolePermission(role => role.canManageRoster),
   controller.getRosterCount,
 );
 
 router.post(
   '/:orgId',
   requireOrgAccess,
-  requireRolePermission(role => role.can_manage_roster),
+  requireRolePermission(role => role.canManageRoster),
   controller.addRosterEntry,
 );
 
 router.post(
   '/:orgId/bulk',
   requireOrgAccess,
-  requireRolePermission(role => role.can_manage_roster),
+  requireRolePermission(role => role.canManageRoster),
   rosterUpload.single('roster_csv'),
   controller.uploadRosterEntries,
 );
@@ -58,21 +58,21 @@ router.post(
 router.get(
   '/:orgId/:rosterEDIPI',
   requireOrgAccess,
-  requireRolePermission(role => role.can_manage_roster),
+  requireRolePermission(role => role.canManageRoster),
   controller.getRosterEntry,
 );
 
 router.delete(
   '/:orgId/:rosterEDIPI',
   requireOrgAccess,
-  requireRolePermission(role => role.can_manage_roster),
+  requireRolePermission(role => role.canManageRoster),
   controller.deleteRosterEntry,
 );
 
 router.put(
   '/:orgId/:rosterEDIPI',
   requireOrgAccess,
-  requireRolePermission(role => role.can_manage_roster),
+  requireRolePermission(role => role.canManageRoster),
   controller.updateRosterEntry,
 );
 

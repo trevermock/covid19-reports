@@ -1,4 +1,4 @@
-import { Roster } from '../actions/rosterActions';
+import { Roster } from '../actions/roster.actions';
 
 export interface RosterState {
 }

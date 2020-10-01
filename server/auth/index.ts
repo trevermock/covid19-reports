@@ -45,7 +45,7 @@ export async function requireUserAuth(req: AuthRequest, res: Response, next: Nex
     user.edipi = id;
   }
 
-  if (user.root_admin) {
+  if (user.rootAdmin) {
     user.roles = (await Org.find()).map(org => Role.admin(org));
   }
 
@@ -55,14 +55,14 @@ export async function requireUserAuth(req: AuthRequest, res: Response, next: Nex
 }
 
 export async function requireRegisteredUser(req: ApiRequest, res: Response, next: NextFunction) {
-  if (req.appUser.is_registered) {
+  if (req.appUser.isRegistered) {
     return next();
   }
   throw new ForbiddenError('User is not registered.');
 }
 
 export async function requireRootAdmin(req: ApiRequest, res: Response, next: NextFunction) {
-  if (req.appUser.root_admin) {
+  if (req.appUser.rootAdmin) {
     return next();
   }
   throw new ForbiddenError('User does not have sufficient privileges to perform this action.');
@@ -89,7 +89,7 @@ export async function requireOrgAccess(req: any, res: Response, next: NextFuncti
     if (orgRole) {
       req.appOrg = orgRole.org;
       req.appRole = orgRole;
-    } else if (user.root_admin) {
+    } else if (user.rootAdmin) {
       const org = await Org.findOne({
         where: {
           id: orgId,

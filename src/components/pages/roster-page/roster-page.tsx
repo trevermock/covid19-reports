@@ -8,29 +8,29 @@ import KeyboardArrowRight from '@material-ui/icons/KeyboardArrowRight';
 import LastPageIcon from '@material-ui/icons/LastPage';
 import React, { ChangeEvent, useEffect, useState } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
-import { Roster } from '../../../actions/rosterActions';
-import useStyles from './RosterPage.styles';
-import { UserState } from '../../../reducers/userReducer';
+import { Roster } from '../../../actions/roster.actions';
+import useStyles from './roster-page.styles';
+import { UserState } from '../../../reducers/user.reducer';
 import { AppState } from '../../../store';
 
 interface RosterEntry {
   edipi: string,
-  rate_rank: string,
-  first_name: string,
-  last_name: string,
+  rateRank: string,
+  firstName: string,
+  lastName: string,
   unit: string,
-  billet_workcenter: string,
-  contract_number: string,
+  billetWorkcenter: string,
+  contractNumber: string,
   pilot: boolean,
   aircrew: boolean,
   cdi: boolean,
   cdqar: boolean,
   dscacrew: boolean,
-  advanced_party: boolean,
+  advancedParty: boolean,
   pui: boolean,
-  covid19_test_return_date: Date,
+  covid19TestReturnDate: Date,
   rom: string,
-  rom_release: string
+  romRelease: string
 }
 
 interface CountResponse {
@@ -208,9 +208,9 @@ export const RosterPage = () => {
                   <TableCell component="th" scope="row">
                     {row.edipi}
                   </TableCell>
-                  <TableCell>{row.rate_rank}</TableCell>
-                  <TableCell>{row.first_name}</TableCell>
-                  <TableCell>{row.last_name}</TableCell>
+                  <TableCell>{row.rateRank}</TableCell>
+                  <TableCell>{row.firstName}</TableCell>
+                  <TableCell>{row.lastName}</TableCell>
                   <TableCell>{row.unit}</TableCell>
                 </TableRow>
               ))}

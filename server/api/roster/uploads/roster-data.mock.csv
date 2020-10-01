@@ -1,4 +1,4 @@
-edipi,first_name,last_name,rate_rank,unit,billet_workcenter,contract_number,pilot,aircrew,cdi,cdgar,dscacrew,advanced_party,pui,covid19_test_return_date,rom,rom_release
+edipi,firstName,lastName,rateRank,unit,billetWorkcenter,contractNumber,pilot,aircrew,cdi,cdgar,dscacrew,advancedParty,pui,covid19TestReturnDate,rom,romRelease
 1000000001,Jeanie,Janjusevic,,test,test,test,test,,,,,,,,1599765130,test,test
 1000000002,Katrina,Rospars,,test,test,test,test,,,,,,,,1599765130,test,test
 1000000003,Viviene,Carnow,,test,test,test,test,,,,,,,,1599765130,test,test

@@ -1,6 +1,6 @@
 import React from 'react';
 import {
-  Divider, Drawer, List, ListItem, ListItemIcon, ListItemText, Toolbar,
+  Divider, Drawer, List, ListItem, ListItemIcon, ListItemText,
 } from '@material-ui/core';
 import BarChartIcon from '@material-ui/icons/BarChart';
 import HomeIcon from '@material-ui/icons/Home';
@@ -9,10 +9,10 @@ import PeopleIcon from '@material-ui/icons/People';
 import clsx from 'clsx';
 import { useSelector } from 'react-redux';
 import { Link } from 'react-router-dom';
-import { AppFrameState } from '../../reducers/appFrameReducer';
-import { UserState } from '../../reducers/userReducer';
+import { AppFrameState } from '../../reducers/app-frame.reducer';
+import { UserState } from '../../reducers/user.reducer';
 import { AppState } from '../../store';
-import useStyles from './AppSidenav.styles';
+import useStyles from './app-sidenav.styles';
 
 export const AppSidenav = () => {
   const classes = useStyles();
