@@ -25,7 +25,7 @@ const config: ConnectionOptions = {
   database: process.env.SQL_DATABASE || 'dds',
   entities: [User, Role, Org, Roster, AccessRequest],
   namingStrategy: new SnakeNamingStrategy(),
-  synchronize: false,
+  synchronize: (process.env.NODE_ENV === 'development' && process.env.SYNC_DATABASE === 'true'),
   logging: false,
   ssl,
 };
