@@ -19,6 +19,12 @@ router.post(
 );
 
 router.post(
+  '/:orgId/cancel',
+  bodyParser.json(),
+  controller.cancelAccessRequest,
+);
+
+router.post(
   '/:orgId/approve',
   requireOrgAccess,
   requireRolePermission(role => role.canManageGroup),
@@ -27,11 +33,11 @@ router.post(
 );
 
 router.post(
-  '/:orgId/reject',
+  '/:orgId/deny',
   requireOrgAccess,
   requireRolePermission(role => role.canManageGroup),
   bodyParser.json(),
-  controller.rejectAccessRequest,
+  controller.denyAccessRequest,
 );
 
 export default router;

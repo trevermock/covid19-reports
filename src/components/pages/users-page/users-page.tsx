@@ -94,7 +94,7 @@ export const UsersPage = () => {
     }
   }
 
-  async function rejectRequest(id: number) {
+  async function denyRequest(id: number) {
     setAccessRequests(requests => {
       return requests.map(request => {
         if (request.id === id) {
@@ -103,7 +103,7 @@ export const UsersPage = () => {
         return request;
       });
     });
-    await axios.post(`api/access-request/${orgId}/reject`, {
+    await axios.post(`api/access-request/${orgId}/deny`, {
       requestId: id,
     });
     await initializeTable();
@@ -163,10 +163,10 @@ export const UsersPage = () => {
                       <Button
                         variant="contained"
                         disabled={row.waiting}
-                        className={classes.accessRequestRejectButton}
-                        onClick={async () => { await rejectRequest(row.id); }}
+                        className={classes.accessRequestDenyButton}
+                        onClick={async () => { await denyRequest(row.id); }}
                       >
-                        Reject
+                        Deny
                       </Button>
                     </TableCell>
                   </TableRow>

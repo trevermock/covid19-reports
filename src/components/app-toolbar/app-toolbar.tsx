@@ -1,8 +1,9 @@
 import {
-  AppBar, MenuItem, Select, Toolbar,
+  AppBar, Button, Menu, MenuItem, Select, Toolbar,
 } from '@material-ui/core';
 import React from 'react';
 import { useDispatch, useSelector } from 'react-redux';
+import { Link } from 'react-router-dom';
 import { User } from '../../actions/user.actions';
 import { UserState } from '../../reducers/user.reducer';
 import { AppState } from '../../store';
@@ -13,6 +14,7 @@ export const AppToolbar = () => {
   const classes = useStyles();
   const dispatch = useDispatch();
   const user = useSelector<AppState, UserState>(state => state.user);
+  const [userMenuAnchor, setUserMenuAnchor] = React.useState<HTMLElement | null>(null);
 
   function handleOrgChanged(event: React.ChangeEvent<{ value: unknown }>) {
     dispatch(User.changeOrg(event.target.value as number));
@@ -24,7 +26,7 @@ export const AppToolbar = () => {
         position="fixed"
         className={classes.appBar}
       >
-        <Toolbar>
+        <Toolbar className={classes.toolbar}>
           <img className={classes.logo} src={logoImage} alt="StatusEngine Logo" height="35" />
 
           {user.activeRole && user.roles && user.roles.length > 1 && (
@@ -45,10 +47,32 @@ export const AppToolbar = () => {
               ))}
             </Select>
           )}
+
+          <Button
+            className={classes.userButton}
+            variant="text"
+            onClick={e => setUserMenuAnchor(e.currentTarget)}
+          >
+            {`${user.firstName} ${user.lastName}`}
+          </Button>
+          <Menu
+            open={Boolean(userMenuAnchor)}
+            onClose={() => setUserMenuAnchor(null)}
+            anchorEl={userMenuAnchor}
+            getContentAnchorEl={null}
+            anchorOrigin={{ vertical: 'bottom', horizontal: 'right' }}
+            transformOrigin={{ vertical: 'top', horizontal: 'right' }}
+          >
+            <MenuItem>
+              <Link to="/groups" onClick={() => setUserMenuAnchor(null)}>
+                My Groups
+              </Link>
+            </MenuItem>
+          </Menu>
         </Toolbar>
       </AppBar>
 
-      {/* Extra empty toolbar to provide proper padding */}
+      {/* Empty toolbar used for spacing purposes */}
       <Toolbar />
     </>
   );

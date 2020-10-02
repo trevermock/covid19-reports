@@ -4,4 +4,5 @@ export default [
   'Marine Corps',
   'Navy',
   'Space Force',
+  'Contractor',
 ];

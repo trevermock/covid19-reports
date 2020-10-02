@@ -12,7 +12,7 @@ import { AppSidenav } from './app-sidenav/app-sidenav';
 import { AppToolbar } from './app-toolbar/app-toolbar';
 import { HomePage } from './pages/home-page/home-page';
 import useStyles from './app.styles';
-import { RequestAccessPage } from './pages/request-access-page/request-access-page';
+import { GroupsPage } from './pages/groups-page/groups-page';
 import { RosterPage } from './pages/roster-page/roster-page';
 import { UserRegistrationPage } from './pages/user-registration-page/user-registration-page';
 import { UsersPage } from './pages/users-page/users-page';
@@ -50,10 +50,10 @@ export const App = () => {
           <AppToolbar />
 
           <Switch>
-            <Route path="/request-access">
-              <RequestAccessPage />
+            <Route path="/groups">
+              <GroupsPage />
             </Route>
-            <Redirect to="/request-access" />
+            <Redirect to="/groups" />
           </Switch>
         </>
       );
@@ -79,6 +79,9 @@ export const App = () => {
             </Route>
             <Route path="/users">
               <UsersPage />
+            </Route>
+            <Route path="/groups">
+              <GroupsPage />
             </Route>
             <Route path="/*">
               <Redirect to="/home" />

@@ -56,7 +56,9 @@
     "padded-blocks": "off",
     "prefer-destructuring": "off",
     "radix": "off",
+    "react/destructuring-assignment": "off",
     "react/jsx-one-expression-per-line": "off",
+    "react/require-default-props": "off",
     "space-before-function-paren": ["error", {
       "anonymous": "never",
       "named": "never",

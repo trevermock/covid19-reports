@@ -28,7 +28,7 @@ export default makeStyles((theme: Theme) => createStyles({
       backgroundColor: '#008C17',
     },
   },
-  accessRequestRejectButton: {
+  accessRequestDenyButton: {
     backgroundColor: '#E41D3D',
     marginLeft: '5px',
     '&:hover': {

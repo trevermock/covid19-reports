@@ -22,7 +22,7 @@ SET row_security = off;
 
 CREATE TYPE public.access_request_status_enum AS ENUM (
     'pending',
-    'rejected'
+    'denied'
 );
 
 

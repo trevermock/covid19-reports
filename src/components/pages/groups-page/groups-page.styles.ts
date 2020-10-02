@@ -9,18 +9,17 @@ export default makeStyles((theme: Theme) => createStyles({
     backgroundColor: '#ECF4FC',
     marginBottom: theme.spacing(3),
 
+    '& p': {
+      lineHeight: '28px',
+    },
+
     '& .MuiCardContent-root': {
       paddingLeft: theme.spacing(12),
       paddingRight: theme.spacing(12),
     },
 
-    '& header': {
-      '& *:nth-child(1)': {
-        fontSize: '33px',
-        fontWeight: 700,
-        color: '#3D4551',
-      },
-      '& *.nth-child(2)': theme.typography.subtitle1,
+    '& .MuiCardActions-root': {
+      padding: theme.spacing(1),
     },
   },
   infoCardContent: {
@@ -28,11 +27,36 @@ export default makeStyles((theme: Theme) => createStyles({
     flexDirection: 'column',
     alignItems: 'center',
     textAlign: 'center',
+    fontSize: '18px',
+  },
+  infoCardStepList: {
+    margin: '20px 0',
+  },
+  infoCardStep: {
+    display: 'flex',
+    marginBottom: '20px',
+    textAlign: 'left',
+    width: '550px',
 
-    '& ol': {
-      textAlign: 'left',
-      marginBottom: theme.spacing(5),
+    '& > *:nth-child(1)': {
+      marginRight: '14px',
     },
+
+    '& > *:nth-child(2)': {
+      flex: 1,
+    },
+  },
+  infoCardStepNumber: {
+    backgroundColor: theme.palette.primary.light,
+    borderRadius: '100px',
+    width: '30px',
+    height: '30px',
+    display: 'inline-flex',
+    alignItems: 'center',
+    justifyContent: 'center',
+    fontWeight: 700,
+    fontSize: '19px',
+    color: 'white',
   },
   infoCardActions: {
     display: 'flex',

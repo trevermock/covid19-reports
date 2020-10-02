@@ -11,7 +11,7 @@ import { User } from '../user/user.model';
 
 export enum AccessRequestStatus {
   Pending = 'pending',
-  Rejected = 'rejected',
+  Denied = 'denied',
 }
 
 @Entity()

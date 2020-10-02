@@ -1,4 +1,5 @@
 import { Response } from 'express';
+import { getConnection } from 'typeorm';
 import { BadRequestError, NotFoundError, UnauthorizedError } from '../../util/error-types';
 import { ApiRequest, OrgParam } from '../index';
 import { Org } from '../org/org.model';
@@ -52,19 +53,62 @@ class AccessRequestController {
       },
     });
 
-    if (request) {
-      throw new BadRequestError('The access request has already been issued.');
-    }
+    let newRequest: AccessRequest | null = null;
+    await getConnection().transaction(async manager => {
+      if (request) {
+        if (request.status === AccessRequestStatus.Denied) {
+          // Remove the denied request so that we can issue a new one.
+          await manager.remove(request);
+        } else {
+          throw new BadRequestError('The access request has already been issued.');
+        }
+      }
 
-    request = new AccessRequest();
-    request.user = req.appUser;
-    request.org = org;
-    request.requestDate = new Date();
-
-    const saved = await request.save();
+      request = new AccessRequest();
+      request.user = req.appUser;
+      request.org = org;
+      request.requestDate = new Date();
+      newRequest = await manager.save(request);
+    });
 
     res.status(201);
-    res.json(saved);
+    res.json(newRequest);
+  }
+
+  async cancelAccessRequest(req: ApiRequest<OrgParam>, res: Response) {
+    if (!req.appUser.isRegistered) {
+      throw new BadRequestError('User is not registered');
+    }
+
+    const orgId = parseInt(req.params.orgId);
+    if (Number.isNaN(orgId) || orgId < 0) {
+      throw new BadRequestError(`Invalid organization id: ${orgId}`);
+    }
+
+    const org = await Org.findOne({
+      where: {
+        id: orgId,
+      },
+    });
+
+    if (!org) {
+      throw new NotFoundError('Organization was not found.');
+    }
+
+    const request = await AccessRequest.findOne({
+      where: {
+        user: req.appUser.edipi,
+        org: org.id,
+      },
+    });
+
+    if (!request) {
+      throw new NotFoundError('Access request was not found.');
+    }
+
+    await request.remove();
+
+    res.status(204).send();
   }
 
   async approveAccessRequest(req: ApiRequest<OrgParam, ApproveAccessRequestBody>, res: Response) {
@@ -146,7 +190,7 @@ class AccessRequestController {
     });
   }
 
-  async rejectAccessRequest(req: ApiRequest<OrgParam, AccessRequestBody>, res: Response) {
+  async denyAccessRequest(req: ApiRequest<OrgParam, AccessRequestBody>, res: Response) {
     if (!req.appOrg) {
       throw new NotFoundError('Organization was not found');
     }
@@ -166,10 +210,10 @@ class AccessRequestController {
       throw new NotFoundError('Access request was not found.');
     }
 
-    request.status = AccessRequestStatus.Rejected;
-    const rejectedRequest = request.save();
+    request.status = AccessRequestStatus.Denied;
+    const deniedRequest = request.save();
 
-    res.json(rejectedRequest);
+    res.json(deniedRequest);
   }
 }
 

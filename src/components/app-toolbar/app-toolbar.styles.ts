@@ -37,9 +37,16 @@ export default makeStyles((theme: Theme) => createStyles({
   toolbar: {
     display: 'flex',
     alignItems: 'center',
-    justifyContent: 'center',
+    justifyContent: 'space-between',
     padding: theme.spacing(0, 1),
     // necessary for content to be below app bar
     ...theme.mixins.toolbar,
+  },
+  controls: {
+    display: 'flex',
+    justifyContent: 'space-between',
+  },
+  userButton: {
+    color: 'white',
   },
 }));

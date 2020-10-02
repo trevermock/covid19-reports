@@ -9,6 +9,15 @@ const theme = createMuiTheme({
       main: '#005ea2',
       light: '#73B3E7',
     },
+    warning: {
+      main: '#C25D00',
+    },
+    error: {
+      main: '#E41D3D',
+    },
+    success: {
+      main: '#00A91C',
+    },
   },
   typography: {
     h1: {
@@ -16,7 +25,13 @@ const theme = createMuiTheme({
       fontWeight: 700,
       lineHeight: '48px',
     },
+    h2: {
+      fontSize: '33px',
+      fontWeight: 700,
+      lineHeight: '48px',
+    },
     subtitle1: {
+      fontSize: '18px',
       fontWeight: 400,
       lineHeight: '29px',
     },
@@ -28,6 +43,9 @@ theme.overrides = {
     '@global': {
       body: {
         backgroundColor: 'rgb(240, 240, 240)',
+      },
+      a: {
+        textDecoration: 'none',
       },
     },
   },
@@ -52,7 +70,10 @@ theme.overrides = {
   },
   MuiCardContent: {
     root: {
-      padding: theme.spacing(3),
+      padding: theme.spacing(4),
+
+      '& header > *:nth-child(1)': theme.typography.h2,
+      '& header p': theme.typography.subtitle1,
     },
   },
   MuiCardActions: {
@@ -96,6 +117,20 @@ theme.overrides = {
         paddingLeft: theme.spacing(2),
         paddingRight: theme.spacing(2),
       },
+    },
+  },
+  MuiMenuItem: {
+    root: {
+      '& a': {
+        color: 'inherit',
+      },
+    },
+  },
+  MuiChip: {
+    root: {
+      borderRadius: '4px',
+      fontWeight: 700,
+      textTransform: 'uppercase',
     },
   },
 };

@@ -39,7 +39,7 @@ export interface ApiAccessRequest {
   org: ApiOrg,
   requestDate: Date,
   user: ApiUser,
-  status: string,
+  status: 'approved' | 'pending' | 'denied',
 }
 
 export interface ApiRosterEntry {
