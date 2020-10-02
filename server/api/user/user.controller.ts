@@ -1,7 +1,6 @@
 import { Response } from 'express';
 import { AccessRequest } from '../access-request/access-request.model';
 import { ApiRequest, OrgEdipiParams, OrgParam } from '../index';
-import { Org } from '../org/org.model';
 import { User } from './user.model';
 import { Role } from '../role/role.model';
 import { BadRequestError, NotFoundError } from '../../util/error-types';

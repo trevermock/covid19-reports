@@ -2,6 +2,7 @@ import { Response } from 'express';
 import { ApiRequest, OrgParam, OrgRoleParams } from '../index';
 import { Role } from './role.model';
 import { BadRequestError, NotFoundError, UnauthorizedError } from '../../util/error-types';
+import { RosterPIIColumns } from '../roster/roster.model';
 
 class RoleController {
 
@@ -145,23 +146,32 @@ function setRoleFromBody(role: Role, body: RoleBody) {
   if (body.indexPrefix != null) {
     role.indexPrefix = body.indexPrefix;
   }
-  if (body.canManageUsers != null) {
-    role.canManageUsers = body.canManageUsers;
+  if (body.allowedRosterColumns != null) {
+    const columns = body.allowedRosterColumns.split(',');
+    for (let i = 0; i < columns.length; i++) {
+      if (!RosterPIIColumns.hasOwnProperty(columns[i])) {
+        throw new BadRequestError(`Unknown roster column: ${columns[i]}`);
+      }
+    }
+    role.allowedRosterColumns = body.allowedRosterColumns;
   }
-  if (body.canManageRoles != null) {
-    role.canManageRoles = body.canManageRoles;
+  if (body.canManageGroup != null) {
+    role.canManageGroup = body.canManageGroup;
   }
   if (body.canManageRoster != null) {
     role.canManageRoster = body.canManageRoster;
   }
-  if (body.canManageDashboards != null) {
-    role.canManageDashboards = body.canManageDashboards;
+  if (body.canManageWorkspace != null) {
+    role.canManageWorkspace = body.canManageWorkspace;
   }
   if (body.canViewRoster != null) {
     role.canViewRoster = body.canViewRoster;
   }
   if (body.canViewMuster != null) {
     role.canViewMuster = body.canViewMuster;
+  }
+  if (body.canViewPII != null) {
+    role.canViewPII = body.canViewPII;
   }
   if (body.notifyOnAccessRequest != null) {
     role.notifyOnAccessRequest = body.notifyOnAccessRequest;
@@ -172,12 +182,13 @@ type RoleBody = {
   name?: string
   description?: string
   indexPrefix?: string
-  canManageUsers?: boolean
-  canManageRoles?: boolean
+  allowedRosterColumns?: string
+  canManageGroup?: boolean
   canManageRoster?: boolean
-  canManageDashboards?: boolean
+  canManageWorkspace?: boolean
   canViewRoster?: boolean
   canViewMuster?: boolean
+  canViewPII?: boolean
   notifyOnAccessRequest?: boolean
 };
 

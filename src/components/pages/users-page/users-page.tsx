@@ -23,39 +23,9 @@ import axios from 'axios';
 import useStyles from './users-page.styles';
 import { UserState } from '../../../reducers/user.reducer';
 import { AppState } from '../../../store';
+import { ApiRole, ApiUser, ApiAccessRequest } from '../../../models/api-response';
 
-interface UserRole {
-  name: string,
-}
-
-interface UserRow {
-  edipi: string,
-  firstName: string,
-  lastName: string,
-  service: string,
-  phone: string,
-  email: string,
-  roles: UserRole[],
-}
-
-interface Role {
-  id: number,
-  name: string,
-  description: string,
-  indexPrefix: string,
-  canManageUsers: boolean,
-  canManageRoster: boolean,
-  canManageRoles: boolean,
-  canManageDashboards: boolean,
-  canViewRoster: boolean,
-  canViewMuster: boolean,
-  notifyOnAccessRequest: boolean,
-}
-
-interface AccessRequestRow {
-  id: number,
-  requestDate: Date,
-  user: UserRow,
+interface AccessRequestRow extends ApiAccessRequest {
   waiting?: boolean,
 }
 
@@ -65,17 +35,17 @@ export const UsersPage = () => {
   const [formDisabled, setFormDisabled] = useState(false);
   const [activeAccessRequest, setActiveAccessRequest] = useState<AccessRequestRow | undefined>();
   const [selectedRole, setSelectedRole] = useState<number>(0);
-  const [availableRoles, setAvailableRoles] = useState<Role[]>([]);
-  const [userRows, setUserRows] = useState<UserRow[]>([]);
+  const [availableRoles, setAvailableRoles] = useState<ApiRole[]>([]);
+  const [userRows, setUserRows] = useState<ApiUser[]>([]);
   const [accessRequests, setAccessRequests] = useState<AccessRequestRow[]>([]);
   const [alert, setAlert] = useState({ open: false, message: '', title: '' });
 
-  const orgId = useSelector<AppState, UserState>(state => state.user).activeRole?.org.id;
+  const orgId = useSelector<AppState, UserState>(state => state.user).activeRole?.org?.id;
 
   async function initializeTable() {
-    const users = (await axios.get(`api/user/${orgId}`)).data as UserRow[];
+    const users = (await axios.get(`api/user/${orgId}`)).data as ApiUser[];
     const requests = (await axios.get(`api/access-request/${orgId}`)).data as AccessRequestRow[];
-    const roles = (await axios.get(`api/role/${orgId}`)).data as Role[];
+    const roles = (await axios.get(`api/role/${orgId}`)).data as ApiRole[];
     setUserRows(users);
     setAccessRequests(requests);
     setAvailableRoles(roles);
@@ -236,7 +206,7 @@ export const UsersPage = () => {
                     </IconButton>
                   </TableCell>
                   <TableCell>{row.phone}</TableCell>
-                  <TableCell>{row.roles[0].name}</TableCell>
+                  <TableCell>{row.roles ? row.roles[0].name : 'Unknown'}</TableCell>
                 </TableRow>
               ))}
             </TableBody>
@@ -280,17 +250,9 @@ export const UsersPage = () => {
                 </TableHead>
                 <TableBody>
                   <TableRow>
-                    <TableCell className={classes.rolePermissionCell}>Manage Users</TableCell>
+                    <TableCell className={classes.rolePermissionCell}>Manage Group</TableCell>
                     <TableCell className={classes.rolePermissionIconCell}>
-                      {availableRoles[selectedRole].canManageUsers && (
-                        <CheckIcon />
-                      )}
-                    </TableCell>
-                  </TableRow>
-                  <TableRow>
-                    <TableCell className={classes.rolePermissionCell}>Manage Roles</TableCell>
-                    <TableCell className={classes.rolePermissionIconCell}>
-                      {availableRoles[selectedRole].canManageRoles && (
+                      {availableRoles[selectedRole].canManageGroup && (
                         <CheckIcon />
                       )}
                     </TableCell>
@@ -304,9 +266,9 @@ export const UsersPage = () => {
                     </TableCell>
                   </TableRow>
                   <TableRow>
-                    <TableCell className={classes.rolePermissionCell}>Manage Dashboards</TableCell>
+                    <TableCell className={classes.rolePermissionCell}>Manage Workspace</TableCell>
                     <TableCell className={classes.rolePermissionIconCell}>
-                      {availableRoles[selectedRole].canManageDashboards && (
+                      {availableRoles[selectedRole].canManageWorkspace && (
                         <CheckIcon />
                       )}
                     </TableCell>
@@ -323,6 +285,15 @@ export const UsersPage = () => {
                     <TableCell className={classes.rolePermissionCell}>View Muster Reports</TableCell>
                     <TableCell className={classes.rolePermissionIconCell}>
                       {availableRoles[selectedRole].canViewMuster && (
+                        <CheckIcon />
+                      )}
+                    </TableCell>
+                  </TableRow>
+
+                  <TableRow>
+                    <TableCell className={classes.rolePermissionCell}>View PII</TableCell>
+                    <TableCell className={classes.rolePermissionIconCell}>
+                      {availableRoles[selectedRole].canViewPII && (
                         <CheckIcon />
                       )}
                     </TableCell>

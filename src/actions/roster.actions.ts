@@ -30,7 +30,7 @@ export namespace Roster {
     formData.append('roster_csv', file);
     // TODO: Don't hardcode role.
     try {
-      const response = await axios.post(`api/roster/${appState.user.activeRole.org.id}/bulk`, formData, {
+      const response = await axios.post(`api/roster/${appState.user.activeRole.org?.id}/bulk`, formData, {
         headers: {
           'Content-Type': 'multipart/form-data',
         },

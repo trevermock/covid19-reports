@@ -10,11 +10,13 @@ export class Role extends BaseEntity {
   id: number;
 
   @Column({
+    nullable: false,
     length: 2048,
   })
   name: string;
 
   @Column({
+    nullable: false,
     length: 2048,
   })
   description: string;
@@ -26,9 +28,16 @@ export class Role extends BaseEntity {
   org: Org;
 
   @Column({
+    nullable: false,
     default: '',
   })
   indexPrefix: string;
+
+  @Column({
+    nullable: false,
+    default: '',
+  })
+  allowedRosterColumns: string;
 
   @Column({
     default: false,
@@ -36,23 +45,18 @@ export class Role extends BaseEntity {
   notifyOnAccessRequest: boolean;
 
   //
-  // ROLE PERMISSIONS - Must be prefixed with "can_"
+  // ROLE PERMISSIONS - Must be prefixed with "can"
   // When adding new permissions, make sure to update the controller to handle them on add and update!
   //
   @Column({
     default: false,
   })
-  canManageUsers: boolean = false;
+  canManageGroup: boolean = false;
 
   @Column({
     default: false,
   })
   canManageRoster: boolean = false;
-
-  @Column({
-    default: false,
-  })
-  canManageRoles: boolean = false;
 
   @Column({
     default: false,
@@ -67,13 +71,18 @@ export class Role extends BaseEntity {
   @Column({
     default: false,
   })
-  canManageDashboards: boolean = false;
+  canViewPII: boolean = false;
+
+  @Column({
+    default: false,
+  })
+  canManageWorkspace: boolean = false;
 
   isSupersetOf(role: Role) {
     // Loop through all permission properties and return false if the input role has
     // any permission that this role does not.
     for (const key of Object.keys(this)) {
-      if (key.startsWith('can_') && Reflect.get(role, key) && !Reflect.get(this, key)) {
+      if (key.startsWith('can') && Reflect.get(role, key) && !Reflect.get(this, key)) {
         return false;
       }
     }
@@ -91,7 +100,7 @@ export class Role extends BaseEntity {
 
     // Allow all permissions
     for (const key of Object.keys(adminRole)) {
-      if (key.startsWith('can_')) {
+      if (key.startsWith('can')) {
         Reflect.set(adminRole, key, true);
       }
     }

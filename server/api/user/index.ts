@@ -25,21 +25,21 @@ router.post(
   '/:orgId',
   bodyParser.json(),
   requireOrgAccess,
-  requireRolePermission(role => role.canManageUsers),
+  requireRolePermission(role => role.canManageGroup),
   controller.addUser,
 );
 
 router.get(
   '/:orgId',
   requireOrgAccess,
-  requireRolePermission(role => role.canManageUsers),
+  requireRolePermission(role => role.canManageGroup),
   controller.getOrgUsers,
 );
 
 router.delete(
   '/:orgId/:userEDIPI',
   requireOrgAccess,
-  requireRolePermission(role => role.canManageUsers),
+  requireRolePermission(role => role.canManageGroup),
   controller.deleteUser,
 );
 
@@ -47,7 +47,7 @@ router.delete(
 //   '/:orgId/:userEDIPI',
 //   bodyParser.json(),
 //   requireOrgAccess,
-//   requireRolePermission((role) => role.canManageUsers),
+//   requireRolePermission((role) => role.canManageGroup),
 //   controller.updateUser
 // );
 

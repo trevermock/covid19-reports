@@ -6,44 +6,31 @@ import { MailOutline, PersonAdd } from '@material-ui/icons';
 import { Alert } from '@material-ui/lab';
 import axios, { AxiosResponse } from 'axios';
 import React, { useEffect, useState } from 'react';
-import { UserData } from '../../../actions/user.actions';
 import useStyles from './request-access.styles';
-
-interface Org {
-  id: number
-  name: string
-  contact: UserData
-}
-
-interface AccessRequest {
-  id: number
-  org: Org
-  requestDate: Date
-  status: string
-}
+import { ApiAccessRequest, ApiOrg } from '../../../models/api-response';
 
 export const RequestAccessPage = () => {
   const classes = useStyles();
   const [isLoading, setIsLoading] = useState(true);
   const [isAlertVisible, setIsAlertVisible] = useState(true);
   const [isInfoCardVisible, setIsInfoCardVisible] = useState(true);
-  const [orgs, setOrgs] = useState<Org[]>([]);
-  const [accessRequests, setAccessRequests] = useState<AccessRequest[]>([]);
+  const [orgs, setOrgs] = useState<ApiOrg[]>([]);
+  const [accessRequests, setAccessRequests] = useState<ApiAccessRequest[]>([]);
 
   async function fetchOrgs() {
-    const response = await axios.get('api/org') as AxiosResponse<Org[]>;
+    const response = await axios.get('api/org') as AxiosResponse<ApiOrg[]>;
     setOrgs(response.data);
   }
 
   async function fetchAccessRequests() {
-    const response = await axios.get('api/user/access-requests') as AxiosResponse<AccessRequest[]>;
+    const response = await axios.get('api/user/access-requests') as AxiosResponse<ApiAccessRequest[]>;
     console.log('accessRequests', response.data);
     setAccessRequests(response.data);
   }
 
-  function handleRequestAccess(org: Org) {
+  function handleRequestAccess(org: ApiOrg) {
     async function requestAccess() {
-      const response = await axios.post(`api/access-request/${org.id}`) as AxiosResponse<AccessRequest>;
+      const response = await axios.post(`api/access-request/${org.id}`) as AxiosResponse<ApiAccessRequest>;
       setAccessRequests([
         ...accessRequests,
         response.data,
@@ -95,13 +82,13 @@ export const RequestAccessPage = () => {
                       <TableCell component="th" scope="row">
                         {req.org.name}
                       </TableCell>
-                      <TableCell>{`${req.org.contact.firstName} ${req.org.contact.lastName}`}</TableCell>
+                      <TableCell>{`${req.org.contact?.firstName} ${req.org.contact?.lastName}`}</TableCell>
                       <TableCell>
-                        <IconButton href={`mailto:${req.org.contact.email}`} target="_blank" aria-label="email">
+                        <IconButton href={`mailto:${req.org.contact?.email}`} target="_blank" aria-label="email">
                           <MailOutline />
                         </IconButton>
                       </TableCell>
-                      <TableCell>{req.org.contact.phone}</TableCell>
+                      <TableCell>{req.org.contact?.phone}</TableCell>
                       <TableCell>
                         <Chip
                           label={req.status}
@@ -171,13 +158,13 @@ export const RequestAccessPage = () => {
                     <TableCell component="th" scope="row">
                       {org.name}
                     </TableCell>
-                    <TableCell>{`${org.contact.firstName} ${org.contact.lastName}`}</TableCell>
+                    <TableCell>{`${org.contact?.firstName} ${org.contact?.lastName}`}</TableCell>
                     <TableCell>
-                      <IconButton href={`mailto:${org.contact.email}`} target="_blank" aria-label="email">
+                      <IconButton href={`mailto:${org.contact?.email}`} target="_blank" aria-label="email">
                         <MailOutline />
                       </IconButton>
                     </TableCell>
-                    <TableCell>{org.contact.phone}</TableCell>
+                    <TableCell>{org.contact?.phone}</TableCell>
                     <TableCell>
                       <Button
                         variant="text"

@@ -108,3 +108,24 @@ export class Roster extends BaseEntity {
   lastReported?: Date;
 
 }
+
+export const RosterPIIColumns = {
+  edipi: false,
+  firstName: true,
+  lastName: true,
+  unit: false,
+  billetWorkcenter: false,
+  contractNumber: false,
+  rateRank: false,
+  pilot: false,
+  aircrew: false,
+  cdi: false,
+  cdqar: false,
+  dscacrew: false,
+  advancedParty: false,
+  pui: false,
+  covid19TestReturnDate: false,
+  rom: false,
+  romRelease: false,
+  lastReported: false,
+};

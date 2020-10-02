@@ -42,7 +42,7 @@ export const AppSidenav = () => {
               <ListItemText primary="Home" />
             </ListItem>
           </Link>
-          <a href={`/dashboard?orgId=${user.activeRole?.org.id}`}>
+          <a href={`/dashboard?orgId=${user.activeRole?.org?.id}`}>
             <ListItem button key="Analytics">
               <ListItemIcon><BarChartIcon /></ListItemIcon>
               <ListItemText primary="Analytics" />
@@ -51,7 +51,7 @@ export const AppSidenav = () => {
         </List>
         <Divider />
         <List>
-          {user.activeRole?.canManageUsers && (
+          {user.activeRole?.canManageGroup && (
             <Link to="/users">
               <ListItem button key="Users">
                 <ListItemIcon><PeopleIcon /></ListItemIcon>

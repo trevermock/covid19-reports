@@ -87,7 +87,7 @@ export const HomePage = () => {
                 </CardContent>
 
                 <CardActions>
-                  <a href={`/dashboard?orgId=${user.activeRole.org.id}`}>
+                  <a href={`/dashboard?orgId=${user.activeRole.org?.id}`}>
                     <Button>
                       View Analytics
                     </Button>

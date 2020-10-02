@@ -14,7 +14,7 @@ class AccessRequestController {
     }
 
     const requests = await AccessRequest.find({
-      relations: ['user'],
+      relations: ['user', 'org'],
       where: {
         org: req.appOrg.id,
         status: AccessRequestStatus.Pending,

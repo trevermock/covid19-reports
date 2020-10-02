@@ -36,14 +36,13 @@ export const UserRegistrationPage = () => {
   }
 
   function isCreateAccountButtonDisabled() {
-    const disabled = (
+    return (
       !inputData.firstName
       || !inputData.lastName
       || !inputData.phone
       || !inputData.service
       || !inputData.email
     );
-    return disabled;
   }
 
   return (

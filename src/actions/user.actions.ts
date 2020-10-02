@@ -1,5 +1,6 @@
 import { Dispatch } from 'redux';
 import axios, { AxiosResponse } from 'axios';
+import { ApiUser } from '../models/api-response';
 
 export namespace User {
 
@@ -9,7 +10,7 @@ export namespace User {
       static type = 'USER_LOGIN';
       type = Login.type;
       constructor(public payload: {
-        userData: UserData
+        userData: ApiUser
       }) {}
     }
 
@@ -30,13 +31,13 @@ export namespace User {
       static type = 'USER_REGISTER';
       type = Register.type;
       constructor(public payload: {
-        userData: UserData
+        userData: ApiUser
       }) {}
     }
   }
 
   export const login = () => async (dispatch: Dispatch<Actions.Login>) => {
-    const response = await axios.get('api/user/current') as AxiosResponse<UserData>;
+    const response = await axios.get('api/user/current') as AxiosResponse<ApiUser>;
 
     console.log('userData', response.data);
 
@@ -66,41 +67,12 @@ export namespace User {
       phone: data.phone,
       email: data.email,
       service: data.service,
-    }) as AxiosResponse<UserData>;
+    }) as AxiosResponse<ApiUser>;
 
     dispatch({
       ...new Actions.Register({ userData: response.data }),
     });
   };
-}
-
-export interface UserData {
-  edipi: string,
-  firstName: string,
-  lastName: string,
-  phone: string,
-  service: string,
-  email: string,
-  enabled: boolean,
-  rootAdmin: boolean,
-  isRegistered: boolean,
-  roles: [{
-    id: number,
-    name: string,
-    description: string,
-    indexPrefix: string,
-    canManageUsers: boolean,
-    canManageRoster: boolean,
-    canManageRoles: boolean,
-    canViewRoster: boolean,
-    canManageDashboards: boolean,
-    org: {
-      id: number,
-      name: string,
-      description: string,
-      indexPrefix: string
-    }
-  }]
 }
 
 export interface UserRegisterData {

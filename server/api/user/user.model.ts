@@ -68,7 +68,7 @@ export class User extends BaseEntity {
   }
 
   getKibanaRoles(role: Role) {
-    if (role.canManageDashboards) {
+    if (role.canManageWorkspace) {
       return 'kibana_admin';
     }
     return 'kibana_ro_strict';

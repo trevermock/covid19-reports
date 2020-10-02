@@ -12,26 +12,7 @@ import { Roster } from '../../../actions/roster.actions';
 import useStyles from './roster-page.styles';
 import { UserState } from '../../../reducers/user.reducer';
 import { AppState } from '../../../store';
-
-interface RosterEntry {
-  edipi: string,
-  rateRank: string,
-  firstName: string,
-  lastName: string,
-  unit: string,
-  billetWorkcenter: string,
-  contractNumber: string,
-  pilot: boolean,
-  aircrew: boolean,
-  cdi: boolean,
-  cdqar: boolean,
-  dscacrew: boolean,
-  advancedParty: boolean,
-  pui: boolean,
-  covid19TestReturnDate: Date,
-  rom: string,
-  romRelease: string
-}
+import { ApiRosterEntry } from '../../../models/api-response';
 
 interface CountResponse {
   count: number
@@ -102,17 +83,17 @@ export const RosterPage = () => {
   const dispatch = useDispatch();
   const fileInputRef = React.createRef<HTMLInputElement>();
 
-  const [rows, setRows] = useState<RosterEntry[]>([]);
+  const [rows, setRows] = useState<ApiRosterEntry[]>([]);
   const [page, setPage] = useState(0);
   const [rosterSize, setRosterSize] = useState(0);
   const [rowsPerPage, setRowsPerPage] = useState(10);
   const [alert, setAlert] = useState({ open: false, message: '', title: '' });
 
-  const orgId = useSelector<AppState, UserState>(state => state.user).activeRole?.org.id;
+  const orgId = useSelector<AppState, UserState>(state => state.user).activeRole?.org?.id;
 
   const handleChangePage = async (event: React.MouseEvent<HTMLButtonElement> | null, newPage: number) => {
     const response = await fetch(`api/roster/${orgId}?limit=${rowsPerPage}&page=${newPage}`);
-    const rosterResponse = (await response.json()) as RosterEntry[];
+    const rosterResponse = (await response.json()) as ApiRosterEntry[];
     setPage(newPage);
     setRows(rosterResponse);
   };
@@ -149,7 +130,7 @@ export const RosterPage = () => {
   ) => {
     const newRowsPerPage = parseInt(event.target.value, 10);
     const response = await fetch(`api/roster/${orgId}?limit=${newRowsPerPage}&page=0`);
-    const rosterResponse = (await response.json()) as RosterEntry[];
+    const rosterResponse = (await response.json()) as ApiRosterEntry[];
     setPage(0);
     setRows(rosterResponse);
     setRowsPerPage(newRowsPerPage);
