@@ -4,6 +4,7 @@ import { useDispatch, useSelector } from 'react-redux';
 import {
   Switch, Route, Redirect,
 } from 'react-router-dom';
+import { CircularProgress } from '@material-ui/core';
 import { User } from '../actions/user.actions';
 import { AppFrameState } from '../reducers/app-frame.reducer';
 import { UserState } from '../reducers/user.reducer';
@@ -70,24 +71,41 @@ export const App = () => {
             [classes.contentSidenavExpanded]: appFrame.sidenavExpanded,
           })}
         >
-          <Switch>
-            <Route path="/home">
-              <HomePage />
-            </Route>
-            <Route path="/roster">
-              <RosterPage />
-            </Route>
-            <Route path="/users">
-              <UsersPage />
-            </Route>
-            <Route path="/groups">
-              <GroupsPage />
-            </Route>
-            <Route path="/*">
-              <Redirect to="/home" />
-            </Route>
-          </Switch>
+          <div
+            className={clsx({
+              [classes.contentFaded]: appFrame.isPageLoading,
+            })}
+          >
+            <Switch>
+              <Route path="/home">
+                <HomePage />
+              </Route>
+              <Route path="/roster">
+                <RosterPage />
+              </Route>
+              <Route path="/users">
+                <UsersPage />
+              </Route>
+              <Route path="/groups">
+                <GroupsPage />
+              </Route>
+              <Route path="/*">
+                <Redirect to="/home" />
+              </Route>
+            </Switch>
+          </div>
+
+          <div
+            className={clsx(classes.content, {
+              [classes.fixedContentCenteredSidenavCollapsed]: !appFrame.sidenavExpanded,
+              [classes.fixedContentCenteredSidenavExpanded]: appFrame.sidenavExpanded,
+            })}
+          >
+            { appFrame.isPageLoading ? <CircularProgress /> : '' }
+          </div>
+
         </div>
+
       </>
     );
   }

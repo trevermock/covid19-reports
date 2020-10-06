@@ -16,7 +16,7 @@ import {
   IconButton, FormControl, InputLabel, Select,
 } from '@material-ui/core';
 import React, { useEffect, useState } from 'react';
-import { useSelector } from 'react-redux';
+import { useDispatch, useSelector } from 'react-redux';
 import MailOutlineIcon from '@material-ui/icons/MailOutline';
 import CheckIcon from '@material-ui/icons/Check';
 import axios from 'axios';
@@ -24,6 +24,7 @@ import useStyles from './users-page.styles';
 import { UserState } from '../../../reducers/user.reducer';
 import { AppState } from '../../../store';
 import { ApiRole, ApiUser, ApiAccessRequest } from '../../../models/api-response';
+import { AppFrame } from '../../../actions/app-frame.actions';
 
 interface AccessRequestRow extends ApiAccessRequest {
   waiting?: boolean,
@@ -31,6 +32,7 @@ interface AccessRequestRow extends ApiAccessRequest {
 
 export const UsersPage = () => {
   const classes = useStyles();
+  const dispatch = useDispatch();
 
   const [formDisabled, setFormDisabled] = useState(false);
   const [activeAccessRequest, setActiveAccessRequest] = useState<AccessRequestRow | undefined>();
@@ -43,12 +45,18 @@ export const UsersPage = () => {
   const orgId = useSelector<AppState, UserState>(state => state.user).activeRole?.org?.id;
 
   async function initializeTable() {
+
+    dispatch(AppFrame.setPageLoading(true));
+
     const users = (await axios.get(`api/user/${orgId}`)).data as ApiUser[];
     const requests = (await axios.get(`api/access-request/${orgId}`)).data as AccessRequestRow[];
     const roles = (await axios.get(`api/role/${orgId}`)).data as ApiRole[];
     setUserRows(users);
     setAccessRequests(requests);
     setAvailableRoles(roles);
+
+    dispatch(AppFrame.setPageLoading(false));
+
   }
 
   function selectedRoleChanged(event: React.ChangeEvent<{ value: unknown }>) {

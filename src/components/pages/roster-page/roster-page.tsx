@@ -8,6 +8,7 @@ import KeyboardArrowRight from '@material-ui/icons/KeyboardArrowRight';
 import LastPageIcon from '@material-ui/icons/LastPage';
 import React, { ChangeEvent, useEffect, useState } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
+import { AppFrame } from '../../../actions/app-frame.actions';
 import { Roster } from '../../../actions/roster.actions';
 import useStyles from './roster-page.styles';
 import { UserState } from '../../../reducers/user.reducer';
@@ -99,11 +100,17 @@ export const RosterPage = () => {
   };
 
   function initializeTable() {
+
+    dispatch(AppFrame.setPageLoading(true));
+
     fetch(`api/roster/${orgId}/count`).then(async response => {
       const countResponse = (await response.json()) as CountResponse;
       setRosterSize(countResponse.count);
       await handleChangePage(null, 0);
     });
+
+    dispatch(AppFrame.setPageLoading(false));
+
   }
 
   function handleFileInputChange(e: ChangeEvent<HTMLInputElement>) {
