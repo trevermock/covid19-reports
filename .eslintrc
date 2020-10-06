@@ -16,6 +16,7 @@
   "rules": {
     "@typescript-eslint/lines-between-class-members": "off",
     "@typescript-eslint/no-use-before-define": "off",
+    "@typescript-eslint/space-before-function-paren": ["error", "never"],
     "arrow-body-style": "off",
     "arrow-parens": ["error", "as-needed", { "requireForBlockBody": false }],
     "class-methods-use-this": "off",

@@ -80,7 +80,8 @@
     "start": "./run-prod.sh",
     "dev": "./run-dev.sh",
     "build": "./build-prod.sh",
-    "test": "./test.sh"
+    "test": "./test.sh",
+    "seed-dev": "./seed-dev.sh"
   },
   "eslintConfig": {
     "extends": "react-app"
