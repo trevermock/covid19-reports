@@ -24,11 +24,11 @@ export const HomePage = () => {
                 <Grid container direction="row">
                   <Grid item xs={8}>
                     <Typography variant="h5" gutterBottom>
-                      Welcome to StatusEngine
+                      Welcome to Status Engine
                     </Typography>
 
                     <Typography>
-                      With StatusEngine you can easily monitor COVID-19 cases across your entire organization. Easily
+                      With Status Engine you can easily monitor COVID-19 cases across your entire organization. Easily
                       setup
                       daily symptom reports, monitor quarantine and non-outbreak scenarios, analyze long-term trends and
                       more!

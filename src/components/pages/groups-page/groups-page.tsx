@@ -269,7 +269,7 @@ export const GroupsPage = () => {
               <header>
                 <div>You are not a member of any groups.</div>
                 <p>
-                  In order to use StatusEngine and view data, you must first belong to a group. Joining a group is easy.
+                  In order to use Status Engine and view data, you must first belong to a group. Joining a group is easy.
                   Simply follow these three steps and you’ll be on your way in no time!
                 </p>
               </header>
