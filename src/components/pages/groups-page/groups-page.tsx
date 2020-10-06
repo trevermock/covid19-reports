@@ -6,17 +6,18 @@ import { MailOutline, PersonAdd, MoreVert } from '@material-ui/icons';
 import { Alert } from '@material-ui/lab';
 import axios, { AxiosResponse } from 'axios';
 import React, { useEffect, useState } from 'react';
-import { useSelector } from 'react-redux';
+import { useDispatch, useSelector } from 'react-redux';
 import { UserState } from '../../../reducers/user.reducer';
 import { AppState } from '../../../store';
 import { StatusChip } from '../../status-chip/status-chip';
 import useStyles from './groups-page.styles';
 import { ApiAccessRequest, ApiOrg } from '../../../models/api-response';
+import { AppFrame } from '../../../actions/app-frame.actions';
 
 export const GroupsPage = () => {
   const classes = useStyles();
   const user = useSelector<AppState, UserState>(state => state.user);
-  const [isLoading, setIsLoading] = useState(true);
+  const dispatch = useDispatch();
   const [isAlertVisible, setIsAlertVisible] = useState(!user.activeRole);
   const [isInfoCardVisible, setIsInfoCardVisible] = useState(true);
   const [accessRequests, setAccessRequests] = useState([] as ApiAccessRequest[]);
@@ -134,13 +135,16 @@ export const GroupsPage = () => {
   useEffect(() => {
     // Initial load.
     async function fetchData() {
+
+      dispatch(AppFrame.setPageLoading(true));
+
       await Promise.all([
         fetchAllOrgs(),
         fetchAccessRequests(),
       ]);
 
       // Finish loading.
-      setIsLoading(false);
+      dispatch(AppFrame.setPageLoading(false));
     }
 
     fetchData().then();
@@ -167,11 +171,6 @@ export const GroupsPage = () => {
         .sort((a, b) => a.name.localeCompare(b.name)),
     );
   }, [allOrgs, accessRequests]);
-
-  if (isLoading) {
-    // TODO: Show loading spinner.
-    return <>Loading...</>;
-  }
 
   const myOrgs = getMyOrgs();
 
