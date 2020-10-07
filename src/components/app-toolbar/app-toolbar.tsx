@@ -28,7 +28,7 @@ export const AppToolbar = () => {
       >
         <Toolbar className={classes.toolbar}>
           <img className={classes.logo} src={logoImage} alt="StatusEngine Logo" height="35" />
-
+          <div className={classes.spacer} />
           {user.activeRole && user.roles && user.roles.length > 1 && (
             <Select
               className={classes.orgSelect}

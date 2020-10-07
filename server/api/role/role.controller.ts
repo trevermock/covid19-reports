@@ -1,7 +1,8 @@
 import { Response } from 'express';
+import { getConnection } from 'typeorm';
 import { ApiRequest, OrgParam, OrgRoleParams } from '../index';
 import { Role } from './role.model';
-import { BadRequestError, NotFoundError, UnauthorizedError } from '../../util/error-types';
+import { BadRequestError, NotFoundError } from '../../util/error-types';
 import { RosterPIIColumns } from '../roster/roster.model';
 
 class RoleController {
@@ -15,9 +16,12 @@ class RoleController {
       where: {
         org: req.appOrg.id,
       },
+      order: {
+        id: 'ASC',
+      },
     });
 
-    res.json(filterVisibleRoles(req.appRole, roles));
+    res.json(roles);
   }
 
   async addRole(req: ApiRequest<OrgParam, RoleBody>, res: Response) {
@@ -40,10 +44,6 @@ class RoleController {
     const role = new Role();
     role.org = req.appOrg;
     setRoleFromBody(role, req.body);
-
-    if (!req.appRole || !req.appRole.isSupersetOf(role)) {
-      throw new UnauthorizedError('Unable to create a role with greater permissions than your current role.');
-    }
 
     const newRole = await role.save();
 
@@ -68,10 +68,6 @@ class RoleController {
       throw new NotFoundError('Role could not be found.');
     }
 
-    if (!req.appRole || !req.appRole.isSupersetOf(role)) {
-      throw new UnauthorizedError('Insufficient privileges to view this role.');
-    }
-
     res.json(role);
   }
 
@@ -93,12 +89,18 @@ class RoleController {
       throw new NotFoundError('Role could not be found.');
     }
 
-    if (!req.appRole || !req.appRole.isSupersetOf(role)) {
-      throw new UnauthorizedError('Insufficient privileges to delete this role.');
+    const userCount = await getConnection()
+      .createQueryBuilder()
+      .select('*')
+      .from('user_roles', 'user_roles')
+      .where('user_roles.role = :id', { id: roleId })
+      .getCount();
+
+    if (userCount > 0) {
+      throw new BadRequestError('Cannot delete a role that is assigned to users.');
     }
 
     const removedRole = await role.remove();
-
     res.json(removedRole);
   }
 
@@ -121,19 +123,11 @@ class RoleController {
 
     setRoleFromBody(role, req.body);
 
-    if (!req.appRole || !req.appRole.isSupersetOf(role)) {
-      throw new UnauthorizedError('Unable to update a role with greater permissions than your current role.');
-    }
-
     const updatedRole = await role.save();
 
     res.json(updatedRole);
   }
 
-}
-
-function filterVisibleRoles(currentRole: Role, roles: Role[]) {
-  return roles.filter(role => currentRole.isSupersetOf(role));
 }
 
 function setRoleFromBody(role: Role, body: RoleBody) {
@@ -147,13 +141,24 @@ function setRoleFromBody(role: Role, body: RoleBody) {
     role.indexPrefix = body.indexPrefix;
   }
   if (body.allowedRosterColumns != null) {
-    const columns = body.allowedRosterColumns.split(',');
-    for (let i = 0; i < columns.length; i++) {
-      if (!RosterPIIColumns.hasOwnProperty(columns[i])) {
-        throw new BadRequestError(`Unknown roster column: ${columns[i]}`);
+    // TODO: This validation logic could be shared with the client-side parsing functionality
+    const columns = body.allowedRosterColumns.split(',').filter(column => column.length > 0);
+    if (columns.length === 0) {
+      role.allowedRosterColumns = '';
+    } else if (columns.length === 1 && columns[0] === '*') {
+      role.allowedRosterColumns = '*';
+    } else {
+      for (const column of columns) {
+        if (!RosterPIIColumns.hasOwnProperty(column)) {
+          throw new BadRequestError(`Unknown roster column: ${column}`);
+        }
       }
+      role.allowedRosterColumns = body.allowedRosterColumns;
     }
-    role.allowedRosterColumns = body.allowedRosterColumns;
+  }
+  if (body.allowedNotificationEvents != null) {
+    // TODO: Validate notification events
+    role.allowedNotificationEvents = body.allowedNotificationEvents;
   }
   if (body.canManageGroup != null) {
     role.canManageGroup = body.canManageGroup;
@@ -173,9 +178,7 @@ function setRoleFromBody(role: Role, body: RoleBody) {
   if (body.canViewPII != null) {
     role.canViewPII = body.canViewPII;
   }
-  if (body.notifyOnAccessRequest != null) {
-    role.notifyOnAccessRequest = body.notifyOnAccessRequest;
-  }
+
 }
 
 type RoleBody = {
@@ -183,13 +186,13 @@ type RoleBody = {
   description?: string
   indexPrefix?: string
   allowedRosterColumns?: string
+  allowedNotificationEvents?: string
   canManageGroup?: boolean
   canManageRoster?: boolean
   canManageWorkspace?: boolean
   canViewRoster?: boolean
   canViewMuster?: boolean
   canViewPII?: boolean
-  notifyOnAccessRequest?: boolean
 };
 
 export default new RoleController();

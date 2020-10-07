@@ -40,9 +40,10 @@ export class Role extends BaseEntity {
   allowedRosterColumns: string;
 
   @Column({
-    default: false,
+    nullable: false,
+    default: '',
   })
-  notifyOnAccessRequest: boolean;
+  allowedNotificationEvents: string;
 
   //
   // ROLE PERMISSIONS - Must be prefixed with "can"
@@ -96,7 +97,8 @@ export class Role extends BaseEntity {
     adminRole.description = 'Site Administrator';
     adminRole.org = org;
     adminRole.indexPrefix = '';
-    adminRole.notifyOnAccessRequest = false;
+    adminRole.allowedNotificationEvents = '*';
+    adminRole.allowedRosterColumns = '*';
 
     // Allow all permissions
     for (const key of Object.keys(adminRole)) {

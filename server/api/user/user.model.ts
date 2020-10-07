@@ -12,7 +12,7 @@ export class User extends BaseEntity {
   })
   edipi: string;
 
-  @ManyToMany(() => Role, { cascade: true })
+  @ManyToMany(() => Role, { cascade: true, onDelete: 'RESTRICT' })
   @JoinTable({
     name: 'user_roles',
     joinColumn: {
