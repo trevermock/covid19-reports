@@ -156,7 +156,7 @@ class AccessRequestController {
     const user = await User.findOne({
       relations: ['roles'],
       where: {
-        edipi: accessRequest.user.edipi,
+        edipi: accessRequest.user!.edipi,
       },
       join: {
         alias: 'user',
@@ -171,14 +171,14 @@ class AccessRequestController {
       throw new NotFoundError('User was not found');
     }
 
-    const existingRole = user.roles.find(userRole => userRole.org.id === orgId);
+    const existingRole = user.roles!.find(userRole => userRole.org!.id === orgId);
 
     if (existingRole) {
       await accessRequest.remove();
       throw new BadRequestError('User already has a role in the organization');
     }
 
-    user.roles.push(role);
+    user.roles!.push(role);
 
     await user.save();
 

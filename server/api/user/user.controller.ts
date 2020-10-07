@@ -110,7 +110,7 @@ class UserController {
       user.roles = [];
     }
 
-    const orgRole = user.roles.find(userRole => userRole.org.id === org.id);
+    const orgRole = user.roles.find(userRole => userRole.org!.id === org.id);
     if (orgRole) {
       throw new BadRequestError('The user already has a role in the organization.');
     }

@@ -81,7 +81,11 @@
     "dev": "./run-dev.sh",
     "build": "./build-prod.sh",
     "test": "./test.sh",
-    "seed-dev": "./seed-dev.sh"
+    "seed-dev": "./seed-dev.sh",
+    "typeorm": "ts-node --project ./server/tsconfig.json ./node_modules/.bin/typeorm",
+    "migration-create": "./migration-create.sh",
+    "migration-generate": "./migration-generate.sh",
+    "migration-run": "./migration-run.sh"
   },
   "eslintConfig": {
     "extends": "react-app"

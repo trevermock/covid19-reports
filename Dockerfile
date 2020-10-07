@@ -28,6 +28,8 @@ COPY package.json /covid19-reports
 COPY package-lock.json /covid19-reports
 COPY run-prod.sh /covid19-reports
 RUN chmod +x /covid19-reports/run-prod.sh
+COPY migration-run.sh /covid19-reports
+RUN chmod +x /covid19-reports/migration-run.sh
 ENV NODE_ENV=prod
 EXPOSE 4000
 CMD [ "npm", "start" ]

@@ -78,7 +78,7 @@ export async function requireOrgAccess(req: any, res: Response, next: NextFuncti
   }
   const user: User = req.appUser;
   if (orgId && user) {
-    const orgRole = user.roles.find(role => role.org.id === orgId);
+    const orgRole = user.roles!.find(role => role.org!.id === orgId);
     if (orgRole) {
       req.appOrg = orgRole.org;
       req.appRole = orgRole;

@@ -7,3 +7,4 @@ mv ./build/static ./build/public/static
 
 tsc --project ./server
 mv ./server/build/* ./build
+rmdir ./server/build

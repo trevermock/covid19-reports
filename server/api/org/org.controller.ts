@@ -1,7 +1,7 @@
 import { Response } from 'express';
 import { ApiRequest, OrgParam } from '../index';
 import { Org } from './org.model';
-import { BadRequestError, ForbiddenError, NotFoundError } from '../../util/error-types';
+import { BadRequestError, NotFoundError } from '../../util/error-types';
 
 class OrgController {
 

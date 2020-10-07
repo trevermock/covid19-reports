@@ -24,8 +24,8 @@ USER_EDIPI=1
 - Navigate to the project root and run the following.
 ```
 npm install
-npm run seed-dev
-npm run dev
+./seed-dev.sh
+./run-dev.sh
 ```
 
 ### Switching Users
@@ -44,6 +44,29 @@ SYNC_DATABASE=true
 
 *This functionality can't be used in production, so you'll still need to remember to write migrations to deploy changes
 to the schema.*
+
+### Database Migrations
+
+#### Running
+
+Migrations will automatically be run on app startup, or they can be manually run with `./migration-run.sh`.
+
+#### Generating
+
+The recommended way to create a new migration is to run `./migration-generate.sh {name}`, where `{name}` is the name of
+the migration you want to create. The generate script will automatically run migrations to make sure you're up to date,
+then it will generate a new migration for you in `/server/migrations` with the necessary changes to match your current
+models.
+
+*NOTE: There's currently a known bug in TypeORM's migration generator, where it will always add unnecessary alterations
+on date columns that use `default: () => 'null'`. So make sure you review the generated migration and remove any of
+these unnecessary alterations before committing them (and also format the generated file to match our eslint rules).*
+
+#### Creating
+
+If you want to write a migration from scratch, you can create a new blank migration with `./migration-create.sh {name}`,
+where `{name}` is the name of the migration you want to create. An empty template will be generated in
+`/server/migrations`.
 
 ### Testing
 
