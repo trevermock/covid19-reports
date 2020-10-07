@@ -9,38 +9,41 @@ export class Roster extends BaseEntity {
   @PrimaryColumn({
     length: 10,
   })
-  edipi: string;
+  edipi!: string;
 
-  @ManyToOne(() => Org, org => org.id, { primary: true, cascade: true })
+  @ManyToOne(() => Org, org => org.id, {
+    primary: true,
+    cascade: true,
+  })
   @JoinColumn({
     name: 'org_id',
   })
-  org: Org;
+  org?: Org;
 
   @Column({
     length: 100,
   })
-  firstName: string;
+  firstName!: string;
 
   @Column({
     length: 100,
   })
-  lastName: string;
+  lastName!: string;
 
   @Column({
     length: 50,
   })
-  unit: string;
+  unit!: string;
 
   @Column({
     length: 50,
   })
-  billetWorkcenter: string;
+  billetWorkcenter!: string;
 
   @Column({
     length: 100,
   })
-  contractNumber: string;
+  contractNumber!: string;
 
   @Column({
     length: 100,
@@ -49,37 +52,37 @@ export class Roster extends BaseEntity {
   rateRank?: string;
 
   @Column({
-    default: false,
+    nullable: true,
   })
   pilot?: boolean;
 
   @Column({
-    default: false,
+    nullable: true,
   })
   aircrew?: boolean;
 
   @Column({
-    default: false,
+    nullable: true,
   })
   cdi?: boolean;
 
   @Column({
-    default: false,
+    nullable: true,
   })
   cdqar?: boolean;
 
   @Column({
-    default: false,
+    nullable: true,
   })
   dscacrew?: boolean;
 
   @Column({
-    default: false,
+    nullable: true,
   })
   advancedParty?: boolean;
 
   @Column({
-    default: false,
+    nullable: true,
   })
   pui?: boolean;
 

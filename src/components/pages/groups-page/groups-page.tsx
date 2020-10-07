@@ -170,7 +170,7 @@ export const GroupsPage = () => {
         .filter(org => !myOrgsLookup[org.id])
         .sort((a, b) => a.name.localeCompare(b.name)),
     );
-  }, [allOrgs, accessRequests]);
+  }, [allOrgs, accessRequests, user]);
 
   const myOrgs = getMyOrgs();
 

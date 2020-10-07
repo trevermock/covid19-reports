@@ -17,6 +17,7 @@ import { GroupsPage } from './pages/groups-page/groups-page';
 import { RosterPage } from './pages/roster-page/roster-page';
 import { UserRegistrationPage } from './pages/user-registration-page/user-registration-page';
 import { UsersPage } from './pages/users-page/users-page';
+import { RoleManagementPage } from './pages/role-management-page/role-management-page';
 
 export const App = () => {
   const user = useSelector<AppState, UserState>(state => state.user);
@@ -82,6 +83,9 @@ export const App = () => {
               </Route>
               <Route path="/roster">
                 <RosterPage />
+              </Route>
+              <Route path="/roles">
+                <RoleManagementPage />
               </Route>
               <Route path="/users">
                 <UsersPage />

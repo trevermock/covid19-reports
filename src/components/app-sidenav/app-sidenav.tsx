@@ -6,6 +6,7 @@ import BarChartIcon from '@material-ui/icons/BarChart';
 import HomeIcon from '@material-ui/icons/Home';
 import ListAltIcon from '@material-ui/icons/ListAlt';
 import PeopleIcon from '@material-ui/icons/People';
+import SecurityIcon from '@material-ui/icons/Security';
 import clsx from 'clsx';
 import { useSelector } from 'react-redux';
 import { Link } from 'react-router-dom';
@@ -51,6 +52,15 @@ export const AppSidenav = () => {
         </List>
         <Divider />
         <List>
+          {user.activeRole?.canManageGroup && (
+            <Link to="/roles">
+              <ListItem button key="Roles">
+                <ListItemIcon><SecurityIcon /></ListItemIcon>
+                <ListItemText primary="Roles" />
+              </ListItem>
+            </Link>
+          )}
+
           {user.activeRole?.canManageGroup && (
             <Link to="/users">
               <ListItem button key="Users">

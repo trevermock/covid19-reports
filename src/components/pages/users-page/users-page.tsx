@@ -44,20 +44,16 @@ export const UsersPage = () => {
 
   const orgId = useSelector<AppState, UserState>(state => state.user).activeRole?.org?.id;
 
-  async function initializeTable() {
-
+  const initializeTable = React.useCallback(async () => {
     dispatch(AppFrame.setPageLoading(true));
-
     const users = (await axios.get(`api/user/${orgId}`)).data as ApiUser[];
     const requests = (await axios.get(`api/access-request/${orgId}`)).data as AccessRequestRow[];
     const roles = (await axios.get(`api/role/${orgId}`)).data as ApiRole[];
     setUserRows(users);
     setAccessRequests(requests);
     setAvailableRoles(roles);
-
-    dispatch(AppFrame.setPageLoading(false));
-
-  }
+    dispatch(AppFrame.setPageLoading(true));
+  }, [orgId]);
 
   function selectedRoleChanged(event: React.ChangeEvent<{ value: unknown }>) {
     setSelectedRole(event.target.value as number);
@@ -121,7 +117,7 @@ export const UsersPage = () => {
     setAlert({ open: false, message: '', title: '' });
   };
 
-  useEffect(() => { initializeTable().then(); }, []);
+  useEffect(() => { initializeTable().then(); }, [initializeTable]);
 
   return (
     <main className={classes.root}>

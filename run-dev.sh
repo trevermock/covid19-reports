@@ -7,4 +7,5 @@ set -o allexport
 source .env
 set +o allexport
 
+./migration-run.sh
 concurrently --kill-others-on-fail "cd server && nodemon" "rescripts start"

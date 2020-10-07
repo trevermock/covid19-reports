@@ -7,42 +7,41 @@ import { Org } from '../org/org.model';
 export class Role extends BaseEntity {
 
   @PrimaryGeneratedColumn()
-  id: number;
+  id!: number;
 
   @Column({
-    nullable: false,
     length: 2048,
   })
-  name: string;
+  name!: string;
 
   @Column({
-    nullable: false,
     length: 2048,
   })
-  description: string;
+  description!: string;
 
-  @ManyToOne(() => Org, { cascade: true, nullable: false })
+  @ManyToOne(() => Org, {
+    cascade: true,
+    nullable: false,
+  })
   @JoinColumn({
     name: 'org_id',
   })
-  org: Org;
+  org?: Org;
 
   @Column({
-    nullable: false,
     default: '',
   })
-  indexPrefix: string;
+  indexPrefix!: string;
 
   @Column({
-    nullable: false,
     default: '',
   })
-  allowedRosterColumns: string;
+  allowedRosterColumns!: string;
 
   @Column({
-    default: false,
+    default: '',
   })
-  notifyOnAccessRequest: boolean;
+  allowedNotificationEvents!: string;
 
   //
   // ROLE PERMISSIONS - Must be prefixed with "can"
@@ -96,7 +95,8 @@ export class Role extends BaseEntity {
     adminRole.description = 'Site Administrator';
     adminRole.org = org;
     adminRole.indexPrefix = '';
-    adminRole.notifyOnAccessRequest = false;
+    adminRole.allowedNotificationEvents = '*';
+    adminRole.allowedRosterColumns = '*';
 
     // Allow all permissions
     for (const key of Object.keys(adminRole)) {

@@ -18,30 +18,34 @@ export enum AccessRequestStatus {
 export class AccessRequest extends BaseEntity {
 
   @PrimaryGeneratedColumn()
-  id: number;
+  id!: number;
 
-  @ManyToOne(() => User, user => user.edipi, { cascade: true })
+  @ManyToOne(() => User, user => user.edipi, {
+    cascade: true,
+  })
   @JoinColumn({
     name: 'user_edipi',
   })
-  user: User;
+  user?: User;
 
-  @ManyToOne(() => Org, org => org.id, { cascade: true })
+  @ManyToOne(() => Org, org => org.id, {
+    cascade: true,
+  })
   @JoinColumn({
     name: 'org_id',
   })
-  org: Org;
+  org?: Org;
 
   @CreateDateColumn({
     type: 'timestamp',
   })
-  requestDate: Date;
+  requestDate!: Date;
 
   @Column({
     type: 'enum',
     enum: AccessRequestStatus,
     default: AccessRequestStatus.Pending,
   })
-  status: AccessRequestStatus;
+  status!: AccessRequestStatus;
 
 }

@@ -13,13 +13,13 @@ export interface ApiRole {
   description: string,
   indexPrefix: string,
   allowedRosterColumns: string,
+  allowedNotificationEvents: string,
   canManageGroup: boolean,
   canManageRoster: boolean,
   canManageWorkspace: boolean,
   canViewRoster: boolean,
   canViewMuster: boolean,
   canViewPII: boolean,
-  notifyOnAccessRequest: boolean,
 }
 
 export interface ApiUser {

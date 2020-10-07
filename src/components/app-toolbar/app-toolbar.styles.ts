@@ -22,13 +22,18 @@ export default makeStyles((theme: Theme) => createStyles({
   logo: {
     transform: 'translateY(-2px)',
   },
+  spacer: {
+    flex: 1,
+  },
   orgSelect: {
     color: 'white',
+    border: 'none',
+    marginRight: '20px',
     '&:before': {
-      borderColor: 'white',
+      borderColor: 'transparent',
     },
     '&:after': {
-      borderColor: 'white',
+      borderColor: 'transparent',
     },
   },
   orgSelectIcon: {
