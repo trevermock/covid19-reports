@@ -4,14 +4,17 @@ import {
 import thunk from 'redux-thunk';
 import { appFrameInitialState, appFrameReducer, AppFrameState } from './reducers/app-frame.reducer';
 import { UserState, userInitialState, userReducer } from './reducers/user.reducer';
+import { RoleState, roleInitialState, roleReducer } from './reducers/role.reducer';
 
 export interface AppState {
   user: UserState
+  role: RoleState
   appFrame: AppFrameState
 }
 
 export const initialState: AppState = {
   user: userInitialState,
+  role: roleInitialState,
   appFrame: appFrameInitialState,
 };
 
@@ -25,6 +28,7 @@ const composeEnhancers = typeof window === 'object' && (window as any).__REDUX_D
 export default createStore(
   combineReducers({
     user: userReducer,
+    role: roleReducer,
     appFrame: appFrameReducer,
   }),
   initialState,

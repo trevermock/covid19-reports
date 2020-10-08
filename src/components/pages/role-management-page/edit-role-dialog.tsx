@@ -1,4 +1,5 @@
 import React, { useState } from 'react';
+import { useDispatch, useSelector } from 'react-redux';
 import {
   Button, Checkbox,
   Dialog,
@@ -12,9 +13,13 @@ import {
 import axios from 'axios';
 import useStyles from './edit-role-dialog.styles';
 import { ApiRole } from '../../../models/api-response';
+import { AppState } from '../../../store';
+import { RoleState } from '../../../reducers/role.reducer';
 import { AllowedRosterColumns, RosterColumnDisplayName, RosterPIIColumns } from '../../../models/roster-columns';
 import { AllowedNotificationEvents, NotificationEventDisplayName } from '../../../models/notification-events';
 import { parsePermissions, permissionsToString } from '../../../utility/permission-set';
+import { ButtonWithSpinner } from '../../buttons/button-with-spinner';
+import { Role } from '../../../actions/role.actions';
 
 export interface EditRoleDialogProps {
   open: boolean,
@@ -26,6 +31,8 @@ export interface EditRoleDialogProps {
 
 export const EditRoleDialog = (props: EditRoleDialogProps) => {
   const classes = useStyles();
+  const dispatch = useDispatch();
+
   const [formDisabled, setFormDisabled] = useState(false);
   const {
     open, orgId, role, onClose, onError,
@@ -43,6 +50,8 @@ export const EditRoleDialog = (props: EditRoleDialogProps) => {
   const [canViewRoster, setCanViewRoster] = useState(role ? role.canViewRoster : false);
   const [canViewMuster, setCanViewMuster] = useState(role ? role.canViewMuster : false);
   const [canViewPII, setCanViewPII] = useState(role ? role.canViewPII : false);
+
+  const roleState = useSelector<AppState, RoleState>(state => state.role);
 
   if (!open) {
     return <></>;
@@ -84,6 +93,7 @@ export const EditRoleDialog = (props: EditRoleDialogProps) => {
   };
 
   const onSave = async () => {
+    dispatch(Role.SetSavingRoleLoading(true));
     setFormDisabled(true);
     const viewPII = canManageGroup || canViewPII;
     const viewMuster = canManageGroup || canViewMuster;
@@ -119,6 +129,7 @@ export const EditRoleDialog = (props: EditRoleDialogProps) => {
       setFormDisabled(false);
       return;
     }
+    dispatch(Role.SetSavingRoleLoading(false));
     if (onClose) {
       onClose();
     }
@@ -309,9 +320,14 @@ export const EditRoleDialog = (props: EditRoleDialogProps) => {
         <Button disabled={formDisabled} variant="outlined" onClick={onClose} color="primary">
           Cancel
         </Button>
-        <Button disabled={!canSave()} onClick={onSave} color="primary">
+        <ButtonWithSpinner
+          disabled={!canSave()}
+          onClick={onSave}
+          color="primary"
+          loading={roleState.isSavingRoleLoading}
+        >
           Save
-        </Button>
+        </ButtonWithSpinner>
       </DialogActions>
     </Dialog>
   );
