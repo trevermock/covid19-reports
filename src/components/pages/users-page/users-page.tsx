@@ -52,7 +52,7 @@ export const UsersPage = () => {
     setUserRows(users);
     setAccessRequests(requests);
     setAvailableRoles(roles);
-    dispatch(AppFrame.setPageLoading(true));
+    dispatch(AppFrame.setPageLoading(false));
   }, [orgId]);
 
   function selectedRoleChanged(event: React.ChangeEvent<{ value: unknown }>) {

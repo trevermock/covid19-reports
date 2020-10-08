@@ -16,7 +16,7 @@ import AddCircleOutlineIcon from '@material-ui/icons/AddCircleOutline';
 import VisibilityOutlinedIcon from '@material-ui/icons/VisibilityOutlined';
 import VisibilityOffOutlinedIcon from '@material-ui/icons/VisibilityOffOutlined';
 import React, { useEffect, useState } from 'react';
-import { useSelector } from 'react-redux';
+import { useDispatch, useSelector } from 'react-redux';
 import axios from 'axios';
 import CheckIcon from '@material-ui/icons/Check';
 import useStyles from './role-management-page.styles';
@@ -28,6 +28,7 @@ import { AlertDialog, AlertDialogProps } from '../../alert-dialog/alert-dialog';
 import { RosterColumnDisplayName, AllowedRosterColumns } from '../../../models/roster-columns';
 import { EditRoleDialog, EditRoleDialogProps } from './edit-role-dialog';
 import { parsePermissions } from '../../../utility/permission-set';
+import { AppFrame } from '../../../actions/app-frame.actions';
 
 interface ParsedRoleData {
   allowedRosterColumns: AllowedRosterColumns,
@@ -37,6 +38,7 @@ interface ParsedRoleData {
 
 export const RoleManagementPage = () => {
   const classes = useStyles();
+  const dispatch = useDispatch();
 
   const [selectedRoleIndex, setSelectedRoleIndex] = useState(-1);
   const [roles, setRoles] = useState<ApiRole[]>([]);
@@ -48,6 +50,7 @@ export const RoleManagementPage = () => {
   const orgId = useSelector<AppState, UserState>(state => state.user).activeRole?.org?.id;
 
   const initializeTable = React.useCallback(async () => {
+    dispatch(AppFrame.setPageLoading(true));
     const orgRoles = (await axios.get(`api/role/${orgId}`)).data as ApiRole[];
     const parsedRoleData = orgRoles.map(role => {
       return {
@@ -57,6 +60,7 @@ export const RoleManagementPage = () => {
     });
     setRoleData(parsedRoleData);
     setRoles(orgRoles);
+    dispatch(AppFrame.setPageLoading(false));
   }, [orgId]);
 
   const cancelDeleteRoleDialog = () => {
