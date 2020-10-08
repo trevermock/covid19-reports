@@ -13,11 +13,18 @@ export const userInitialState: UserState = {
   roles: [],
   activeRole: undefined,
   isLoggedIn: false,
+  isRegisterLoading: false,
 };
 
 
 export function userReducer(state = userInitialState, action: any): UserState {
   switch (action.type) {
+    case User.Actions.SetRegisterLoading.type: {
+      return {
+        ...state,
+        isRegisterLoading: (action as User.Actions.SetRegisterLoading).payload.isRegisterLoading,
+      };
+    }
     case User.Actions.Register.type: {
       const userData = (action as User.Actions.Register).payload.userData;
 
@@ -67,4 +74,5 @@ function getDefaultActiveRole(roles: ApiRole[]) {
 export interface UserState extends ApiUser {
   activeRole: ApiRole | undefined
   isLoggedIn: boolean
+  isRegisterLoading: boolean
 }
