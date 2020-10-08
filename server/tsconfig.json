@@ -28,6 +28,7 @@
   ],
   "exclude": [
     "node_modules",
-    "nodemon.json"
+    "nodemon.json",
+    "migration"
   ]
 }
