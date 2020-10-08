@@ -68,6 +68,12 @@ If you want to write a migration from scratch, you can create a new blank migrat
 where `{name}` is the name of the migration you want to create. An empty template will be generated in
 `/server/migrations`.
 
+#### Restoring State Locally
+
+If your local database schema falls out of sync with migrations and you want to get back to a clean state, you can 
+run `./seed-dev.sh`. This will automatically recreate the database, apply the current migrations, and get the app back 
+into a usable state.
+
 ### Testing
 
 ```
