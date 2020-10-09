@@ -18,6 +18,9 @@ export default makeStyles((theme: Theme) => createStyles({
   accessRequestButtons: {
     display: 'grid',
     gridTemplateColumns: '1fr 1fr',
+    '& div': {
+      width: '100%',
+    },
   },
   accessRequestApproveButton: {
     width: '100%',
