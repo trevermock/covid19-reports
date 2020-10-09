@@ -41,7 +41,7 @@ export const UsersPage = () => {
   const [availableRoles, setAvailableRoles] = useState<ApiRole[]>([]);
   const [userRows, setUserRows] = useState<ApiUser[]>([]);
   const [accessRequests, setAccessRequests] = useState<AccessRequestRow[]>([]);
-  const [finalizeApprovalLoading, setFinalizeApprovalLoading] = useState<boolean>(false);
+  const [finalizeApprovalLoading, setFinalizeApprovalLoading] = useState(false);
   const [denyRequestsLoading, setDenyRequestsLoading] = useState({} as ({[rowId: number]: boolean}));
   const [alert, setAlert] = useState({ open: false, message: '', title: '' });
 
@@ -59,9 +59,10 @@ export const UsersPage = () => {
   }, [orgId]);
 
   function updateDenyRequestLoading(rowId: number, isLoading: boolean) {
-    const denyRequestsLoadingClone = { ...denyRequestsLoading };
-    denyRequestsLoadingClone[rowId] = isLoading;
-    setDenyRequestsLoading(denyRequestsLoadingClone);
+    setDenyRequestsLoading({
+      ...denyRequestsLoading,
+      [rowId]: isLoading,
+    });
   }
 
   function selectedRoleChanged(event: React.ChangeEvent<{ value: unknown }>) {

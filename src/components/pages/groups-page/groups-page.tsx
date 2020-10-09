@@ -43,9 +43,10 @@ export const GroupsPage = () => {
   }
 
   function updateAccessRequestsLoading(org: ApiOrg, isLoading: boolean) {
-    const accessRequestsLoadingClone = { ...accessRequestsLoading };
-    accessRequestsLoadingClone[org.id] = isLoading;
-    setAccessRequestsLoading(accessRequestsLoadingClone);
+    setAccessRequestsLoading({
+      ...accessRequestsLoading,
+      [org.id]: isLoading,
+    });
   }
 
   async function requestAccess(org: ApiOrg) {
