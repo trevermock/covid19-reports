@@ -2,11 +2,9 @@ import { createStyles, makeStyles, Theme } from '@material-ui/core/styles';
 
 export default makeStyles((theme: Theme) => createStyles({
   root: {
-    display: 'flex',
-    alignItems: 'center',
+    margin: theme.spacing(0),
   },
   wrapper: {
-    margin: theme.spacing(1),
     position: 'relative',
   },
   buttonProgress: {
