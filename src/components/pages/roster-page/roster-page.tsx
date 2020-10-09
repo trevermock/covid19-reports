@@ -7,6 +7,7 @@ import KeyboardArrowLeft from '@material-ui/icons/KeyboardArrowLeft';
 import KeyboardArrowRight from '@material-ui/icons/KeyboardArrowRight';
 import LastPageIcon from '@material-ui/icons/LastPage';
 import React, { ChangeEvent, useEffect, useState } from 'react';
+import axios from 'axios';
 import { useDispatch, useSelector } from 'react-redux';
 import { AppFrame } from '../../../actions/app-frame.actions';
 import { Roster } from '../../../actions/roster.actions';
@@ -99,12 +100,12 @@ export const RosterPage = () => {
     setRows(rosterResponse);
   };
 
-  function initializeTable() {
+  async function initializeTable() {
 
     dispatch(AppFrame.setPageLoading(true));
 
-    fetch(`api/roster/${orgId}/count`).then(async response => {
-      const countResponse = (await response.json()) as CountResponse;
+    await axios.get(`api/roster/${orgId}/count`).then(async response => {
+      const countResponse = (response.data) as CountResponse;
       setRosterSize(countResponse.count);
       await handleChangePage(null, 0);
     });
@@ -147,7 +148,7 @@ export const RosterPage = () => {
     setAlert({ open: false, message: '', title: '' });
   };
 
-  useEffect(initializeTable, []);
+  useEffect(() => { initializeTable().then(); }, []);
 
   return (
     <main className={classes.root}>
