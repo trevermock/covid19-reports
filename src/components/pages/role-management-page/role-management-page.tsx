@@ -22,7 +22,6 @@ import CheckIcon from '@material-ui/icons/Check';
 import useStyles from './role-management-page.styles';
 import { UserState } from '../../../reducers/user.reducer';
 import { AppState } from '../../../store';
-import { RoleState } from '../../../reducers/role.reducer';
 import { ApiRole } from '../../../models/api-response';
 import { AllowedNotificationEvents, NotificationEventDisplayName } from '../../../models/notification-events';
 import { AlertDialog, AlertDialogProps } from '../../alert-dialog/alert-dialog';
@@ -31,7 +30,6 @@ import { EditRoleDialog, EditRoleDialogProps } from './edit-role-dialog';
 import { parsePermissions } from '../../../utility/permission-set';
 import { AppFrame } from '../../../actions/app-frame.actions';
 import { ButtonWithSpinner } from '../../buttons/button-with-spinner';
-import { Role } from '../../../actions/role.actions';
 
 interface ParsedRoleData {
   allowedRosterColumns: AllowedRosterColumns,
@@ -49,9 +47,9 @@ export const RoleManagementPage = () => {
   const [deleteRoleDialogOpen, setDeleteRoleDialogOpen] = useState(false);
   const [alertDialogProps, setAlertDialogProps] = useState<AlertDialogProps>({ open: false });
   const [editRoleDialogProps, setEditRoleDialogProps] = useState<EditRoleDialogProps>({ open: false });
+  const [deleteRoleLoading, setDeleteRoleLoading] = useState(false);
 
   const orgId = useSelector<AppState, UserState>(state => state.user).activeRole?.org?.id;
-  const roleState = useSelector<AppState, RoleState>(state => state.role);
 
   const initializeTable = React.useCallback(async () => {
     dispatch(AppFrame.setPageLoading(true));
@@ -112,7 +110,7 @@ export const RoleManagementPage = () => {
   };
 
   const deleteRole = async () => {
-    dispatch(Role.SetDeletingRoleLoading(true));
+    setDeleteRoleLoading(true);
     try {
       await axios.delete(`api/role/${orgId}/${roles[selectedRoleIndex].id}`);
     } catch (error) {
@@ -127,7 +125,7 @@ export const RoleManagementPage = () => {
         onClose: () => { setAlertDialogProps({ open: false }); },
       });
     }
-    dispatch(Role.SetDeletingRoleLoading(false));
+    setDeleteRoleLoading(false);
     setDeleteRoleDialogOpen(false);
     await initializeTable();
   };
@@ -334,7 +332,7 @@ export const RoleManagementPage = () => {
           <DialogActions>
             <ButtonWithSpinner
               onClick={deleteRole}
-              loading={roleState.isDeletingRoleLoading}
+              loading={deleteRoleLoading}
             >
               Yes
             </ButtonWithSpinner>

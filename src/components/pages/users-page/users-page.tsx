@@ -91,6 +91,7 @@ export const UsersPage = () => {
     }
     await initializeTable();
     setFinalizeApprovalLoading(false);
+    setFormDisabled(false);
     setActiveAccessRequest(undefined);
   }
 
