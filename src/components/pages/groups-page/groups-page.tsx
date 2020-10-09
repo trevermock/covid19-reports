@@ -13,6 +13,7 @@ import { StatusChip } from '../../status-chip/status-chip';
 import useStyles from './groups-page.styles';
 import { ApiAccessRequest, ApiOrg } from '../../../models/api-response';
 import { AppFrame } from '../../../actions/app-frame.actions';
+import { ButtonWithSpinner } from '../../buttons/button-with-spinner';
 
 export const GroupsPage = () => {
   const classes = useStyles();
@@ -21,6 +22,7 @@ export const GroupsPage = () => {
   const [isAlertVisible, setIsAlertVisible] = useState(!user.activeRole);
   const [isInfoCardVisible, setIsInfoCardVisible] = useState(true);
   const [accessRequests, setAccessRequests] = useState([] as ApiAccessRequest[]);
+  const [accessRequestsLoading, setAccessRequestsLoading] = useState({} as ({[orgId: number]: boolean}));
   const [allOrgs, setAllOrgs] = useState([] as ApiOrg[]);
   const [requestAccessOrgs, setRequestAccessOrgs] = useState([] as ApiOrg[]);
   const [myOrgMenuAnchor, setMyOrgMenuAnchor] = useState(null as HTMLElement | null);
@@ -40,7 +42,14 @@ export const GroupsPage = () => {
     requestAccess(org).then();
   }
 
+  function updateAccessRequestsLoading(org: ApiOrg, isLoading: boolean) {
+    const accessRequestsLoadingClone = { ...accessRequestsLoading };
+    accessRequestsLoadingClone[org.id] = isLoading;
+    setAccessRequestsLoading(accessRequestsLoadingClone);
+  }
+
   async function requestAccess(org: ApiOrg) {
+    updateAccessRequestsLoading(org, true);
     const response = await axios.post(`api/access-request/${org.id}`) as AxiosResponse<ApiAccessRequest>;
     const newRequest = response.data;
 
@@ -54,6 +63,7 @@ export const GroupsPage = () => {
     }
 
     setAccessRequests(accessRequestsUpdated);
+    updateAccessRequestsLoading(org, false);
   }
 
   async function cancelRequest(org: MyOrg) {
@@ -342,13 +352,14 @@ export const GroupsPage = () => {
                       </TableCell>
                       <TableCell>{org.contact!.phone}</TableCell>
                       <TableCell>
-                        <Button
+                        <ButtonWithSpinner
                           variant="text"
                           startIcon={<PersonAdd />}
+                          loading={accessRequestsLoading[org.id]}
                           onClick={() => handleRequestAccessClick(org)}
                         >
                           Request Access
-                        </Button>
+                        </ButtonWithSpinner>
                       </TableCell>
                     </TableRow>
                   ))}
