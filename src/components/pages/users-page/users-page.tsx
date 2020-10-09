@@ -25,6 +25,7 @@ import { UserState } from '../../../reducers/user.reducer';
 import { AppState } from '../../../store';
 import { ApiRole, ApiUser, ApiAccessRequest } from '../../../models/api-response';
 import { AppFrame } from '../../../actions/app-frame.actions';
+import { ButtonWithSpinner } from '../../buttons/button-with-spinner';
 
 interface AccessRequestRow extends ApiAccessRequest {
   waiting?: boolean,
@@ -40,6 +41,8 @@ export const UsersPage = () => {
   const [availableRoles, setAvailableRoles] = useState<ApiRole[]>([]);
   const [userRows, setUserRows] = useState<ApiUser[]>([]);
   const [accessRequests, setAccessRequests] = useState<AccessRequestRow[]>([]);
+  const [finalizeApprovalLoading, setFinalizeApprovalLoading] = useState<boolean>(false);
+  const [denyRequestsLoading, setDenyRequestsLoading] = useState({} as ({[rowId: number]: boolean}));
   const [alert, setAlert] = useState({ open: false, message: '', title: '' });
 
   const orgId = useSelector<AppState, UserState>(state => state.user).activeRole?.org?.id;
@@ -54,6 +57,12 @@ export const UsersPage = () => {
     setAvailableRoles(roles);
     dispatch(AppFrame.setPageLoading(false));
   }, [orgId]);
+
+  function updateDenyRequestLoading(rowId: number, isLoading: boolean) {
+    const denyRequestsLoadingClone = { ...denyRequestsLoading };
+    denyRequestsLoadingClone[rowId] = isLoading;
+    setDenyRequestsLoading(denyRequestsLoadingClone);
+  }
 
   function selectedRoleChanged(event: React.ChangeEvent<{ value: unknown }>) {
     setSelectedRole(event.target.value as number);
@@ -72,6 +81,7 @@ export const UsersPage = () => {
   }
 
   async function acceptRoleSelection() {
+    setFinalizeApprovalLoading(true);
     setFormDisabled(true);
     if (activeAccessRequest) {
       await axios.post(`api/access-request/${orgId}/approve`, {
@@ -80,6 +90,7 @@ export const UsersPage = () => {
       });
     }
     await initializeTable();
+    setFinalizeApprovalLoading(false);
     setActiveAccessRequest(undefined);
   }
 
@@ -99,6 +110,7 @@ export const UsersPage = () => {
   }
 
   async function denyRequest(id: number) {
+    updateDenyRequestLoading(id, true);
     setAccessRequests(requests => {
       return requests.map(request => {
         if (request.id === id) {
@@ -110,6 +122,7 @@ export const UsersPage = () => {
     await axios.post(`api/access-request/${orgId}/deny`, {
       requestId: id,
     });
+    updateDenyRequestLoading(id, false);
     await initializeTable();
   }
 
@@ -164,14 +177,15 @@ export const UsersPage = () => {
                       >
                         Approve
                       </Button>
-                      <Button
+                      <ButtonWithSpinner
                         variant="contained"
                         disabled={row.waiting}
                         className={classes.accessRequestDenyButton}
                         onClick={async () => { await denyRequest(row.id); }}
+                        loading={denyRequestsLoading[row.id]}
                       >
                         Deny
-                      </Button>
+                      </ButtonWithSpinner>
                     </TableCell>
                   </TableRow>
                 ))}
@@ -311,9 +325,14 @@ export const UsersPage = () => {
           <Button disabled={formDisabled} variant="outlined" onClick={cancelRoleSelection} color="primary">
             Cancel
           </Button>
-          <Button disabled={formDisabled} onClick={acceptRoleSelection} color="primary">
+          <ButtonWithSpinner
+            disabled={formDisabled}
+            onClick={acceptRoleSelection}
+            color="primary"
+            loading={finalizeApprovalLoading}
+          >
             Finalize Approval
-          </Button>
+          </ButtonWithSpinner>
         </DialogActions>
       </Dialog>
       <Dialog
