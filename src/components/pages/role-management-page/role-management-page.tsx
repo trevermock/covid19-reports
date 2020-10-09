@@ -13,8 +13,6 @@ import {
 } from '@material-ui/core';
 import ExpandMoreIcon from '@material-ui/icons/ExpandMore';
 import AddCircleOutlineIcon from '@material-ui/icons/AddCircleOutline';
-import VisibilityOutlinedIcon from '@material-ui/icons/VisibilityOutlined';
-import VisibilityOffOutlinedIcon from '@material-ui/icons/VisibilityOffOutlined';
 import React, { useEffect, useState } from 'react';
 import { useSelector } from 'react-redux';
 import axios from 'axios';
@@ -22,7 +20,7 @@ import CheckIcon from '@material-ui/icons/Check';
 import useStyles from './role-management-page.styles';
 import { UserState } from '../../../reducers/user.reducer';
 import { AppState } from '../../../store';
-import { ApiRole } from '../../../models/api-response';
+import { ApiRole, ApiWorkspace } from '../../../models/api-response';
 import { AllowedNotificationEvents, NotificationEventDisplayName } from '../../../models/notification-events';
 import { AlertDialog, AlertDialogProps } from '../../alert-dialog/alert-dialog';
 import { RosterColumnDisplayName, AllowedRosterColumns } from '../../../models/roster-columns';
@@ -41,6 +39,7 @@ export const RoleManagementPage = () => {
   const [selectedRoleIndex, setSelectedRoleIndex] = useState(-1);
   const [roles, setRoles] = useState<ApiRole[]>([]);
   const [roleData, setRoleData] = useState<ParsedRoleData[]>([]);
+  const [workspaces, setWorkspaces] = useState<ApiWorkspace[]>([]);
   const [deleteRoleDialogOpen, setDeleteRoleDialogOpen] = useState(false);
   const [alertDialogProps, setAlertDialogProps] = useState<AlertDialogProps>({ open: false });
   const [editRoleDialogProps, setEditRoleDialogProps] = useState<EditRoleDialogProps>({ open: false });
@@ -49,6 +48,7 @@ export const RoleManagementPage = () => {
 
   const initializeTable = React.useCallback(async () => {
     const orgRoles = (await axios.get(`api/role/${orgId}`)).data as ApiRole[];
+    const orgWorkspaces = (await axios.get(`api/workspace/${orgId}`)).data as ApiWorkspace[];
     const parsedRoleData = orgRoles.map(role => {
       return {
         allowedRosterColumns: parsePermissions(new AllowedRosterColumns(), role.allowedRosterColumns),
@@ -56,6 +56,7 @@ export const RoleManagementPage = () => {
       };
     });
     setRoleData(parsedRoleData);
+    setWorkspaces(orgWorkspaces);
     setRoles(orgRoles);
   }, [orgId]);
 
@@ -185,8 +186,8 @@ export const RoleManagementPage = () => {
         </Grid>
         <div className={classes.accordionHeader}>
           <Typography>Role Name</Typography>
-          <Typography>Index Prefix</Typography>
-          <Typography>PII Access</Typography>
+          <Typography>Unit Filter</Typography>
+          <Typography>Analytics Workspace</Typography>
         </div>
         {roles.map((row, index) => (
           <Accordion
@@ -201,7 +202,7 @@ export const RoleManagementPage = () => {
             >
               <Typography className={classes.nameColumn}>{row.name}</Typography>
               <Typography className={classes.indexPrefixColumn}>{row.indexPrefix}</Typography>
-              {row.canViewPII ? <VisibilityOutlinedIcon /> : <VisibilityOffOutlinedIcon />}
+              <Typography>{row.workspace ? row.workspace.name : 'None'}</Typography>
             </AccordionSummary>
             <AccordionDetails>
               <Grid container spacing={3}>
@@ -332,7 +333,7 @@ export const RoleManagementPage = () => {
         </Dialog>
       )}
       {editRoleDialogProps.open && (
-        <EditRoleDialog open={editRoleDialogProps.open} orgId={editRoleDialogProps.orgId} role={editRoleDialogProps.role} onClose={editRoleDialogProps.onClose} onError={editRoleDialogProps.onError} />
+        <EditRoleDialog open={editRoleDialogProps.open} orgId={editRoleDialogProps.orgId} role={editRoleDialogProps.role} workspaces={workspaces} onClose={editRoleDialogProps.onClose} onError={editRoleDialogProps.onError} />
       )}
       {alertDialogProps.open && (
         <AlertDialog open={alertDialogProps.open} title={alertDialogProps.title} message={alertDialogProps.message} onClose={alertDialogProps.onClose} />

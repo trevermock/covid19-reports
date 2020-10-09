@@ -5,21 +5,22 @@ import {
   DialogActions,
   DialogContent,
   DialogTitle,
-  Grid,
+  Grid, Select,
   Table, TableBody, TableCell,
   TableRow, TextField, Typography,
 } from '@material-ui/core';
 import axios from 'axios';
 import useStyles from './edit-role-dialog.styles';
-import { ApiRole } from '../../../models/api-response';
+import { ApiRole, ApiWorkspace } from '../../../models/api-response';
 import { AllowedRosterColumns, RosterColumnDisplayName, RosterPIIColumns } from '../../../models/roster-columns';
 import { AllowedNotificationEvents, NotificationEventDisplayName } from '../../../models/notification-events';
-import { parsePermissions, permissionsToString } from '../../../utility/permission-set';
+import { parsePermissions, permissionsToArray, setAllPermissions } from '../../../utility/permission-set';
 
 export interface EditRoleDialogProps {
   open: boolean,
   orgId?: number,
   role?: ApiRole,
+  workspaces?: ApiWorkspace[],
   onClose?: () => void,
   onError?: (error: string) => void,
 }
@@ -28,13 +29,14 @@ export const EditRoleDialog = (props: EditRoleDialogProps) => {
   const classes = useStyles();
   const [formDisabled, setFormDisabled] = useState(false);
   const {
-    open, orgId, role, onClose, onError,
+    open, orgId, role, workspaces, onClose, onError,
   } = props;
 
   const existingRole: boolean = !!role;
   const [name, setName] = useState(role?.name || '');
   const [description, setDescription] = useState(role?.description || '');
   const [indexPrefix, setIndexPrefix] = useState(role?.indexPrefix || '');
+  const [workspaceId, setWorkspaceId] = useState(role?.workspace?.id || -1);
   const [allowedRosterColumns, setAllowedRosterColumns] = useState(parsePermissions(new AllowedRosterColumns(), role?.allowedRosterColumns));
   const [allowedNotificationEvents, setAllowedNotificationEvents] = useState(parsePermissions(new AllowedNotificationEvents(), role?.allowedNotificationEvents));
   const [canManageGroup, setCanManageGroup] = useState(role ? role.canManageGroup : false);
@@ -56,6 +58,35 @@ export const EditRoleDialog = (props: EditRoleDialogProps) => {
     func(event.target.checked);
   };
 
+  const onWorkspaceChanged = (event: React.ChangeEvent<{ value: unknown }>) => {
+    const newWorkspaceId = parseInt(event.target.value as string);
+    const selectedWorkspace = workspaces?.find(workspace => workspace.id === newWorkspaceId);
+    if (selectedWorkspace) {
+      const allowedColumns = new AllowedRosterColumns();
+      setAllPermissions(allowedColumns, true);
+      if (selectedWorkspace.pii) {
+        setCanViewPII(true);
+      } else {
+        Object.keys(RosterPIIColumns).forEach(column => {
+          const columnIsPII = Reflect.get(RosterPIIColumns, column);
+          if (columnIsPII) {
+            Reflect.set(allowedColumns, column, false);
+          }
+        });
+        setCanViewPII(false);
+      }
+      setAllowedRosterColumns(allowedColumns);
+    }
+    setWorkspaceId(newWorkspaceId);
+  };
+
+  const getWorkspaceDescription = () => {
+    const selectedWorkspace = workspaces?.find(workspace => {
+      return workspace.id === workspaceId;
+    });
+    return selectedWorkspace?.description || 'No workspace, users with this role will not have access to analytics dashboards.';
+  };
+
   const onRosterColumnChanged = (property: string) => (event: React.ChangeEvent<HTMLInputElement>) => {
     setAllowedRosterColumns(previous => {
       const newState = { ...previous };
@@ -72,10 +103,10 @@ export const EditRoleDialog = (props: EditRoleDialogProps) => {
     });
   };
 
-  const filterAllowedRosterColumns = (viewPII: boolean, viewMuster: boolean) => {
+  const filterAllowedRosterColumns = (viewMuster: boolean) => {
     const allowedColumns = new AllowedRosterColumns();
     Object.keys(allowedRosterColumns).forEach(column => {
-      const allowed = columnAllowed(column, viewPII);
+      const allowed = columnAllowed(column);
       const previousValue = Reflect.get(allowedRosterColumns, column);
       Reflect.set(allowedColumns, column, previousValue && allowed);
     });
@@ -85,21 +116,21 @@ export const EditRoleDialog = (props: EditRoleDialogProps) => {
 
   const onSave = async () => {
     setFormDisabled(true);
-    const viewPII = canManageGroup || canViewPII;
     const viewMuster = canManageGroup || canViewMuster;
-    const allowedColumns = filterAllowedRosterColumns(viewPII, viewMuster);
+    const allowedColumns = filterAllowedRosterColumns(viewMuster);
     const body = {
       name,
       description,
       indexPrefix,
-      allowedRosterColumns: permissionsToString(allowedColumns),
-      allowedNotificationEvents: permissionsToString(allowedNotificationEvents),
+      workspaceId: workspaceId < 0 ? null : workspaceId,
+      allowedRosterColumns: permissionsToArray(allowedColumns),
+      allowedNotificationEvents: permissionsToArray(allowedNotificationEvents),
       canManageGroup,
       canManageRoster: canManageGroup || canManageRoster,
       canManageWorkspace: canManageGroup || canManageWorkspace,
       canViewRoster: canManageGroup || canManageRoster || canViewRoster,
       canViewMuster: viewMuster,
-      canViewPII: viewPII,
+      canViewPII,
     };
     try {
       if (existingRole) {
@@ -108,7 +139,6 @@ export const EditRoleDialog = (props: EditRoleDialogProps) => {
         await axios.post(`api/role/${orgId}`, body);
       }
     } catch (error) {
-      console.log(error, onError);
       if (onError) {
         let message = 'Internal Server Error';
         if (error.response?.data?.errors && error.response.data.errors.length > 0) {
@@ -128,12 +158,11 @@ export const EditRoleDialog = (props: EditRoleDialogProps) => {
     return !formDisabled && name.length > 0 && description.length > 0;
   };
 
-  const columnAllowed = (column: string, viewPII: boolean) => {
-    return !Reflect.get(RosterPIIColumns, column) || viewPII;
+  const columnAllowed = (column: string) => {
+    return !Reflect.get(RosterPIIColumns, column) || canViewPII;
   };
 
   const buildRosterColumnRows = () => {
-    const viewPII = canManageGroup || canViewPII;
     const columns = Object.keys(allowedRosterColumns).filter(column => column !== 'lastReported');
     return columns.map(column => (
       <TableRow key={column}>
@@ -143,8 +172,8 @@ export const EditRoleDialog = (props: EditRoleDialogProps) => {
         <TableCell className={classes.iconCell}>
           <Checkbox
             color="primary"
-            disabled={formDisabled || !columnAllowed(column, viewPII)}
-            checked={Reflect.get(allowedRosterColumns, column) && columnAllowed(column, viewPII)}
+            disabled={formDisabled || !columnAllowed(column) || workspaceId >= 0}
+            checked={Reflect.get(allowedRosterColumns, column) && columnAllowed(column)}
             onChange={onRosterColumnChanged(column)}
           />
         </TableCell>
@@ -171,7 +200,7 @@ export const EditRoleDialog = (props: EditRoleDialogProps) => {
   };
 
   return (
-    <Dialog maxWidth="md" onClose={onClose} open={open}>
+    <Dialog className={classes.root} maxWidth="md" onClose={onClose} open={open}>
       <DialogTitle id="alert-dialog-title">{existingRole ? 'Edit Role' : 'New Role'}</DialogTitle>
       <DialogContent>
         <Grid container spacing={3}>
@@ -183,16 +212,6 @@ export const EditRoleDialog = (props: EditRoleDialogProps) => {
               disabled={formDisabled}
               value={name}
               onChange={onInputChanged(setName)}
-            />
-          </Grid>
-          <Grid item xs={6}>
-            <Typography className={classes.roleHeader}>Index Prefix:</Typography>
-            <TextField
-              className={classes.textField}
-              id="role-index-prefix"
-              disabled={formDisabled}
-              value={indexPrefix}
-              onChange={onInputChanged(setIndexPrefix)}
             />
           </Grid>
           <Grid item xs={6}>
@@ -208,6 +227,41 @@ export const EditRoleDialog = (props: EditRoleDialogProps) => {
             />
           </Grid>
           <Grid item xs={6}>
+            <Typography className={classes.roleHeader}>Analytics Workspace:</Typography>
+            <Select
+              className={classes.workspaceSelect}
+              native
+              disabled={formDisabled}
+              autoFocus
+              value={workspaceId}
+              onChange={onWorkspaceChanged}
+              inputProps={{
+                name: 'template',
+                id: 'template-select',
+              }}
+            >
+              <option key={-1} value={-1}>None</option>
+              {workspaces && workspaces.map(workspace => (
+                <option key={workspace.id} value={workspace.id}>{workspace.name}</option>
+              ))}
+            </Select>
+          </Grid>
+
+          <Grid item xs={6}>
+            <Typography className={classes.roleHeader}>Workspace Description:</Typography>
+            <Typography className={classes.workspaceDescription}>{getWorkspaceDescription()}</Typography>
+          </Grid>
+          <Grid item xs={6}>
+            <Typography className={classes.roleHeader}>Unit Filter:</Typography>
+            <TextField
+              className={classes.textField}
+              id="role-index-prefix"
+              disabled={formDisabled}
+              value={indexPrefix}
+              onChange={onInputChanged(setIndexPrefix)}
+            />
+          </Grid>
+          <Grid item xs={6}>
             <Typography className={classes.roleHeader}>Allowed Notifications:</Typography>
             <div className={classes.tableScroll}>
               <Table aria-label="Notifications" className={classes.roleTable}>
@@ -218,7 +272,9 @@ export const EditRoleDialog = (props: EditRoleDialogProps) => {
             </div>
           </Grid>
           <Grid item xs={6}>
-            <Typography className={classes.roleHeader}>Viewable Roster Columns:</Typography>
+            <Typography className={classes.roleHeader}>
+              {`Viewable Roster Columns: ${workspaceId >= 0 ? '(Set by Workspace)' : ''}`}
+            </Typography>
             <div className={classes.tableScroll}>
               <Table aria-label="Roster Columns" className={classes.roleTable}>
                 <TableBody>
@@ -289,12 +345,14 @@ export const EditRoleDialog = (props: EditRoleDialogProps) => {
                   </TableRow>
 
                   <TableRow>
-                    <TableCell className={classes.textCell}>View PII</TableCell>
+                    <TableCell className={classes.textCell}>
+                      {`View PII ${workspaceId >= 0 ? '(Set by Workspace)' : ''}`}
+                    </TableCell>
                     <TableCell className={classes.iconCell}>
                       <Checkbox
                         color="primary"
-                        disabled={formDisabled || canManageGroup}
-                        checked={canManageGroup || canViewPII}
+                        disabled={formDisabled || workspaceId >= 0}
+                        checked={canViewPII}
                         onChange={onPermissionChanged(setCanViewPII)}
                       />
                     </TableCell>

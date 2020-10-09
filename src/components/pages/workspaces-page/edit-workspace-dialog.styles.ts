@@ -17,7 +17,11 @@ export default makeStyles((theme: Theme) => createStyles({
       },
     },
   },
-  roleHeader: {
+  templateText: {
+    width: '100%',
+    margin: 0,
+  },
+  workspaceHeader: {
     textTransform: 'uppercase',
     fontWeight: 'bold',
     fontSize: '13px',
@@ -28,21 +32,17 @@ export default makeStyles((theme: Theme) => createStyles({
     maxHeight: '193px',
     overflowY: 'auto',
   },
-  workspaceSelect: {
-    width: '100%',
-    '&:before': {
-      border: 'none',
-    },
-  },
-  workspaceDescription: {
-    width: '100%',
-    margin: 0,
-  },
-  roleTable: {
+  templateDataTable: {
     '&  .MuiTableCell-root': {
       border: '1px solid #E0E0E0',
       padding: '0px 16px',
       height: '32px',
+    },
+  },
+  templateSelect: {
+    width: '100%',
+    '&:before': {
+      border: 'none',
     },
   },
   textCell: {
@@ -50,20 +50,17 @@ export default makeStyles((theme: Theme) => createStyles({
     backgroundColor: '#F0F1F1',
   },
   iconCell: {
+    padding: '0px 16px',
+    height: '32px',
     textAlign: 'center',
     backgroundColor: '#EAEAEA',
-    '& .MuiCheckbox-root': {
+    '& svg': {
       position: 'relative',
-      padding: '0px',
-      '&:hover': {
-        backgroundColor: 'rgb(115 179 231 / 27%)',
-      },
-      '& svg': {
-        top: '0px',
-      },
+      top: '3px',
+      color: theme.palette.primary.light,
     },
   },
-  roleDialogActions: {
+  dialogActions: {
     justifyContent: 'center',
     backgroundColor: '#F0F1F1',
     padding: '15px 35px',

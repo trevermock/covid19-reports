@@ -4,6 +4,7 @@ import { ApiRequest, OrgParam, OrgRoleParams } from '../index';
 import { Role } from './role.model';
 import { BadRequestError, NotFoundError } from '../../util/error-types';
 import { RosterPIIColumns } from '../roster/roster.model';
+import { Workspace } from '../workspace/workspace.model';
 
 class RoleController {
 
@@ -13,6 +14,7 @@ class RoleController {
     }
 
     const roles = await Role.find({
+      relations: ['workspace'],
       where: {
         org: req.appOrg.id,
       },
@@ -43,7 +45,7 @@ class RoleController {
 
     const role = new Role();
     role.org = req.appOrg;
-    setRoleFromBody(role, req.body);
+    await setRoleFromBody(req.appOrg.id, role, req.body);
 
     const newRole = await role.save();
 
@@ -58,6 +60,7 @@ class RoleController {
     const roleId = parseInt(req.params.roleId);
 
     const role = await Role.findOne({
+      relations: ['workspace'],
       where: {
         id: roleId,
         org: req.appOrg.id,
@@ -121,7 +124,7 @@ class RoleController {
       throw new NotFoundError('Role could not be found.');
     }
 
-    setRoleFromBody(role, req.body);
+    await setRoleFromBody(req.appOrg.id, role, req.body);
 
     const updatedRole = await role.save();
 
@@ -130,7 +133,7 @@ class RoleController {
 
 }
 
-function setRoleFromBody(role: Role, body: RoleBody) {
+async function setRoleFromBody(orgId: number, role: Role, body: RoleBody) {
   if (body.name != null) {
     role.name = body.name;
   }
@@ -140,21 +143,34 @@ function setRoleFromBody(role: Role, body: RoleBody) {
   if (body.indexPrefix != null) {
     role.indexPrefix = body.indexPrefix;
   }
-  if (body.allowedRosterColumns != null) {
-    // TODO: This validation logic could be shared with the client-side parsing functionality
-    const columns = body.allowedRosterColumns.split(',').filter(column => column.length > 0);
-    if (columns.length === 0) {
-      role.allowedRosterColumns = '';
-    } else if (columns.length === 1 && columns[0] === '*') {
-      role.allowedRosterColumns = '*';
+  if (body.workspaceId !== undefined) {
+    console.log('workspaceId', body.workspaceId);
+    if (body.workspaceId == null) {
+      role.workspace = null;
     } else {
-      for (const column of columns) {
+      const workspace = await Workspace.findOne({
+        where: {
+          id: body.workspaceId,
+          org: orgId,
+        },
+      });
+
+      if (!workspace) {
+        throw new NotFoundError('Workspace could not be found.');
+      }
+
+      role.workspace = workspace;
+    }
+  }
+  if (body.allowedRosterColumns != null) {
+    if (!(body.allowedRosterColumns.length === 1 && body.allowedRosterColumns[0] === '*')) {
+      for (const column of body.allowedRosterColumns) {
         if (!RosterPIIColumns.hasOwnProperty(column)) {
           throw new BadRequestError(`Unknown roster column: ${column}`);
         }
       }
-      role.allowedRosterColumns = body.allowedRosterColumns;
     }
+    role.allowedRosterColumns = body.allowedRosterColumns;
   }
   if (body.allowedNotificationEvents != null) {
     // TODO: Validate notification events
@@ -185,8 +201,9 @@ type RoleBody = {
   name?: string
   description?: string
   indexPrefix?: string
-  allowedRosterColumns?: string
-  allowedNotificationEvents?: string
+  workspaceId?: number | null
+  allowedRosterColumns?: string[]
+  allowedNotificationEvents?: string[]
   canManageGroup?: boolean
   canManageRoster?: boolean
   canManageWorkspace?: boolean

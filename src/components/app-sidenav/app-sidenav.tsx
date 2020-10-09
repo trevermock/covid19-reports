@@ -7,6 +7,7 @@ import HomeIcon from '@material-ui/icons/Home';
 import ListAltIcon from '@material-ui/icons/ListAlt';
 import PeopleIcon from '@material-ui/icons/People';
 import SecurityIcon from '@material-ui/icons/Security';
+import AssessmentOutlinedIcon from '@material-ui/icons/AssessmentOutlined';
 import clsx from 'clsx';
 import { useSelector } from 'react-redux';
 import { Link } from 'react-router-dom';
@@ -43,15 +44,26 @@ export const AppSidenav = () => {
               <ListItemText primary="Home" />
             </ListItem>
           </Link>
-          <a href={`/dashboard?orgId=${user.activeRole?.org?.id}`}>
-            <ListItem button key="Analytics">
-              <ListItemIcon><BarChartIcon /></ListItemIcon>
-              <ListItemText primary="Analytics" />
-            </ListItem>
-          </a>
+          {user.activeRole?.workspace && (
+            <a href={`/dashboard?orgId=${user.activeRole?.org?.id}`}>
+              <ListItem button key="Analytics">
+                <ListItemIcon><BarChartIcon /></ListItemIcon>
+                <ListItemText primary="Analytics" />
+              </ListItem>
+            </a>
+          )}
         </List>
         <Divider />
         <List>
+          {user.activeRole?.canManageGroup && (
+            <Link to="/workspaces">
+              <ListItem button key="Workspaces">
+                <ListItemIcon><AssessmentOutlinedIcon /></ListItemIcon>
+                <ListItemText primary="Workspaces" />
+              </ListItem>
+            </Link>
+          )}
+
           {user.activeRole?.canManageGroup && (
             <Link to="/roles">
               <ListItem button key="Roles">

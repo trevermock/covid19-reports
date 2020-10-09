@@ -5,6 +5,8 @@ import { Org } from './api/org/org.model';
 import { Role } from './api/role/role.model';
 import { Roster } from './api/roster/roster.model';
 import { User } from './api/user/user.model';
+import { Workspace } from './api/workspace/workspace.model';
+import { WorkspaceTemplate } from './api/workspace/workspace-template.model';
 
 export const ormConfig: PostgresConnectionOptions = {
   type: 'postgres',
@@ -13,7 +15,7 @@ export const ormConfig: PostgresConnectionOptions = {
   username: process.env.SQL_USER || 'postgres',
   password: process.env.SQL_PASSWORD || 'postgres',
   database: process.env.SQL_DATABASE || 'dds',
-  entities: [User, Role, Org, Roster, AccessRequest],
+  entities: [User, Role, Org, Roster, AccessRequest, Workspace, WorkspaceTemplate],
   namingStrategy: new SnakeNamingStrategy(),
   synchronize: (process.env.NODE_ENV === 'development' && process.env.SYNC_DATABASE === 'true'),
   logging: false,

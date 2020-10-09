@@ -1,6 +1,6 @@
 // Utility functions for permission objects (objects that consist of many boolean fields).
 
-export function permissionsToString<T extends object>(permissionObject: T) {
+export function permissionsToArray<T extends object>(permissionObject: T) {
   let filteredCount = 0;
   const allowed = Object.keys(permissionObject).filter(key => {
     const value = Reflect.get(permissionObject, key);
@@ -10,13 +10,10 @@ export function permissionsToString<T extends object>(permissionObject: T) {
     filteredCount += 1;
     return false;
   });
-  if (allowed.length === 0) {
-    return '';
-  }
   if (filteredCount === 0) {
-    return '*';
+    return ['*'];
   }
-  return allowed.join(',');
+  return allowed;
 }
 
 export function setAllPermissions<T extends object>(permissionObject: T, newValue: boolean) {
@@ -28,18 +25,17 @@ export function setAllPermissions<T extends object>(permissionObject: T, newValu
   });
 }
 
-export function parsePermissions<T extends object>(permissionObject: T, permissions: string | undefined): T {
+export function parsePermissions<T extends object>(permissionObject: T, permissions: string[] | undefined): T {
   if (!permissions) {
     return permissionObject;
   }
-  const split = permissions.split(',').filter(permission => permission.length > 0);
-  if (split.length === 0) {
+  if (permissions.length === 0) {
     setAllPermissions(permissionObject, false);
-  } else if (split.length === 1 && split[0] === '*') {
+  } else if (permissions.length === 1 && permissions[0] === '*') {
     setAllPermissions(permissionObject, true);
   } else {
     setAllPermissions(permissionObject, false);
-    split.forEach(permission => {
+    permissions.forEach(permission => {
       if (permissionObject.hasOwnProperty(permission)) {
         Reflect.set(permissionObject, permission, true);
       }

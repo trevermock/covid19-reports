@@ -2,6 +2,7 @@ import {
   Entity, PrimaryGeneratedColumn, Column, BaseEntity, JoinColumn, ManyToOne,
 } from 'typeorm';
 import { Org } from '../org/org.model';
+import { Workspace } from '../workspace/workspace.model';
 
 @Entity()
 export class Role extends BaseEntity {
@@ -28,20 +29,26 @@ export class Role extends BaseEntity {
   })
   org?: Org;
 
+  @ManyToOne(() => Workspace, { cascade: true, onDelete: 'RESTRICT', nullable: true })
+  @JoinColumn({
+    name: 'workspace_id',
+  })
+  workspace?: Workspace | null;
+
   @Column({
     default: '',
   })
   indexPrefix!: string;
 
-  @Column({
+  @Column('simple-array', {
     default: '',
   })
-  allowedRosterColumns!: string;
+  allowedRosterColumns!: string[];
 
-  @Column({
+  @Column('simple-array', {
     default: '',
   })
-  allowedNotificationEvents!: string;
+  allowedNotificationEvents!: string[];
 
   //
   // ROLE PERMISSIONS - Must be prefixed with "can"
@@ -95,8 +102,8 @@ export class Role extends BaseEntity {
     adminRole.description = 'Site Administrator';
     adminRole.org = org;
     adminRole.indexPrefix = '';
-    adminRole.allowedNotificationEvents = '*';
-    adminRole.allowedRosterColumns = '*';
+    adminRole.allowedNotificationEvents = ['*'];
+    adminRole.allowedRosterColumns = ['*'];
 
     // Allow all permissions
     for (const key of Object.keys(adminRole)) {

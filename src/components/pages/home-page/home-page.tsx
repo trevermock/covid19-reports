@@ -72,7 +72,7 @@ export const HomePage = () => {
           </Grid>
 
           {/* Analytics & Reporting */}
-          {user.activeRole && (
+          {user.activeRole?.workspace && (
             <Grid item xs={6}>
               <Card className={classes.card}>
                 <CardContent>

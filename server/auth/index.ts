@@ -27,7 +27,7 @@ export async function requireUserAuth(req: AuthRequest, res: Response, next: Nex
   }
 
   let user = await User.findOne({
-    relations: ['roles', 'roles.org', 'roles.org.contact'],
+    relations: ['roles', 'roles.org', 'roles.workspace', 'roles.org.contact'],
     where: {
       edipi: id,
     },

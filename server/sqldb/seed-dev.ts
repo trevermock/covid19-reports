@@ -58,8 +58,8 @@ async function createGroupAdminRole(org: Org) {
   role.name = 'Group Admin';
   role.description = 'For managing the group.';
   role.org = org;
-  role.allowedRosterColumns = '*';
-  role.allowedNotificationEvents = '*';
+  role.allowedRosterColumns = ['*'];
+  role.allowedNotificationEvents = ['*'];
   role.canManageGroup = true;
   role.canManageRoster = true;
   role.canManageWorkspace = true;
@@ -74,8 +74,8 @@ async function createRosterManagerRole(org: Org) {
   role.name = 'Roster Manager';
   role.description = 'For managing the roster.';
   role.org = org;
-  role.allowedRosterColumns = 'edipi,unit,rateRank';
-  role.allowedNotificationEvents = '';
+  role.allowedRosterColumns = ['edipi', 'unit', 'rateRank'];
+  role.allowedNotificationEvents = [];
   role.canManageRoster = true;
   role.canViewRoster = true;
   return role.save();
