@@ -16,19 +16,18 @@ export default makeStyles((theme: Theme) => createStyles({
     },
   },
   accessRequestButtons: {
-    display: 'flex',
-    flexFlow: 'row',
-    '& button': {
-      flex: 1,
-    },
+    display: 'grid',
+    gridTemplateColumns: '1fr 1fr',
   },
   accessRequestApproveButton: {
+    width: '100%',
     backgroundColor: '#00A91C',
     '&:hover': {
       backgroundColor: '#008C17',
     },
   },
   accessRequestDenyButton: {
+    width: '100%',
     backgroundColor: '#E41D3D',
     marginLeft: '5px',
     '&:hover': {
