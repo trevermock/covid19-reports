@@ -35,14 +35,6 @@ export namespace User {
       }) {}
     }
 
-    export class SetRegisterLoading {
-      static type = 'USER_SET_REGISTER_LOADING';
-      type = SetRegisterLoading.type;
-      constructor(public payload: {
-        isRegisterLoading: boolean
-      }) {}
-    }
-
   }
 
   export const login = () => async (dispatch: Dispatch<Actions.Login>) => {
@@ -64,12 +56,6 @@ export namespace User {
   export const changeOrg = (orgId: number) => (dispatch: Dispatch<Actions.ChangeOrg>) => {
     dispatch({
       ...new Actions.ChangeOrg({ orgId }),
-    });
-  };
-
-  export const setRegisterLoading = (isLoading: boolean) => (dispatch: Dispatch<Actions.SetRegisterLoading>) => {
-    dispatch({
-      ...new Actions.SetRegisterLoading({ isRegisterLoading: isLoading }),
     });
   };
 

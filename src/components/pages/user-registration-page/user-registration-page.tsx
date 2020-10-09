@@ -17,6 +17,7 @@ export const UserRegistrationPage = () => {
   const classes = useStyles();
   const dispatch = useDispatch();
   const user = useSelector<AppState, UserState>(state => state.user);
+  const [registerUserLoading, setRegisterUserLoading] = useState(false);
   const [inputData, setInputData] = useState<UserRegisterData>({
     firstName: '',
     lastName: '',
@@ -33,9 +34,9 @@ export const UserRegistrationPage = () => {
   }
 
   async function handleCreateAccountClick() {
-    dispatch(User.setRegisterLoading(true));
+    setRegisterUserLoading(true);
     await dispatch(User.register(inputData));
-    dispatch(User.setRegisterLoading(false));
+    setRegisterUserLoading(false);
   }
 
   function isCreateAccountButtonDisabled() {
@@ -145,7 +146,7 @@ export const UserRegistrationPage = () => {
             size="large"
             onClick={handleCreateAccountClick}
             disabled={isCreateAccountButtonDisabled()}
-            loading={user.isRegisterLoading}
+            loading={registerUserLoading}
           >
             Create Account
           </ButtonWithSpinner>
