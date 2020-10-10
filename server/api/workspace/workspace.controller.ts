@@ -1,4 +1,7 @@
 import { Response } from 'express';
+import { getConnection } from 'typeorm';
+import { KibanaApi } from '../../kibana/kibana-api';
+import { setupKibanaWorkspace } from '../../kibana/kibana-utility';
 import {
   ApiRequest, OrgParam, OrgWorkspaceParams,
 } from '../index';
@@ -47,6 +50,10 @@ class WorkspaceController {
       throw new NotFoundError('Organization was not found.');
     }
 
+    if (!req.appRole) {
+      throw new NotFoundError('req.appRole is not set');
+    }
+
     if (!req.body.name) {
       throw new BadRequestError('A name must be supplied when adding a workspace.');
     }
@@ -76,7 +83,17 @@ class WorkspaceController {
     workspace.phi = template.phi;
     await setWorkspaceFromBody(workspace, req.body);
 
-    const newWorkspace = await workspace.save();
+    let newWorkspace = undefined as Workspace | undefined;
+    await getConnection().transaction(async manager => {
+      newWorkspace = await manager.save(workspace);
+      req.appWorkspace = newWorkspace;
+
+      // Create new Kibana workspace.
+      // NOTE: We can't connect to the Kibana API with middleware when creating a workspace, since the workspace
+      // doesn't exist yet to build the JWT with. So connect manually now that it exists.
+      await KibanaApi.connect(req);
+      await setupKibanaWorkspace(newWorkspace, req.appRole!, req.kibanaApi!);
+    });
 
     await res.status(201).json(newWorkspace);
   }

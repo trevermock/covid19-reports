@@ -1,4 +1,3 @@
-/* eslint @typescript-eslint/no-unused-vars: "off" */
 import { ClientRequest, IncomingMessage } from 'http';
 import { Config } from 'http-proxy-middleware';
 import { ApiRequest } from '../api';
@@ -10,15 +9,10 @@ const kibanaProxyConfig: Config = {
   logLevel: 'debug',
   secure: false,
 
-  // Strip out the appPath, so kibana sees requested path
-  pathRewrite: (path: string) => {
-    return path.replace(`${config.kibana.appPath}`, '');
-  },
-
   // add custom headers to request
   onProxyReq: (proxyReq: ClientRequest, req: ProxyRequest) => {
     if (req.appRole) {
-      proxyReq.setHeader('x-se-fire-department-all', req.appUser.getKibanaIndex(req.appRole));
+      proxyReq.setHeader('x-se-fire-department-all', req.appRole.getKibanaIndex());
     }
   },
 

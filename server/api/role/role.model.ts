@@ -95,6 +95,17 @@ export class Role extends BaseEntity {
     return true;
   }
 
+  getKibanaIndex() {
+    return `${this.org!.indexPrefix}-${this.indexPrefix}`;
+  }
+
+  getKibanaRoles() {
+    if (this.canManageWorkspace) {
+      return 'kibana_admin';
+    }
+    return 'kibana_ro_strict';
+  }
+
   static admin(org: Org) {
     const adminRole = new Role();
     adminRole.id = 0;

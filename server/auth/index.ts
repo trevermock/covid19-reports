@@ -2,6 +2,7 @@ import { Request, Response, NextFunction } from 'express';
 import { ApiRequest } from '../api';
 import { User } from '../api/user/user.model';
 import { Role } from '../api/role/role.model';
+import { Workspace } from '../api/workspace/workspace.model';
 import {
   BadRequestError, ForbiddenError, NotFoundError, UnauthorizedError,
 } from '../util/error-types';
@@ -82,6 +83,7 @@ export async function requireOrgAccess(req: any, res: Response, next: NextFuncti
     if (orgRole) {
       req.appOrg = orgRole.org;
       req.appRole = orgRole;
+      req.appWorkspace = orgRole.workspace;
     } else if (user.rootAdmin) {
       const org = await Org.findOne({
         where: {
@@ -97,6 +99,13 @@ export async function requireOrgAccess(req: any, res: Response, next: NextFuncti
     }
   }
   if (req.appOrg) {
+    return next();
+  }
+  throw new ForbiddenError('User does not have sufficient privileges to perform this action.');
+}
+
+export function requireWorkspaceAccess(req: any, res: Response, next: NextFunction) {
+  if (req.appWorkspace) {
     return next();
   }
   throw new ForbiddenError('User does not have sufficient privileges to perform this action.');

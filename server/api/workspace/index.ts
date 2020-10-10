@@ -1,6 +1,6 @@
 import bodyParser from 'body-parser';
 import express from 'express';
-
+import { KibanaApi } from '../../kibana/kibana-api';
 import controller from './workspace.controller';
 import { requireOrgAccess, requireRolePermission } from '../../auth';
 
@@ -39,6 +39,7 @@ router.delete(
   '/:orgId/:workspaceId',
   requireOrgAccess,
   requireRolePermission(role => role.canManageGroup),
+  KibanaApi.connect,
   controller.deleteWorkspace,
 );
 

@@ -12,7 +12,7 @@ import kibanaProxy from './kibana';
 import kibanaDashboard from './kibana/dashboard';
 import database from './sqldb';
 import config from './config';
-import { requireOrgAccess, requireUserAuth } from './auth';
+import { requireOrgAccess, requireUserAuth, requireWorkspaceAccess } from './auth';
 import { errorHandler } from './util/error-handler';
 
 database.then(() => {
@@ -56,6 +56,7 @@ app.use(
 app.use(
   config.kibana.appPath,
   requireOrgAccess,
+  requireWorkspaceAccess,
   kibanaProxy,
 );
 

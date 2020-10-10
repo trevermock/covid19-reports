@@ -1,4 +1,5 @@
 import express, { Request } from 'express';
+import { KibanaApi } from '../kibana/kibana-api';
 import orgRoutes from './org';
 import userRoutes from './user';
 import roleRoutes from './role';
@@ -8,6 +9,7 @@ import workspaceRoutes from './workspace';
 import { User } from './user/user.model';
 import { Org } from './org/org.model';
 import { Role } from './role/role.model';
+import { Workspace } from './workspace/workspace.model';
 
 const router = express.Router();
 
@@ -22,6 +24,8 @@ export interface ApiRequest<ReqParams = object, ReqBody = object, ReqQuery = obj
   appUser: User,
   appOrg?: Org,
   appRole?: Role,
+  appWorkspace?: Workspace,
+  kibanaApi?: KibanaApi,
 }
 
 export type OrgParam = {

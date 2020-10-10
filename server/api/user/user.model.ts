@@ -59,22 +59,4 @@ export class User extends BaseEntity {
   })
   isRegistered?: boolean;
 
-  getKibanaIndex(role: Role) {
-    if (this.rootAdmin) {
-      return '*';
-    }
-    return `${role.org!.indexPrefix}-${role.indexPrefix}`;
-  }
-
-  getKibanaUserClaim(role: Role) {
-    return `org${role.org!.id}-role${role.id}`;
-  }
-
-  getKibanaRoles(role: Role) {
-    if (role.canManageWorkspace) {
-      return 'kibana_admin';
-    }
-    return 'kibana_ro_strict';
-  }
-
 }
