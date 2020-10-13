@@ -15,6 +15,9 @@ export default makeStyles((theme: Theme) => createStyles({
       marginRight: theme.spacing(3),
     },
   },
+  fillWidth: {
+    width: '100%',
+  },
   tableFooter: {
     flexShrink: 0,
     padding: '10px 20px',

@@ -170,6 +170,17 @@ export const RosterPage = () => {
           >
             Download CSV Template
           </Button>
+
+          {/* TODO: this should go through proxy, but that's currently not working for href's */}
+          <a href={`http://localhost:4000/api/roster/${orgId}/export`} download>
+            <Button
+              type="button"
+              size="large"
+              className={classes.fillWidth}
+            >
+              Export to CSV
+            </Button>
+          </a>
         </div>
 
         <TableContainer component={Paper}>
