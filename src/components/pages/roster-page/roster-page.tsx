@@ -8,6 +8,9 @@ import KeyboardArrowRight from '@material-ui/icons/KeyboardArrowRight';
 import LastPageIcon from '@material-ui/icons/LastPage';
 import EditIcon from '@material-ui/icons/Edit';
 import DeleteIcon from '@material-ui/icons/Delete';
+import AddCircleOutlineIcon from '@material-ui/icons/AddCircleOutline';
+import PublishIcon from '@material-ui/icons/Publish';
+import GetAppIcon from '@material-ui/icons/GetApp';
 import React, { ChangeEvent, useEffect, useState } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
 import { Roster } from '../../../actions/roster.actions';
@@ -148,6 +151,7 @@ export const RosterPage = () => {
     <main className={classes.root}>
       <Container maxWidth="md">
         <div className={classes.buttons}>
+
           <input
             accept="text/csv"
             id="raised-button-file"
@@ -159,6 +163,7 @@ export const RosterPage = () => {
           <label htmlFor="raised-button-file">
             <Button
               size="large"
+              startIcon={<PublishIcon />}
               component="span"
             >
               Upload CSV
@@ -168,6 +173,7 @@ export const RosterPage = () => {
           <Button
             type="button"
             size="large"
+            startIcon={<GetAppIcon />}
             href={`api/roster/${orgId}/template`}
           >
             Download CSV Template
@@ -178,11 +184,22 @@ export const RosterPage = () => {
             <Button
               type="button"
               size="large"
+              startIcon={<GetAppIcon />}
               className={classes.fillWidth}
             >
               Export to CSV
             </Button>
           </a>
+
+          <Button
+            className={classes.addRosterEntryButton}
+            color="primary"
+            size="large"
+            startIcon={<AddCircleOutlineIcon />}
+          >
+            Add
+          </Button>
+
         </div>
 
         <TableContainer component={Paper}>

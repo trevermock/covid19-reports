@@ -18,6 +18,9 @@ export default makeStyles((theme: Theme) => createStyles({
   fillWidth: {
     width: '100%',
   },
+  addRosterEntryButton: {
+    marginLeft: theme.spacing(3),
+  },
   tableButtons: {
     '& .MuiButtonBase-root': {
       padding: '6px 6px',
