@@ -6,6 +6,8 @@ import FirstPageIcon from '@material-ui/icons/FirstPage';
 import KeyboardArrowLeft from '@material-ui/icons/KeyboardArrowLeft';
 import KeyboardArrowRight from '@material-ui/icons/KeyboardArrowRight';
 import LastPageIcon from '@material-ui/icons/LastPage';
+import EditIcon from '@material-ui/icons/Edit';
+import DeleteIcon from '@material-ui/icons/Delete';
 import React, { ChangeEvent, useEffect, useState } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
 import { Roster } from '../../../actions/roster.actions';
@@ -192,6 +194,7 @@ export const RosterPage = () => {
                 <TableCell>First Name</TableCell>
                 <TableCell>Last Name</TableCell>
                 <TableCell>Unit</TableCell>
+                <TableCell />
               </TableRow>
             </TableHead>
             <TableBody>
@@ -204,6 +207,20 @@ export const RosterPage = () => {
                   <TableCell>{row.firstName}</TableCell>
                   <TableCell>{row.lastName}</TableCell>
                   <TableCell>{row.unit}</TableCell>
+                  <TableCell className={classes.tableButtons}>
+                    <Button
+                      className={classes.editRosterEntryButton}
+                      variant="outlined"
+                    >
+                      <EditIcon />
+                    </Button>
+                    <Button
+                      className={classes.deleteRosterEntryButton}
+                      variant="outlined"
+                    >
+                      <DeleteIcon />
+                    </Button>
+                  </TableCell>
                 </TableRow>
               ))}
             </TableBody>
