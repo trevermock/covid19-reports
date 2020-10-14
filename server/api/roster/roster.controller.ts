@@ -183,6 +183,7 @@ class RosterController {
     const userEDIPI = req.params.edipi;
 
     const rosterEntry = await Roster.findOne({
+      relations: ["org"],
       where: {
         edipi: userEDIPI,
         org: req.appOrg!.id,
