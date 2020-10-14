@@ -3,6 +3,7 @@ import {
 } from 'typeorm';
 import { Role } from '../role/role.model';
 
+const internalUserEdipi = 'internal';
 
 @Entity()
 export class User extends BaseEntity {
@@ -59,4 +60,22 @@ export class User extends BaseEntity {
   })
   isRegistered?: boolean;
 
+  public isInternal() {
+    return this.edipi === internalUserEdipi;
+  }
+
+  static internal() {
+    const internalUser = new User();
+    internalUser.edipi = internalUserEdipi;
+    internalUser.firstName = 'Internal';
+    internalUser.lastName = 'User';
+    internalUser.email = 'internal@statusengine.com';
+    internalUser.phone = '000-000-0000';
+    internalUser.service = 'Space Force';
+    internalUser.enabled = true;
+    internalUser.isRegistered = true;
+    internalUser.rootAdmin = true;
+
+    return internalUser;
+  }
 }

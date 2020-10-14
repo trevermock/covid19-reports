@@ -3,9 +3,8 @@ import database from '.';
 import { Org } from '../api/org/org.model';
 import { Role } from '../api/role/role.model';
 import { User } from '../api/user/user.model';
-import { WorkspaceTemplate } from '../api/workspace/workspace-template.model';
 import { Workspace } from '../api/workspace/workspace.model';
-import { kibanaSavedObjectsMock } from '../kibana/kibana-saved-objects.mock';
+import { Roster } from '../api/roster/roster.model';
 
 export default (async function() {
   if (process.env.NODE_ENV !== 'development') {
@@ -51,8 +50,30 @@ export default (async function() {
   groupAdmin.roles = [testOrgGroupAdminRole, testOrg2GroupAdminRole];
   await groupAdmin.save();
 
-  await connection.close();
+  // Create roster entries
+  const rosterEntry1 = new Roster();
+  rosterEntry1.org = testOrg;
+  rosterEntry1.edipi = '1000000001';
+  rosterEntry1.firstName = 'Luke';
+  rosterEntry1.lastName = 'Skywalker';
+  rosterEntry1.pilot = true;
+  rosterEntry1.unit = 'unit1';
+  rosterEntry1.billetWorkcenter = '';
+  rosterEntry1.contractNumber = '';
+  await rosterEntry1.save();
 
+  const rosterEntry2 = new Roster();
+  rosterEntry2.org = testOrg;
+  rosterEntry2.edipi = '1000000002';
+  rosterEntry2.firstName = 'Han';
+  rosterEntry2.lastName = 'Solo';
+  rosterEntry2.pilot = true;
+  rosterEntry2.unit = 'unit1';
+  rosterEntry2.billetWorkcenter = '';
+  rosterEntry2.contractNumber = '';
+  await rosterEntry2.save();
+
+  await connection.close();
   console.log('Finished!');
 }());
 

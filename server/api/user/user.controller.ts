@@ -171,7 +171,7 @@ class UserController {
       throw new NotFoundError('Organization was not found.');
     }
 
-    const userEDIPI = req.params.userEDIPI;
+    const userEDIPI = req.params.edipi;
 
     const user = await User.findOne({
       where: {
