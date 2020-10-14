@@ -37,14 +37,14 @@ router.get(
 );
 
 router.delete(
-  '/:orgId/:userEDIPI',
+  '/:orgId/:edipi',
   requireOrgAccess,
   requireRolePermission(role => role.canManageGroup),
   controller.deleteUser,
 );
 
 // router.put(
-//   '/:orgId/:userEDIPI',
+//   '/:orgId/:edipi',
 //   bodyParser.json(),
 //   requireOrgAccess,
 //   requireRolePermission((role) => role.canManageGroup),

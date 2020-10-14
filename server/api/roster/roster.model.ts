@@ -112,23 +112,150 @@ export class Roster extends BaseEntity {
 
 }
 
-export const RosterPIIColumns = {
-  edipi: false,
-  firstName: true,
-  lastName: true,
-  unit: false,
-  billetWorkcenter: false,
-  contractNumber: false,
-  rateRank: false,
-  pilot: false,
-  aircrew: false,
-  cdi: false,
-  cdqar: false,
-  dscacrew: false,
-  advancedParty: false,
-  pui: false,
-  covid19TestReturnDate: false,
-  rom: false,
-  romRelease: false,
-  lastReported: false,
+enum ColumnType {
+  String = 'string',
+  Boolean = 'boolean',
+  Date = 'date',
+  Number = 'number',
+}
+
+interface ColumnInfo {
+  displayName: string,
+  type: ColumnType,
+  pii: boolean,
+  phi: boolean,
+  required: boolean,
+}
+
+interface ColumnInfoDictionary {
+  [Key: string]: ColumnInfo;
+}
+
+export const RosterColumnInfo: ColumnInfoDictionary = {
+  edipi: {
+    displayName: 'EDIPI',
+    type: ColumnType.String,
+    pii: false,
+    phi: false,
+    required: true,
+  },
+  firstName: {
+    displayName: 'First Name',
+    type: ColumnType.String,
+    pii: true,
+    phi: false,
+    required: true,
+  },
+  lastName: {
+    displayName: 'Last Name',
+    type: ColumnType.String,
+    pii: true,
+    phi: false,
+    required: true,
+  },
+  unit: {
+    displayName: 'Unit',
+    type: ColumnType.String,
+    pii: false,
+    phi: false,
+    required: true,
+  },
+  billetWorkcenter: {
+    displayName: 'Billet Workcenter',
+    type: ColumnType.String,
+    pii: false,
+    phi: false,
+    required: true,
+  },
+  contractNumber: {
+    displayName: 'Contract Number',
+    type: ColumnType.String,
+    pii: false,
+    phi: false,
+    required: true,
+  },
+  rateRank: {
+    displayName: 'Rate/Rank',
+    type: ColumnType.String,
+    pii: false,
+    phi: false,
+    required: false,
+  },
+  pilot: {
+    displayName: 'Pilot',
+    type: ColumnType.Boolean,
+    pii: false,
+    phi: false,
+    required: false,
+  },
+  aircrew: {
+    displayName: 'Aircrew',
+    type: ColumnType.Boolean,
+    pii: false,
+    phi: false,
+    required: false,
+  },
+  cdi: {
+    displayName: 'CDI',
+    type: ColumnType.Boolean,
+    pii: false,
+    phi: false,
+    required: false,
+  },
+  cdqar: {
+    displayName: 'CDQAR',
+    type: ColumnType.Boolean,
+    pii: false,
+    phi: false,
+    required: false,
+  },
+  dscacrew: {
+    displayName: 'DSCA Crew',
+    type: ColumnType.Boolean,
+    pii: false,
+    phi: false,
+    required: false,
+  },
+  advancedParty: {
+    displayName: 'Advanced Party',
+    type: ColumnType.Boolean,
+    pii: false,
+    phi: false,
+    required: false,
+  },
+  pui: {
+    displayName: 'PUI',
+    type: ColumnType.Boolean,
+    pii: false,
+    phi: false,
+    required: false,
+  },
+  covid19TestReturnDate: {
+    displayName: 'COVID 19 Test Return Date',
+    type: ColumnType.Date,
+    pii: false,
+    phi: false,
+    required: false,
+  },
+  rom: {
+    displayName: 'ROM',
+    type: ColumnType.String,
+    pii: false,
+    phi: false,
+    required: false,
+  },
+  romRelease: {
+    displayName: 'ROM Release',
+    type: ColumnType.String,
+    pii: false,
+    phi: false,
+    required: false,
+  },
+  lastReported: {
+    displayName: 'Last Reported',
+    type: ColumnType.Date,
+    pii: false,
+    phi: false,
+    required: false,
+  },
 };

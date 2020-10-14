@@ -3,7 +3,7 @@ import { getConnection } from 'typeorm';
 import { ApiRequest, OrgParam, OrgRoleParams } from '../index';
 import { Role } from './role.model';
 import { BadRequestError, NotFoundError } from '../../util/error-types';
-import { RosterPIIColumns } from '../roster/roster.model';
+import { RosterColumnInfo } from '../roster/roster.model';
 import { Workspace } from '../workspace/workspace.model';
 
 class RoleController {
@@ -165,7 +165,7 @@ async function setRoleFromBody(orgId: number, role: Role, body: RoleBody) {
   if (body.allowedRosterColumns != null) {
     if (!(body.allowedRosterColumns.length === 1 && body.allowedRosterColumns[0] === '*')) {
       for (const column of body.allowedRosterColumns) {
-        if (!RosterPIIColumns.hasOwnProperty(column)) {
+        if (!RosterColumnInfo.hasOwnProperty(column)) {
           throw new BadRequestError(`Unknown roster column: ${column}`);
         }
       }

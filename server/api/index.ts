@@ -37,7 +37,7 @@ export type RoleParam = {
 };
 
 export type EdipiParam = {
-  userEDIPI: string
+  edipi: string
 };
 
 export type WorkspaceParam = {

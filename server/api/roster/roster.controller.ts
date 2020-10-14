@@ -1,10 +1,14 @@
 import { Response } from 'express';
 import csv from 'csvtojson';
 import fs from 'fs';
-import { ApiRequest, OrgEdipiParams, OrgParam } from '../index';
-import { Roster } from './roster.model';
+import { ColumnType } from 'typeorm';
+import {
+  ApiRequest, EdipiParam, OrgEdipiParams, OrgParam,
+} from '../index';
+import { Roster, RosterColumnInfo } from './roster.model';
 import { BadRequestError, NotFoundError, UnprocessableEntity } from '../../util/error-types';
 import { getOptionalParam, getRequiredParam } from '../../util/util';
+import { Org } from '../org/org.model';
 
 class RosterController {
 
@@ -14,10 +18,6 @@ class RosterController {
   }
 
   async getRoster(req: ApiRequest<OrgParam, any, GetRosterQuery>, res: Response) {
-    if (!req.appOrg) {
-      throw new NotFoundError('Organization was not found.');
-    }
-
     const limit = (req.query.limit != null) ? parseInt(req.query.limit) : 100;
     const page = (req.query.page != null) ? parseInt(req.query.page) : 0;
 
@@ -25,7 +25,7 @@ class RosterController {
       skip: page * limit,
       take: limit,
       where: {
-        org: req.appOrg.id,
+        org: req.appOrg!.id,
       },
       order: {
         edipi: 'ASC',
@@ -36,13 +36,9 @@ class RosterController {
   }
 
   async getRosterCount(req: ApiRequest<OrgParam>, res: Response) {
-    if (!req.appOrg) {
-      throw new NotFoundError('Organization was not found.');
-    }
-
     const count = await Roster.count({
       where: {
-        org: req.appOrg.id,
+        org: req.appOrg!.id,
       },
     });
 
@@ -50,11 +46,7 @@ class RosterController {
   }
 
   async uploadRosterEntries(req: ApiRequest<OrgParam>, res: Response) {
-    if (!req.appOrg) {
-      throw new NotFoundError('Organization was not found.');
-    }
-
-    const org = req.appOrg;
+    const org = req.appOrg!;
 
     if (!req.file || !req.file.path) {
       throw new BadRequestError('No file to process.');
@@ -96,31 +88,51 @@ class RosterController {
     });
   }
 
-  async addRosterEntry(req: ApiRequest<OrgParam, RosterEntryData>, res: Response) {
-    if (!req.appOrg) {
-      throw new NotFoundError('Organization was not found.');
-    }
+  async getRosterInfo(req: ApiRequest<OrgParam>, res: Response) {
+    const columns = mapBaseRosterInfoColumns(undefined);
+    res.json({
+      columns,
+    });
+  }
 
+  async getRosterInfosForIndividual(req: ApiRequest<EdipiParam>, res: Response) {
+    const entries = await Roster.find({
+      relations: ['org'],
+      where: {
+        edipi: req.params.edipi,
+      },
+    });
+
+    const responseData = entries.map(roster => {
+      const columns = mapBaseRosterInfoColumns(roster);
+      const rosterInfo :RosterInfo = {
+        org: roster.org!,
+        columns,
+      };
+      return rosterInfo;
+    });
+    res.json({
+      rosters: responseData,
+    });
+  }
+
+  async addRosterEntry(req: ApiRequest<OrgParam, RosterEntryData>, res: Response) {
     const entry = new Roster();
     entry.edipi = getRequiredParam('edipi', req.body);
     entry.org = req.appOrg;
     setRosterParamsFromBody(entry, req.body);
     const newRosterEntry = await entry.save();
 
-    await res.status(201).json(newRosterEntry);
+    res.status(201).json(newRosterEntry);
   }
 
   async getRosterEntry(req: ApiRequest<OrgEdipiParams>, res: Response) {
-    if (!req.appOrg) {
-      throw new NotFoundError('Organization was not found.');
-    }
-
-    const userEDIPI = req.params.userEDIPI;
+    const userEDIPI = req.params.edipi;
 
     const rosterEntry = await Roster.findOne({
       where: {
         edipi: userEDIPI,
-        org: req.appOrg.id,
+        org: req.appOrg!.id,
       },
     });
 
@@ -132,16 +144,12 @@ class RosterController {
   }
 
   async deleteRosterEntry(req: ApiRequest<OrgEdipiParams>, res: Response) {
-    if (!req.appOrg) {
-      throw new NotFoundError('Organization was not found.');
-    }
-
-    const userEDIPI = req.params.userEDIPI;
+    const userEDIPI = req.params.edipi;
 
     const rosterEntry = await Roster.findOne({
       where: {
         edipi: userEDIPI,
-        org: req.appOrg.id,
+        org: req.appOrg!.id,
       },
     });
 
@@ -155,16 +163,12 @@ class RosterController {
   }
 
   async updateRosterEntry(req: ApiRequest<OrgEdipiParams, RosterEntryData>, res: Response) {
-    if (!req.appOrg) {
-      throw new NotFoundError('Organization was not found.');
-    }
-
-    const userEDIPI = req.params.userEDIPI;
+    const userEDIPI = req.params.edipi;
 
     const entry = await Roster.findOne({
       where: {
         edipi: userEDIPI,
-        org: req.appOrg.id,
+        org: req.appOrg!.id,
       },
     });
 
@@ -178,6 +182,23 @@ class RosterController {
     res.json(updatedRosterEntry);
   }
 
+}
+
+function mapBaseRosterInfoColumns(roster: Roster | undefined) {
+  return Object.keys(RosterColumnInfo).map(column => {
+    const columnInfo = RosterColumnInfo[column];
+    const responseColumnInfo : RosterInfoColumn = {
+      displayName: columnInfo.displayName,
+      name: column,
+      pii: columnInfo.pii,
+      phi: columnInfo.phi,
+      required: columnInfo.required,
+      type: columnInfo.type,
+      value: roster ? Reflect.get(roster, column) : undefined,
+    };
+
+    return responseColumnInfo;
+  });
 }
 
 function setRosterParamsFromBody(entry: Roster, body: RosterEntryData) {
@@ -204,6 +225,21 @@ function setRosterParamsFromBody(entry: Roster, body: RosterEntryData) {
   if (lastReported) {
     entry.lastReported = new Date(lastReported);
   }
+}
+
+interface RosterInfoColumn {
+  name: string,
+  displayName: string,
+  pii: boolean,
+  phi: boolean,
+  required: boolean,
+  type: ColumnType,
+  value?: string,
+}
+
+interface RosterInfo {
+  org: Org,
+  columns: RosterInfoColumn[],
 }
 
 type GetRosterQuery = {

@@ -2,13 +2,13 @@ import { Request, Response, NextFunction } from 'express';
 import { ApiRequest } from '../api';
 import { User } from '../api/user/user.model';
 import { Role } from '../api/role/role.model';
-import { Workspace } from '../api/workspace/workspace.model';
 import {
   BadRequestError, ForbiddenError, NotFoundError, UnauthorizedError,
 } from '../util/error-types';
 import { Org } from '../api/org/org.model';
 
 const sslHeader = 'ssl-client-subject-dn';
+const internalAccessHeader = 'status-engine-internal-access-key';
 
 export async function requireUserAuth(req: AuthRequest, res: Response, next: NextFunction) {
   let id: string | undefined;
@@ -19,6 +19,9 @@ export async function requireUserAuth(req: AuthRequest, res: Response, next: Nex
     if (commonName && commonName.length > 0) {
       id = commonName[0].substr(commonName[0].lastIndexOf('.') + 1, commonName[0].length);
     }
+  } else if (req.header(internalAccessHeader)
+    && process.env.INTERNAL_ACCESS_KEY === req.header(internalAccessHeader)) {
+    id = 'internal';
   } else if (process.env.NODE_ENV === 'development') {
     id = process.env.USER_EDIPI;
   }
@@ -27,12 +30,17 @@ export async function requireUserAuth(req: AuthRequest, res: Response, next: Nex
     throw new UnauthorizedError('Client not authorized.', true);
   }
 
-  let user = await User.findOne({
-    relations: ['roles', 'roles.org', 'roles.workspace', 'roles.org.contact'],
-    where: {
-      edipi: id,
-    },
-  });
+  let user: User | undefined;
+  if (id === 'internal') {
+    user = User.internal();
+  } else {
+    user = await User.findOne({
+      relations: ['roles', 'roles.org', 'roles.workspace', 'roles.org.contact'],
+      where: {
+        edipi: id,
+      },
+    });
+  }
 
   if (!user) {
     user = new User();
@@ -46,6 +54,13 @@ export async function requireUserAuth(req: AuthRequest, res: Response, next: Nex
   req.appUser = user;
 
   next();
+}
+
+export async function requireInternalUser(req: ApiRequest, res: Response, next: NextFunction) {
+  if (req.appUser.isInternal()) {
+    return next();
+  }
+  throw new ForbiddenError('User does not have sufficient privileges to perform this action.');
 }
 
 export async function requireRegisteredUser(req: ApiRequest, res: Response, next: NextFunction) {

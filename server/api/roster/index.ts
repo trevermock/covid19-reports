@@ -2,7 +2,7 @@ import express from 'express';
 import multer from 'multer';
 import path from 'path';
 import controller from './roster.controller';
-import { requireOrgAccess, requireRolePermission } from '../../auth';
+import { requireInternalUser, requireOrgAccess, requireRolePermission } from '../../auth';
 
 const rosterUpload = multer({
   storage: multer.diskStorage({
@@ -20,10 +20,23 @@ const rosterUpload = multer({
 const router = express.Router() as any;
 
 router.get(
+  '/info/:edipi',
+  requireInternalUser,
+  controller.getRosterInfosForIndividual,
+);
+
+router.get(
   '/:orgId/template',
   requireOrgAccess,
   requireRolePermission(role => role.canManageRoster),
   controller.getRosterTemplate,
+);
+
+router.get(
+  '/:orgId/info',
+  requireOrgAccess,
+  requireRolePermission(role => role.canManageRoster),
+  controller.getRosterInfo,
 );
 
 router.get(
@@ -56,21 +69,21 @@ router.post(
 );
 
 router.get(
-  '/:orgId/:rosterEDIPI',
+  '/:orgId/:edipi',
   requireOrgAccess,
   requireRolePermission(role => role.canManageRoster),
   controller.getRosterEntry,
 );
 
 router.delete(
-  '/:orgId/:rosterEDIPI',
+  '/:orgId/:edipi',
   requireOrgAccess,
   requireRolePermission(role => role.canManageRoster),
   controller.deleteRosterEntry,
 );
 
 router.put(
-  '/:orgId/:rosterEDIPI',
+  '/:orgId/:edipi',
   requireOrgAccess,
   requireRolePermission(role => role.canManageRoster),
   controller.updateRosterEntry,
