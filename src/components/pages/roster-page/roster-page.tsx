@@ -268,8 +268,7 @@ export const RosterPage = () => {
             Download CSV Template
           </Button>
 
-          {/* TODO: this should go through proxy, but that's currently not working for href's */}
-          <a href={`http://localhost:4000/api/roster/${orgId}/export`} download>
+          <a href={`api/roster/${orgId}/export`} download>
             <Button
               type="button"
               size="large"
