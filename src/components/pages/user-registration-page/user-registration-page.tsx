@@ -1,5 +1,5 @@
 import {
-  Button, Icon, MenuItem, Paper, TextField,
+  Icon, MenuItem, Paper, TextField,
 } from '@material-ui/core';
 import {
   AssignmentOutlined, DoneAll, FavoriteBorder, LocalHospital, Timeline,
@@ -11,11 +11,13 @@ import { UserState } from '../../../reducers/user.reducer';
 import { AppState } from '../../../store';
 import useStyles from './user-registration-page.styles';
 import services from '../../../data/services';
+import { ButtonWithSpinner } from '../../buttons/button-with-spinner';
 
 export const UserRegistrationPage = () => {
   const classes = useStyles();
   const dispatch = useDispatch();
   const user = useSelector<AppState, UserState>(state => state.user);
+  const [registerUserLoading, setRegisterUserLoading] = useState(false);
   const [inputData, setInputData] = useState<UserRegisterData>({
     firstName: '',
     lastName: '',
@@ -31,8 +33,10 @@ export const UserRegistrationPage = () => {
     });
   }
 
-  function handleCreateAccountClick() {
-    dispatch(User.register(inputData));
+  async function handleCreateAccountClick() {
+    setRegisterUserLoading(true);
+    await dispatch(User.register(inputData));
+    setRegisterUserLoading(false);
   }
 
   function isCreateAccountButtonDisabled() {
@@ -137,14 +141,15 @@ export const UserRegistrationPage = () => {
             </div>
           </form>
 
-          <Button
+          <ButtonWithSpinner
             className={classes.createAccountButton}
             size="large"
             onClick={handleCreateAccountClick}
             disabled={isCreateAccountButtonDisabled()}
+            loading={registerUserLoading}
           >
             Create Account
-          </Button>
+          </ButtonWithSpinner>
         </div>
       </Paper>
     </main>

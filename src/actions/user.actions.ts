@@ -34,6 +34,7 @@ export namespace User {
         userData: ApiUser
       }) {}
     }
+
   }
 
   export const login = () => async (dispatch: Dispatch<Actions.Login>) => {

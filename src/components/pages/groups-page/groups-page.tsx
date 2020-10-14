@@ -6,20 +6,23 @@ import { MailOutline, PersonAdd, MoreVert } from '@material-ui/icons';
 import { Alert } from '@material-ui/lab';
 import axios, { AxiosResponse } from 'axios';
 import React, { useEffect, useState } from 'react';
-import { useSelector } from 'react-redux';
+import { useDispatch, useSelector } from 'react-redux';
 import { UserState } from '../../../reducers/user.reducer';
 import { AppState } from '../../../store';
 import { StatusChip } from '../../status-chip/status-chip';
 import useStyles from './groups-page.styles';
 import { ApiAccessRequest, ApiOrg } from '../../../models/api-response';
+import { AppFrame } from '../../../actions/app-frame.actions';
+import { ButtonWithSpinner } from '../../buttons/button-with-spinner';
 
 export const GroupsPage = () => {
   const classes = useStyles();
   const user = useSelector<AppState, UserState>(state => state.user);
-  const [isLoading, setIsLoading] = useState(true);
+  const dispatch = useDispatch();
   const [isAlertVisible, setIsAlertVisible] = useState(!user.activeRole);
   const [isInfoCardVisible, setIsInfoCardVisible] = useState(true);
   const [accessRequests, setAccessRequests] = useState([] as ApiAccessRequest[]);
+  const [accessRequestsLoading, setAccessRequestsLoading] = useState({} as ({[orgId: number]: boolean}));
   const [allOrgs, setAllOrgs] = useState([] as ApiOrg[]);
   const [requestAccessOrgs, setRequestAccessOrgs] = useState([] as ApiOrg[]);
   const [myOrgMenuAnchor, setMyOrgMenuAnchor] = useState(null as HTMLElement | null);
@@ -39,7 +42,15 @@ export const GroupsPage = () => {
     requestAccess(org).then();
   }
 
+  function updateAccessRequestsLoading(org: ApiOrg, isLoading: boolean) {
+    setAccessRequestsLoading({
+      ...accessRequestsLoading,
+      [org.id]: isLoading,
+    });
+  }
+
   async function requestAccess(org: ApiOrg) {
+    updateAccessRequestsLoading(org, true);
     const response = await axios.post(`api/access-request/${org.id}`) as AxiosResponse<ApiAccessRequest>;
     const newRequest = response.data;
 
@@ -53,6 +64,7 @@ export const GroupsPage = () => {
     }
 
     setAccessRequests(accessRequestsUpdated);
+    updateAccessRequestsLoading(org, false);
   }
 
   async function cancelRequest(org: MyOrg) {
@@ -134,13 +146,16 @@ export const GroupsPage = () => {
   useEffect(() => {
     // Initial load.
     async function fetchData() {
+
+      dispatch(AppFrame.setPageLoading(true));
+
       await Promise.all([
         fetchAllOrgs(),
         fetchAccessRequests(),
       ]);
 
       // Finish loading.
-      setIsLoading(false);
+      dispatch(AppFrame.setPageLoading(false));
     }
 
     fetchData().then();
@@ -167,11 +182,6 @@ export const GroupsPage = () => {
         .sort((a, b) => a.name.localeCompare(b.name)),
     );
   }, [allOrgs, accessRequests, user]);
-
-  if (isLoading) {
-    // TODO: Show loading spinner.
-    return <>Loading...</>;
-  }
 
   const myOrgs = getMyOrgs();
 
@@ -343,13 +353,14 @@ export const GroupsPage = () => {
                       </TableCell>
                       <TableCell>{org.contact!.phone}</TableCell>
                       <TableCell>
-                        <Button
+                        <ButtonWithSpinner
                           variant="text"
                           startIcon={<PersonAdd />}
+                          loading={accessRequestsLoading[org.id]}
                           onClick={() => handleRequestAccessClick(org)}
                         >
                           Request Access
-                        </Button>
+                        </ButtonWithSpinner>
                       </TableCell>
                     </TableRow>
                   ))}
