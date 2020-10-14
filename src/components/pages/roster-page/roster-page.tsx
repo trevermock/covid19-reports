@@ -18,6 +18,8 @@ import useStyles from './roster-page.styles';
 import { UserState } from '../../../reducers/user.reducer';
 import { AppState } from '../../../store';
 import { ApiRosterEntry } from '../../../models/api-response';
+import { AlertDialog, AlertDialogProps } from '../../alert-dialog/alert-dialog';
+import { EditRosterEntryDialog, EditRosterEntryDialogProps } from './edit-roster-entry-dialog';
 
 interface CountResponse {
   count: number
@@ -92,9 +94,10 @@ export const RosterPage = () => {
   const [page, setPage] = useState(0);
   const [rosterSize, setRosterSize] = useState(0);
   const [rowsPerPage, setRowsPerPage] = useState(10);
-  const [alert, setAlert] = useState({ open: false, message: '', title: '' });
   const [selectedRosterEntry, setSelectedRosterEntry] = useState<ApiRosterEntry>();
+  const [alertDialogProps, setAlertDialogProps] = useState<AlertDialogProps>({ open: false });
   const [deleteRosterEntryDialogOpen, setDeleteRosterEntryDialogOpen] = useState(false);
+  const [editRosterEntryDialogProps, setEditRosterEntryDialogProps] = useState<EditRosterEntryDialogProps>({ open: false });
 
   const orgId = useSelector<AppState, UserState>(state => state.user).activeRole?.org?.id;
 
@@ -120,13 +123,19 @@ export const RosterPage = () => {
 
     dispatch(Roster.upload(e.target.files[0], async count => {
       if (count < 0) {
-        setAlert({
+        setAlertDialogProps({
           open: true,
-          message: 'An error occurred while uploading roster. Please verify the roster data.',
           title: 'Upload Error',
+          message: 'An error occurred while uploading roster. Please verify the roster data.',
+          onClose: () => { setAlertDialogProps({ open: false }); },
         });
       } else {
-        setAlert({ open: true, message: `Successfully uploaded ${count} roster entries.`, title: 'Upload Successful' });
+        setAlertDialogProps({
+          open: true,
+          title: 'Upload Successful',
+          message: `Successfully uploaded ${count} roster entries.`,
+          onClose: () => { setAlertDialogProps({ open: false }); },
+        });
         initializeTable();
       }
     }));
@@ -143,8 +152,44 @@ export const RosterPage = () => {
     setRowsPerPage(newRowsPerPage);
   };
 
-  const handleAlertClose = () => {
-    setAlert({ open: false, message: '', title: '' });
+  const editButtonClicked = async (rosterEntry: ApiRosterEntry) => {
+    setSelectedRosterEntry(rosterEntry);
+    setEditRosterEntryDialogProps({
+      open: true,
+      orgId,
+      rosterEntry,
+      onClose: async () => {
+        setEditRosterEntryDialogProps({ open: false });
+        await initializeTable();
+      },
+      onError: (message: string) => {
+        setAlertDialogProps({
+          open: true,
+          title: 'Edit Roster Entry',
+          message: `Unable to edit roster entry: ${message}`,
+          onClose: () => { setAlertDialogProps({ open: false }); },
+        });
+      },
+    });
+  };
+
+  const addButtonClicked = async () => {
+    setEditRosterEntryDialogProps({
+      open: true,
+      orgId,
+      onClose: async () => {
+        setEditRosterEntryDialogProps({ open: false });
+        await initializeTable();
+      },
+      onError: (message: string) => {
+        setAlertDialogProps({
+          open: true,
+          title: 'Add Roster Entry',
+          message: `Unable to add roster entry: ${message}`,
+          onClose: () => { setAlertDialogProps({ open: false }); },
+        });
+      },
+    });
   };
 
   function deleteButtonClicked(rosterEntry: ApiRosterEntry) {
@@ -213,6 +258,7 @@ export const RosterPage = () => {
             color="primary"
             size="large"
             startIcon={<AddCircleOutlineIcon />}
+            onClick={addButtonClicked}
           >
             Add
           </Button>
@@ -245,6 +291,7 @@ export const RosterPage = () => {
                     <Button
                       className={classes.editRosterEntryButton}
                       variant="outlined"
+                      onClick={() => editButtonClicked(row)}
                     >
                       <EditIcon />
                     </Button>
@@ -304,24 +351,12 @@ export const RosterPage = () => {
           </DialogActions>
         </Dialog>
       )}
-      <Dialog
-        open={alert.open}
-        onClose={handleAlertClose}
-        aria-labelledby="alert-dialog-title"
-        aria-describedby="alert-dialog-description"
-      >
-        <DialogTitle id="alert-dialog-title">{alert.title}</DialogTitle>
-        <DialogContent>
-          <DialogContentText id="alert-dialog-description">
-            {alert.message}
-          </DialogContentText>
-        </DialogContent>
-        <DialogActions>
-          <Button onClick={handleAlertClose} autoFocus>
-            OK
-          </Button>
-        </DialogActions>
-      </Dialog>
+      {editRosterEntryDialogProps.open && (
+        <EditRosterEntryDialog open={editRosterEntryDialogProps.open} orgId={editRosterEntryDialogProps.orgId} rosterEntry={selectedRosterEntry} onClose={editRosterEntryDialogProps.onClose} onError={editRosterEntryDialogProps.onError} />
+      )}
+      {alertDialogProps.open && (
+        <AlertDialog open={alertDialogProps.open} title={alertDialogProps.title} message={alertDialogProps.message} onClose={alertDialogProps.onClose} />
+      )}
     </main>
   );
 };
