@@ -200,6 +200,7 @@ export const RosterPage = () => {
   function deleteRosterEntry() {
     // TODO - delete request to remove entry and then handle row change
     console.log('DELETE');
+    setDeleteRosterEntryDialogOpen(false);
   }
 
   const cancelDeleteRosterEntryDialog = () => {
