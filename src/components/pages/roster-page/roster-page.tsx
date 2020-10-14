@@ -12,7 +12,9 @@ import AddCircleOutlineIcon from '@material-ui/icons/AddCircleOutline';
 import PublishIcon from '@material-ui/icons/Publish';
 import GetAppIcon from '@material-ui/icons/GetApp';
 import React, { ChangeEvent, useEffect, useState } from 'react';
+import axios from 'axios';
 import { useDispatch, useSelector } from 'react-redux';
+import { AppFrame } from '../../../actions/app-frame.actions';
 import { Roster } from '../../../actions/roster.actions';
 import useStyles from './roster-page.styles';
 import { UserState } from '../../../reducers/user.reducer';
@@ -108,12 +110,16 @@ export const RosterPage = () => {
     setRows(rosterResponse);
   };
 
-  function initializeTable() {
-    fetch(`api/roster/${orgId}/count`).then(async response => {
-      const countResponse = (await response.json()) as CountResponse;
-      setRosterSize(countResponse.count);
-      await handleChangePage(null, 0);
-    });
+  async function initializeTable() {
+
+    dispatch(AppFrame.setPageLoading(true));
+
+    const countData = (await axios.get(`api/roster/${orgId}/count`)).data as CountResponse;
+    setRosterSize(countData.count);
+    await handleChangePage(null, 0);
+
+    dispatch(AppFrame.setPageLoading(false));
+
   }
 
   function handleFileInputChange(e: ChangeEvent<HTMLInputElement>) {
@@ -208,7 +214,7 @@ export const RosterPage = () => {
     setSelectedRosterEntry(undefined);
   };
 
-  useEffect(initializeTable, []);
+  useEffect(() => { initializeTable().then(); }, []);
 
   return (
     <main className={classes.root}>
