@@ -11,6 +11,7 @@ import {
 import axios from 'axios';
 import useStyles from './edit-roster-entry-dialog.style';
 import { ApiRosterEntry } from '../../../models/api-response';
+import { ButtonWithSpinner } from '../../buttons/button-with-spinner';
 
 export interface EditRosterEntryDialogProps {
   open: boolean,
@@ -26,6 +27,8 @@ export const EditRosterEntryDialog = (props: EditRosterEntryDialogProps) => {
   const {
     open, orgId, rosterEntry, onClose, onError,
   } = props;
+
+  const [saveRosterEntryLoading, setSaveRosterEntryLoading] = useState(false);
 
   const existingRosterEntry: boolean = !!rosterEntry;
   const [firstName, setFirstName] = useState(rosterEntry?.firstName || '');
@@ -46,6 +49,7 @@ export const EditRosterEntryDialog = (props: EditRosterEntryDialogProps) => {
       lastName,
     };
     try {
+      setSaveRosterEntryLoading(true);
       if (existingRosterEntry) {
         await axios.put(`api/roster/${orgId}/${rosterEntry!.edipi}`, body);
       } else {
@@ -61,6 +65,8 @@ export const EditRosterEntryDialog = (props: EditRosterEntryDialogProps) => {
       }
       setFormDisabled(false);
       return;
+    } finally {
+      setSaveRosterEntryLoading(false);
     }
     if (onClose) {
       onClose();
@@ -105,9 +111,9 @@ export const EditRosterEntryDialog = (props: EditRosterEntryDialogProps) => {
         <Button disabled={formDisabled} variant="outlined" onClick={onClose} color="primary">
           Cancel
         </Button>
-        <Button disabled={!canSave()} onClick={onSave} color="primary">
+        <ButtonWithSpinner disabled={!canSave()} onClick={onSave} color="primary" loading={saveRosterEntryLoading}>
           Save
-        </Button>
+        </ButtonWithSpinner>
       </DialogActions>
     </Dialog>
   );

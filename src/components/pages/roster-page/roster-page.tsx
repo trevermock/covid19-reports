@@ -22,6 +22,7 @@ import { AppState } from '../../../store';
 import { ApiRosterEntry } from '../../../models/api-response';
 import { AlertDialog, AlertDialogProps } from '../../alert-dialog/alert-dialog';
 import { EditRosterEntryDialog, EditRosterEntryDialogProps } from './edit-roster-entry-dialog';
+import { ButtonWithSpinner } from '../../buttons/button-with-spinner';
 
 interface CountResponse {
   count: number
@@ -100,6 +101,7 @@ export const RosterPage = () => {
   const [alertDialogProps, setAlertDialogProps] = useState<AlertDialogProps>({ open: false });
   const [deleteRosterEntryDialogOpen, setDeleteRosterEntryDialogOpen] = useState(false);
   const [editRosterEntryDialogProps, setEditRosterEntryDialogProps] = useState<EditRosterEntryDialogProps>({ open: false });
+  const [deleteRosterEntryLoading, setDeleteRosterEntryLoading] = useState(false);
 
   const orgId = useSelector<AppState, UserState>(state => state.user).activeRole?.org?.id;
 
@@ -207,6 +209,7 @@ export const RosterPage = () => {
 
   const deleteRosterEntry = async () => {
     try {
+      setDeleteRosterEntryLoading(true);
       await axios.delete(`api/roster/${orgId}/${selectedRosterEntry!.edipi}`);
     } catch (error) {
       let message = 'Internal Server Error';
@@ -219,9 +222,11 @@ export const RosterPage = () => {
         message: `Unable to delete roster entry: ${message}`,
         onClose: () => { setAlertDialogProps({ open: false }); },
       });
+    } finally {
+      setDeleteRosterEntryLoading(false);
+      setDeleteRosterEntryDialogOpen(false);
+      await initializeTable();
     }
-    setDeleteRosterEntryDialogOpen(false);
-    await initializeTable();
   };
 
   const cancelDeleteRosterEntryDialog = () => {
@@ -364,9 +369,9 @@ export const RosterPage = () => {
             </DialogContentText>
           </DialogContent>
           <DialogActions>
-            <Button onClick={deleteRosterEntry}>
+            <ButtonWithSpinner onClick={deleteRosterEntry} loading={deleteRosterEntryLoading}>
               Yes
-            </Button>
+            </ButtonWithSpinner>
             <Button onClick={cancelDeleteRosterEntryDialog}>
               No
             </Button>
