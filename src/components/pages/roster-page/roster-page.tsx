@@ -93,6 +93,8 @@ export const RosterPage = () => {
   const [rosterSize, setRosterSize] = useState(0);
   const [rowsPerPage, setRowsPerPage] = useState(10);
   const [alert, setAlert] = useState({ open: false, message: '', title: '' });
+  const [selectedRosterEntry, setSelectedRosterEntry] = useState<ApiRosterEntry>();
+  const [deleteRosterEntryDialogOpen, setDeleteRosterEntryDialogOpen] = useState(false);
 
   const orgId = useSelector<AppState, UserState>(state => state.user).activeRole?.org?.id;
 
@@ -143,6 +145,21 @@ export const RosterPage = () => {
 
   const handleAlertClose = () => {
     setAlert({ open: false, message: '', title: '' });
+  };
+
+  function deleteButtonClicked(rosterEntry: ApiRosterEntry) {
+    setSelectedRosterEntry(rosterEntry);
+    setDeleteRosterEntryDialogOpen(true);
+  }
+
+  function deleteRosterEntry() {
+    // TODO - delete request to remove entry and then handle row change
+    console.log('DELETE');
+  }
+
+  const cancelDeleteRosterEntryDialog = () => {
+    setDeleteRosterEntryDialogOpen(false);
+    setSelectedRosterEntry(undefined);
   };
 
   useEffect(initializeTable, []);
@@ -234,6 +251,7 @@ export const RosterPage = () => {
                     <Button
                       className={classes.deleteRosterEntryButton}
                       variant="outlined"
+                      onClick={() => deleteButtonClicked(row)}
                     >
                       <DeleteIcon />
                     </Button>
@@ -262,6 +280,30 @@ export const RosterPage = () => {
           </Table>
         </TableContainer>
       </Container>
+      {deleteRosterEntryDialogOpen && (
+        <Dialog
+          open={deleteRosterEntryDialogOpen}
+          onClose={cancelDeleteRosterEntryDialog}
+          aria-labelledby="alert-dialog-title"
+          aria-describedby="alert-dialog-description"
+        >
+          <DialogTitle id="alert-dialog-title">Remove User</DialogTitle>
+          <DialogContent>
+            <DialogContentText id="alert-dialog-description">
+              {`Are you sure you want to remove '${selectedRosterEntry?.firstName} ${selectedRosterEntry?.lastName}' 
+                (EPIDI: ${selectedRosterEntry?.edipi}) from this roster?`}
+            </DialogContentText>
+          </DialogContent>
+          <DialogActions>
+            <Button onClick={deleteRosterEntry}>
+              Yes
+            </Button>
+            <Button onClick={cancelDeleteRosterEntryDialog}>
+              No
+            </Button>
+          </DialogActions>
+        </Dialog>
+      )}
       <Dialog
         open={alert.open}
         onClose={handleAlertClose}
