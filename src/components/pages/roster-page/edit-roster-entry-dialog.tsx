@@ -47,12 +47,9 @@ export const EditRosterEntryDialog = (props: EditRosterEntryDialogProps) => {
     };
     try {
       if (existingRosterEntry) {
-        console.log('UPDATE');
-        // await axios.put(`api/role/${orgId}/${rosterEntry!.edipi}`, body);
+        await axios.put(`api/roster/${orgId}/${rosterEntry!.edipi}`, body);
       } else {
-        console.log('ADD');
-        console.log(body);
-        // await axios.post(`api/role/${orgId}`, body);
+        await axios.post(`api/roster/${orgId}`, body);
       }
     } catch (error) {
       if (onError) {

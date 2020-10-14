@@ -166,6 +166,7 @@ export const RosterPage = () => {
       rosterEntry,
       onClose: async () => {
         setEditRosterEntryDialogProps({ open: false });
+        setSelectedRosterEntry(undefined);
         await initializeTable();
       },
       onError: (message: string) => {
@@ -185,6 +186,7 @@ export const RosterPage = () => {
       orgId,
       onClose: async () => {
         setEditRosterEntryDialogProps({ open: false });
+        setSelectedRosterEntry(undefined);
         await initializeTable();
       },
       onError: (message: string) => {
@@ -203,11 +205,24 @@ export const RosterPage = () => {
     setDeleteRosterEntryDialogOpen(true);
   }
 
-  function deleteRosterEntry() {
-    // TODO - delete request to remove entry and then handle row change
-    console.log('DELETE');
+  const deleteRosterEntry = async () => {
+    try {
+      await axios.delete(`api/roster/${orgId}/${selectedRosterEntry!.edipi}`);
+    } catch (error) {
+      let message = 'Internal Server Error';
+      if (error.response?.data?.errors && error.response.data.errors.length > 0) {
+        message = error.response.data.errors[0].message;
+      }
+      setAlertDialogProps({
+        open: true,
+        title: 'Delete Roster Entry',
+        message: `Unable to delete roster entry: ${message}`,
+        onClose: () => { setAlertDialogProps({ open: false }); },
+      });
+    }
     setDeleteRosterEntryDialogOpen(false);
-  }
+    await initializeTable();
+  };
 
   const cancelDeleteRosterEntryDialog = () => {
     setDeleteRosterEntryDialogOpen(false);
