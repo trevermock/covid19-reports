@@ -15,4 +15,21 @@ export default makeStyles((theme: Theme) => createStyles({
   contentSidenavCollapsed: {
     marginLeft: sidenavWidthCollapsed,
   },
+  contentFaded: {
+    opacity: 0.15,
+  },
+  fixedContentCenteredSidenavExpanded: {
+    paddingLeft: sidenavWidthExpanded / 2,
+    paddingRight: sidenavWidthExpanded / 2,
+    position: 'fixed',
+    top: '50%',
+    left: '50%',
+  },
+  fixedContentCenteredSidenavCollapsed: {
+    paddingLeft: sidenavWidthCollapsed / 2,
+    paddingRight: sidenavWidthCollapsed / 2,
+    position: 'fixed',
+    top: '50%',
+    left: '50%',
+  },
 }));
