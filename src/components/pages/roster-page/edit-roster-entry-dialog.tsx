@@ -10,12 +10,13 @@ import {
 } from '@material-ui/core';
 import axios from 'axios';
 import useStyles from './edit-roster-entry-dialog.style';
-import { ApiRosterEntry } from '../../../models/api-response';
+import { ApiRosterEntry, ApiRosterColumnInfo } from '../../../models/api-response';
 import { ButtonWithSpinner } from '../../buttons/button-with-spinner';
 
 export interface EditRosterEntryDialogProps {
   open: boolean,
   orgId?: number,
+  rosterColumnInfos?: ApiRosterColumnInfo[],
   rosterEntry?: ApiRosterEntry,
   onClose?: () => void,
   onError?: (error: string) => void,
@@ -25,7 +26,7 @@ export const EditRosterEntryDialog = (props: EditRosterEntryDialogProps) => {
   const classes = useStyles();
   const [formDisabled, setFormDisabled] = useState(false);
   const {
-    open, orgId, rosterEntry, onClose, onError,
+    open, orgId, rosterColumnInfos, rosterEntry, onClose, onError,
   } = props;
 
   const [saveRosterEntryLoading, setSaveRosterEntryLoading] = useState(false);
@@ -105,6 +106,11 @@ export const EditRosterEntryDialog = (props: EditRosterEntryDialogProps) => {
               onChange={onInputChanged(setLastName)}
             />
           </Grid>
+          {rosterColumnInfos!.map(columnInfo => (
+            <div key={columnInfo.displayName}>
+              {columnInfo.displayName}
+            </div>
+          ))}
         </Grid>
       </DialogContent>
       <DialogActions className={classes.editRosterEntryDialogActions}>

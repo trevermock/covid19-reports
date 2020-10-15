@@ -64,6 +64,15 @@ export interface ApiRosterEntry {
   lastReported?: Date,
 }
 
+export interface ApiRosterColumnInfo {
+  displayName: string;
+  name: string;
+  phi: boolean;
+  pii: boolean;
+  required: boolean;
+  type: string;
+}
+
 export interface ApiWorkspaceTemplate {
   id: number,
   name: string,

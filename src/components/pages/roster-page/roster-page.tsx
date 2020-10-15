@@ -19,7 +19,7 @@ import { Roster } from '../../../actions/roster.actions';
 import useStyles from './roster-page.styles';
 import { UserState } from '../../../reducers/user.reducer';
 import { AppState } from '../../../store';
-import { ApiRosterEntry } from '../../../models/api-response';
+import { ApiRosterEntry, ApiRosterColumnInfo } from '../../../models/api-response';
 import { AlertDialog, AlertDialogProps } from '../../alert-dialog/alert-dialog';
 import { EditRosterEntryDialog, EditRosterEntryDialogProps } from './edit-roster-entry-dialog';
 import { ButtonWithSpinner } from '../../buttons/button-with-spinner';
@@ -102,6 +102,7 @@ export const RosterPage = () => {
   const [deleteRosterEntryDialogOpen, setDeleteRosterEntryDialogOpen] = useState(false);
   const [editRosterEntryDialogProps, setEditRosterEntryDialogProps] = useState<EditRosterEntryDialogProps>({ open: false });
   const [deleteRosterEntryLoading, setDeleteRosterEntryLoading] = useState(false);
+  const [rosterColumnInfos, setRosterColumnInfos] = useState<ApiRosterColumnInfo[]>([]);
 
   const orgId = useSelector<AppState, UserState>(state => state.user).activeRole?.org?.id;
 
@@ -112,9 +113,11 @@ export const RosterPage = () => {
     setRows(rosterResponse);
   };
 
-  async function initializeTable() {
+  const initializeTable = React.useCallback(async () => {
 
     dispatch(AppFrame.setPageLoading(true));
+
+    initializeRosterColumnInfo();
 
     const countData = (await axios.get(`api/roster/${orgId}/count`)).data as CountResponse;
     setRosterSize(countData.count);
@@ -122,6 +125,24 @@ export const RosterPage = () => {
 
     dispatch(AppFrame.setPageLoading(false));
 
+  }, [orgId]);
+
+  async function initializeRosterColumnInfo() {
+    try {
+      const infos = (await axios.get(`api/roster/${orgId}/info`)).data.columns as ApiRosterColumnInfo[];
+      setRosterColumnInfos(infos);
+    } catch (error) {
+      let message = 'Internal Server Error';
+      if (error.response?.data?.errors && error.response.data.errors.length > 0) {
+        message = error.response.data.errors[0].message;
+      }
+      setAlertDialogProps({
+        open: true,
+        title: 'Get Roster Column Info',
+        message: `Failed to get roster column info: ${message}`,
+        onClose: () => { setAlertDialogProps({ open: false }); },
+      });
+    }
   }
 
   function handleFileInputChange(e: ChangeEvent<HTMLInputElement>) {
@@ -165,6 +186,7 @@ export const RosterPage = () => {
     setEditRosterEntryDialogProps({
       open: true,
       orgId,
+      rosterColumnInfos,
       rosterEntry,
       onClose: async () => {
         setEditRosterEntryDialogProps({ open: false });
@@ -186,6 +208,7 @@ export const RosterPage = () => {
     setEditRosterEntryDialogProps({
       open: true,
       orgId,
+      rosterColumnInfos,
       onClose: async () => {
         setEditRosterEntryDialogProps({ open: false });
         setSelectedRosterEntry(undefined);
@@ -234,7 +257,7 @@ export const RosterPage = () => {
     setSelectedRosterEntry(undefined);
   };
 
-  useEffect(() => { initializeTable().then(); }, []);
+  useEffect(() => { initializeTable().then(); }, [initializeTable]);
 
   return (
     <main className={classes.root}>
@@ -378,7 +401,7 @@ export const RosterPage = () => {
         </Dialog>
       )}
       {editRosterEntryDialogProps.open && (
-        <EditRosterEntryDialog open={editRosterEntryDialogProps.open} orgId={editRosterEntryDialogProps.orgId} rosterEntry={selectedRosterEntry} onClose={editRosterEntryDialogProps.onClose} onError={editRosterEntryDialogProps.onError} />
+        <EditRosterEntryDialog open={editRosterEntryDialogProps.open} orgId={editRosterEntryDialogProps.orgId} rosterColumnInfos={rosterColumnInfos} rosterEntry={selectedRosterEntry} onClose={editRosterEntryDialogProps.onClose} onError={editRosterEntryDialogProps.onError} />
       )}
       {alertDialogProps.open && (
         <AlertDialog open={alertDialogProps.open} title={alertDialogProps.title} message={alertDialogProps.message} onClose={alertDialogProps.onClose} />
