@@ -6,7 +6,9 @@ import {
   DialogContent,
   DialogTitle,
   Grid,
-  TextField, Typography,
+  TextField,
+  Checkbox,
+  Typography,
 } from '@material-ui/core';
 import axios from 'axios';
 import useStyles from './edit-roster-entry-dialog.style';
@@ -78,6 +80,42 @@ export const EditRosterEntryDialog = (props: EditRosterEntryDialogProps) => {
     return !formDisabled && firstName.length > 0 && lastName.length > 0;
   };
 
+  const getFieldForColumnType = (columnInfo: ApiRosterColumnInfo) => {
+    switch (columnInfo.type) {
+      case 'string':
+        return (
+          <TextField
+            className={classes.textField}
+            id={columnInfo.name}
+            // TODO - disabled also if updatable is false
+            disabled={formDisabled}
+            value={lastName}
+            onChange={onInputChanged(setLastName)}
+          />
+        );
+      case 'boolean':
+        return (
+          <Checkbox
+            defaultChecked={false}
+          />
+        );
+      case 'date':
+        return (
+          <TextField
+            id={columnInfo.name}
+            type="date"
+            value="2017-05-24"
+            className={classes.textField}
+            InputLabelProps={{
+              shrink: true,
+            }}
+          />
+        );
+      default:
+        return '';
+    }
+  };
+
   return (
     <Dialog className={classes.root} maxWidth="md" onClose={onClose} open={open}>
       <DialogTitle id="alert-dialog-title">{existingRosterEntry ? 'Edit Roster Entry' : 'New Roster Entry'}</DialogTitle>
@@ -86,30 +124,11 @@ export const EditRosterEntryDialog = (props: EditRosterEntryDialogProps) => {
           {existingRosterEntry ? `EDIPI: ${rosterEntry?.edipi}` : ''}
         </div>
         <Grid container spacing={3}>
-          <Grid item xs={6}>
-            <Typography className={classes.editRosterEntryHeader}>First Name:</Typography>
-            <TextField
-              className={classes.textField}
-              id="first-name"
-              disabled={formDisabled}
-              value={firstName}
-              onChange={onInputChanged(setFirstName)}
-            />
-          </Grid>
-          <Grid item xs={6}>
-            <Typography className={classes.editRosterEntryHeader}>Last Name:</Typography>
-            <TextField
-              className={classes.textField}
-              id="last-name"
-              disabled={formDisabled}
-              value={lastName}
-              onChange={onInputChanged(setLastName)}
-            />
-          </Grid>
           {rosterColumnInfos!.map(columnInfo => (
-            <div key={columnInfo.displayName}>
-              {columnInfo.displayName}
-            </div>
+            <Grid key={columnInfo.displayName} item xs={6}>
+              <Typography className={classes.editRosterEntryHeader}>{columnInfo.displayName}</Typography>
+              {getFieldForColumnType(columnInfo)}
+            </Grid>
           ))}
         </Grid>
       </DialogContent>
