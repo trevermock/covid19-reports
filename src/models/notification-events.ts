@@ -1,7 +1,11 @@
-export class AllowedNotificationEvents {
-  accessRequest: boolean = false;
+export interface NotificationEvent {
+  name: string,
+  displayName: string,
 }
 
-export const NotificationEventDisplayName = {
-  accessRequest: 'Access Requests',
-};
+export const AllNotificationEvents: NotificationEvent[] = [
+  {
+    name: 'accessRequest',
+    displayName: 'Access Requests',
+  },
+];

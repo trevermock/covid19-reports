@@ -11,16 +11,20 @@ import {
 } from '@material-ui/core';
 import axios from 'axios';
 import useStyles from './edit-role-dialog.styles';
-import { ApiRole, ApiWorkspace } from '../../../models/api-response';
-import { AllowedRosterColumns, RosterColumnDisplayName, RosterPIIColumns } from '../../../models/roster-columns';
-import { AllowedNotificationEvents, NotificationEventDisplayName } from '../../../models/notification-events';
-import { parsePermissions, permissionsToArray, setAllPermissions } from '../../../utility/permission-set';
+import { ApiRole, ApiRosterColumnInfo, ApiWorkspace } from '../../../models/api-response';
+import {
+  AllNotificationEvents,
+} from '../../../models/notification-events';
+import {
+  RolePermissions, parsePermissions, permissionsToArray,
+} from '../../../utility/permission-set';
 import { ButtonWithSpinner } from '../../buttons/button-with-spinner';
 
 export interface EditRoleDialogProps {
   open: boolean,
   orgId?: number,
   role?: ApiRole,
+  rosterColumns?: ApiRosterColumnInfo[],
   workspaces?: ApiWorkspace[],
   onClose?: () => void,
   onError?: (error: string) => void,
@@ -31,7 +35,7 @@ export const EditRoleDialog = (props: EditRoleDialogProps) => {
 
   const [formDisabled, setFormDisabled] = useState(false);
   const {
-    open, orgId, role, workspaces, onClose, onError,
+    open, orgId, role, workspaces, rosterColumns, onClose, onError,
   } = props;
 
   const existingRole: boolean = !!role;
@@ -39,14 +43,15 @@ export const EditRoleDialog = (props: EditRoleDialogProps) => {
   const [description, setDescription] = useState(role?.description || '');
   const [indexPrefix, setIndexPrefix] = useState(role?.indexPrefix || '');
   const [workspaceId, setWorkspaceId] = useState(role?.workspace?.id || -1);
-  const [allowedRosterColumns, setAllowedRosterColumns] = useState(parsePermissions(new AllowedRosterColumns(), role?.allowedRosterColumns));
-  const [allowedNotificationEvents, setAllowedNotificationEvents] = useState(parsePermissions(new AllowedNotificationEvents(), role?.allowedNotificationEvents));
+  const [allowedRosterColumns, setAllowedRosterColumns] = useState(parsePermissions(rosterColumns || [], role?.allowedRosterColumns));
+  const [allowedNotificationEvents, setAllowedNotificationEvents] = useState(parsePermissions(AllNotificationEvents, role?.allowedNotificationEvents));
   const [canManageGroup, setCanManageGroup] = useState(role ? role.canManageGroup : false);
   const [canManageRoster, setCanManageRoster] = useState(role ? role.canManageRoster : false);
   const [canManageWorkspace, setCanManageWorkspace] = useState(role ? role.canManageWorkspace : false);
   const [canViewRoster, setCanViewRoster] = useState(role ? role.canViewRoster : false);
   const [canViewMuster, setCanViewMuster] = useState(role ? role.canViewMuster : false);
   const [canViewPII, setCanViewPII] = useState(role ? role.canViewPII : false);
+  const [canViewPHI, setCanViewPHI] = useState(role ? role.canViewPHI : false);
   const [saveRoleLoading, setSaveRoleLoading] = useState(false);
 
   if (!open) {
@@ -64,19 +69,16 @@ export const EditRoleDialog = (props: EditRoleDialogProps) => {
   const onWorkspaceChanged = (event: React.ChangeEvent<{ value: unknown }>) => {
     const newWorkspaceId = parseInt(event.target.value as string);
     const selectedWorkspace = workspaces?.find(workspace => workspace.id === newWorkspaceId);
-    if (selectedWorkspace) {
-      const allowedColumns = new AllowedRosterColumns();
-      setAllPermissions(allowedColumns, true);
+    if (selectedWorkspace && rosterColumns) {
+      const allowedColumns: RolePermissions = {};
+      rosterColumns.forEach(column => {
+        allowedColumns[column.name] = (!column.pii || selectedWorkspace.pii) && (!column.phi || selectedWorkspace.phi);
+      });
       if (selectedWorkspace.pii) {
         setCanViewPII(true);
-      } else {
-        Object.keys(RosterPIIColumns).forEach(column => {
-          const columnIsPII = Reflect.get(RosterPIIColumns, column);
-          if (columnIsPII) {
-            Reflect.set(allowedColumns, column, false);
-          }
-        });
-        setCanViewPII(false);
+      }
+      if (selectedWorkspace.phi) {
+        setCanViewPHI(true);
       }
       setAllowedRosterColumns(allowedColumns);
     }
@@ -93,7 +95,7 @@ export const EditRoleDialog = (props: EditRoleDialogProps) => {
   const onRosterColumnChanged = (property: string) => (event: React.ChangeEvent<HTMLInputElement>) => {
     setAllowedRosterColumns(previous => {
       const newState = { ...previous };
-      Reflect.set(newState, property, event.target.checked);
+      newState[property] = event.target.checked;
       return newState;
     });
   };
@@ -101,17 +103,17 @@ export const EditRoleDialog = (props: EditRoleDialogProps) => {
   const onNotificationEventChanged = (property: string) => (event: React.ChangeEvent<HTMLInputElement>) => {
     setAllowedNotificationEvents(previous => {
       const newState = { ...previous };
-      Reflect.set(newState, property, event.target.checked);
+      newState[property] = event.target.checked;
       return newState;
     });
   };
 
   const filterAllowedRosterColumns = (viewMuster: boolean) => {
-    const allowedColumns = new AllowedRosterColumns();
-    Object.keys(allowedRosterColumns).forEach(column => {
+    const allowedColumns: RolePermissions = {};
+    rosterColumns!.forEach(column => {
       const allowed = columnAllowed(column);
-      const previousValue = Reflect.get(allowedRosterColumns, column);
-      Reflect.set(allowedColumns, column, previousValue && allowed);
+      const previousValue = allowedRosterColumns[column.name];
+      allowedColumns[column.name] = previousValue && allowed;
     });
     allowedColumns.lastReported = viewMuster;
     return allowedColumns;
@@ -134,7 +136,8 @@ export const EditRoleDialog = (props: EditRoleDialogProps) => {
       canManageWorkspace: canManageGroup || canManageWorkspace,
       canViewRoster: canManageGroup || canManageRoster || canViewRoster,
       canViewMuster: viewMuster,
-      canViewPII,
+      canViewPII: canViewPII || canViewPHI,
+      canViewPHI,
     };
     try {
       if (existingRole) {
@@ -163,23 +166,23 @@ export const EditRoleDialog = (props: EditRoleDialogProps) => {
     return !formDisabled && name.length > 0 && description.length > 0;
   };
 
-  const columnAllowed = (column: string) => {
-    return !Reflect.get(RosterPIIColumns, column) || canViewPII;
+  const columnAllowed = (column: ApiRosterColumnInfo) => {
+    return (!column.pii || canViewPII || canViewPHI) && (!column.phi || canViewPHI);
   };
 
   const buildRosterColumnRows = () => {
-    const columns = Object.keys(allowedRosterColumns).filter(column => column !== 'lastReported');
-    return columns.map(column => (
-      <TableRow key={column}>
+    const columns = rosterColumns?.filter(column => column.name !== 'lastReported');
+    return columns?.map(column => (
+      <TableRow key={column.name}>
         <TableCell className={classes.textCell}>
-          {Reflect.get(RosterColumnDisplayName, column) || 'Unknown'}
+          {column.displayName}
         </TableCell>
         <TableCell className={classes.iconCell}>
           <Checkbox
             color="primary"
             disabled={formDisabled || !columnAllowed(column) || workspaceId >= 0}
-            checked={Reflect.get(allowedRosterColumns, column) && columnAllowed(column)}
-            onChange={onRosterColumnChanged(column)}
+            checked={allowedRosterColumns[column.name] && columnAllowed(column)}
+            onChange={onRosterColumnChanged(column.name)}
           />
         </TableCell>
       </TableRow>
@@ -187,17 +190,17 @@ export const EditRoleDialog = (props: EditRoleDialogProps) => {
   };
 
   const buildNotificationEventRows = () => {
-    return Object.keys(allowedNotificationEvents).map(event => (
-      <TableRow key={event}>
+    return AllNotificationEvents.map(event => (
+      <TableRow key={event.name}>
         <TableCell className={classes.textCell}>
-          {Reflect.get(NotificationEventDisplayName, event) || 'Unknown'}
+          {event.displayName}
         </TableCell>
         <TableCell className={classes.iconCell}>
           <Checkbox
             color="primary"
             disabled={formDisabled}
-            checked={Reflect.get(allowedNotificationEvents, event)}
-            onChange={onNotificationEventChanged(event)}
+            checked={allowedNotificationEvents[event.name]}
+            onChange={onNotificationEventChanged(event.name)}
           />
         </TableCell>
       </TableRow>
@@ -356,9 +359,23 @@ export const EditRoleDialog = (props: EditRoleDialogProps) => {
                     <TableCell className={classes.iconCell}>
                       <Checkbox
                         color="primary"
-                        disabled={formDisabled || workspaceId >= 0}
-                        checked={canViewPII}
+                        disabled={formDisabled || workspaceId >= 0 || canViewPHI}
+                        checked={canViewPII || canViewPHI}
                         onChange={onPermissionChanged(setCanViewPII)}
+                      />
+                    </TableCell>
+                  </TableRow>
+
+                  <TableRow>
+                    <TableCell className={classes.textCell}>
+                      {`View PHI ${workspaceId >= 0 ? '(Set by Workspace)' : ''}`}
+                    </TableCell>
+                    <TableCell className={classes.iconCell}>
+                      <Checkbox
+                        color="primary"
+                        disabled={formDisabled || workspaceId >= 0}
+                        checked={canViewPHI}
+                        onChange={onPermissionChanged(setCanViewPHI)}
                       />
                     </TableCell>
                   </TableRow>

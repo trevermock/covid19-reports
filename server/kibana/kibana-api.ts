@@ -2,6 +2,7 @@ import axios, { AxiosInstance } from 'axios';
 import { NextFunction, Response } from 'express';
 import axiosCookieJarSupport from 'axios-cookiejar-support';
 import tough from 'tough-cookie';
+import * as https from 'https';
 import { ApiRequest } from '../api';
 import config from '../config';
 import { buildJWT } from './dashboard/read-only-rest.controller';
@@ -27,6 +28,9 @@ export class KibanaApi {
         'kbn-xsrf': 'true', // Kibana requires 'kbn-xsrf' to be set or it will return an error. It can be any string.
         'x-se-fire-department-all': req.appRole.getKibanaIndex(),
       },
+      httpsAgent: new https.Agent({
+        rejectUnauthorized: false,
+      }),
       withCredentials: true,
     });
 
