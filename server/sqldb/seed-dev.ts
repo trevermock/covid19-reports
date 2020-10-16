@@ -4,7 +4,8 @@ import { Org } from '../api/org/org.model';
 import { Role } from '../api/role/role.model';
 import { User } from '../api/user/user.model';
 import { Workspace } from '../api/workspace/workspace.model';
-import { Roster } from '../api/roster/roster.model';
+import { Roster, RosterColumnType } from '../api/roster/roster.model';
+import { CustomRosterColumn } from '../api/roster/custom-roster-column.model';
 
 export default (async function() {
   if (process.env.NODE_ENV !== 'development') {
@@ -26,62 +27,96 @@ export default (async function() {
   groupAdmin.isRegistered = true;
   await groupAdmin.save();
 
-  // Create orgs
-  const testOrg = new Org();
-  testOrg.name = 'Test Org';
-  testOrg.description = 'First test org';
-  testOrg.contact = groupAdmin;
-  await testOrg.save();
-
-  const testOrg2 = new Org();
-  testOrg2.name = 'Test Org 2';
-  testOrg2.description = 'Second test org';
-  testOrg2.contact = groupAdmin;
-  await testOrg2.save();
-
-  // Create roles
-  const testOrgGroupAdminRole = await createGroupAdminRole(testOrg);
-  await createRosterManagerRole(testOrg);
-
-  const testOrg2GroupAdminRole = await createGroupAdminRole(testOrg2);
-  await createRosterManagerRole(testOrg2);
-
-  // Assign roles
-  groupAdmin.roles = [testOrgGroupAdminRole, testOrg2GroupAdminRole];
-  await groupAdmin.save();
-
-  // Create roster entries
-  const rosterEntry1 = new Roster();
-  rosterEntry1.org = testOrg;
-  rosterEntry1.edipi = '1000000001';
-  rosterEntry1.firstName = 'Luke';
-  rosterEntry1.lastName = 'Skywalker';
-  rosterEntry1.pilot = true;
-  rosterEntry1.unit = 'unit1';
-  rosterEntry1.billetWorkcenter = '';
-  rosterEntry1.contractNumber = '';
-  await rosterEntry1.save();
-
-  const rosterEntry2 = new Roster();
-  rosterEntry2.org = testOrg;
-  rosterEntry2.edipi = '1000000002';
-  rosterEntry2.firstName = 'Han';
-  rosterEntry2.lastName = 'Solo';
-  rosterEntry2.pilot = true;
-  rosterEntry2.unit = 'unit1';
-  rosterEntry2.billetWorkcenter = '';
-  rosterEntry2.contractNumber = '';
-  await rosterEntry2.save();
+  await generateOrg(1, groupAdmin, 'Test Group', 'First Test Group', 5, 20);
+  await generateOrg(2, groupAdmin, 'Test Group 2', 'Second Test Group', 5, 20);
 
   await connection.close();
   console.log('Finished!');
 }());
 
-async function createGroupAdminRole(org: Org, workspace?: Workspace) {
+async function generateOrg(orgNum: number, admin: User, name: string, description: string, numUsers: number, numRosterEntries: number) {
+  const org = new Org();
+  org.name = name;
+  org.description = description;
+  org.contact = admin;
+  await org.save();
+
+  const customColumn = new CustomRosterColumn();
+  customColumn.org = org;
+  customColumn.name = 'myCustomColumn';
+  customColumn.display = 'My Custom Column';
+  customColumn.type = RosterColumnType.String;
+  customColumn.phi = false;
+  customColumn.pii = false;
+  customColumn.required = false;
+  await customColumn.save();
+
+  const groupAdminRole = await createGroupAdminRole(org).save();
+  if (admin.roles) {
+    admin.roles.push(groupAdminRole);
+  } else {
+    admin.roles = [groupAdminRole];
+  }
+  await admin.save();
+
+  let userRole = createUserRole(org);
+  userRole.allowedRosterColumns.push(customColumn.name);
+  userRole = await userRole.save();
+
+  for (let i = 0; i < numUsers; i++) {
+    const user = new User();
+    user.edipi = `${orgNum}00000000${i}`;
+    user.firstName = 'User';
+    user.lastName = `${i}`;
+    user.phone = randomPhoneNumber();
+    user.email = `user${i}@org${orgNum}.com`;
+    user.service = 'Space Force';
+    user.roles = [userRole];
+    user.isRegistered = true;
+    await user.save();
+  }
+
+  for (let i = 0; i < numRosterEntries; i++) {
+    const rosterEntry = new Roster();
+    rosterEntry.org = org;
+    rosterEntry.edipi = `${orgNum}${`${i}`.padStart(9, '0')}`;
+    rosterEntry.firstName = 'Roster';
+    rosterEntry.lastName = `Entry${i}`;
+    rosterEntry.rateRank = `Rank ${randomNumber(1, 10)}`;
+    rosterEntry.pilot = Math.random() > 0.5;
+    rosterEntry.aircrew = Math.random() > 0.5;
+    rosterEntry.advancedParty = Math.random() > 0.5;
+    rosterEntry.cdi = Math.random() > 0.5;
+    rosterEntry.cdqar = Math.random() > 0.5;
+    rosterEntry.dscacrew = Math.random() > 0.5;
+    // Ensure at least some roster entries are in unit 1.
+    rosterEntry.unit = (i % 2 === 0) ? 'unit1' : `unit${randomNumber(2, 5)}`;
+    rosterEntry.billetWorkcenter = '';
+    rosterEntry.contractNumber = '';
+    rosterEntry.lastReported = new Date();
+    const customColumns: any = {};
+    customColumns[customColumn.name] = `custom column value`;
+    rosterEntry.customColumns = customColumns;
+    await rosterEntry.save();
+  }
+
+  return org;
+}
+
+function randomPhoneNumber() {
+  return `${randomNumber(100, 999)}-${randomNumber(100, 999)}-${randomNumber(1000, 9999)}`;
+}
+
+function randomNumber(min: number, max: number) {
+  return Math.floor(Math.random() * (max - min + 1)) + min;
+}
+
+function createGroupAdminRole(org: Org, workspace?: Workspace) {
   const role = new Role();
   role.name = 'Group Admin';
   role.description = 'For managing the group.';
   role.org = org;
+  role.indexPrefix = '*';
   role.allowedRosterColumns = ['*'];
   role.allowedNotificationEvents = ['*'];
   role.canManageGroup = true;
@@ -91,18 +126,20 @@ async function createGroupAdminRole(org: Org, workspace?: Workspace) {
   role.canViewPII = true;
   role.canViewRoster = true;
   role.workspace = workspace;
-  return role.save();
+  return role;
 }
 
-async function createRosterManagerRole(org: Org, workspace?: Workspace) {
+function createUserRole(org: Org, workspace?: Workspace) {
   const role = new Role();
-  role.name = 'Roster Manager';
-  role.description = 'For managing the roster.';
+  role.name = 'Group User';
+  role.description = 'Basic role for all group users.';
   role.org = org;
-  role.allowedRosterColumns = ['edipi', 'unit', 'rateRank'];
+  role.indexPrefix = 'unit1';
+  role.allowedRosterColumns = ['edipi', 'unit', 'rateRank', 'lastReported'];
   role.allowedNotificationEvents = [];
   role.canManageRoster = true;
   role.canViewRoster = true;
+  role.canViewMuster = true;
   role.workspace = workspace;
-  return role.save();
+  return role;
 }

@@ -82,6 +82,11 @@ export class Role extends BaseEntity {
   @Column({
     default: false,
   })
+  canViewPHI: boolean = false;
+
+  @Column({
+    default: false,
+  })
   canManageWorkspace: boolean = false;
 
   isSupersetOf(role: Role) {
@@ -96,7 +101,8 @@ export class Role extends BaseEntity {
   }
 
   getKibanaIndex() {
-    return `${this.org!.indexPrefix}-${this.indexPrefix}`;
+    const suffix = this.canViewPHI ? 'phi' : (this.canViewPII ? 'pii' : 'base');
+    return `${this.org!.indexPrefix}-${this.indexPrefix}-${suffix}`;
   }
 
   getKibanaRoles() {

@@ -3,8 +3,9 @@ import { getConnection } from 'typeorm';
 import { ApiRequest, OrgParam, OrgRoleParams } from '../index';
 import { Role } from './role.model';
 import { BadRequestError, NotFoundError } from '../../util/error-types';
-import { RosterColumnInfo } from '../roster/roster.model';
+import { BaseRosterColumns } from '../roster/roster.model';
 import { Workspace } from '../workspace/workspace.model';
+import { getRosterColumns } from '../roster/roster.controller';
 
 class RoleController {
 
@@ -162,20 +163,6 @@ async function setRoleFromBody(orgId: number, role: Role, body: RoleBody) {
       role.workspace = workspace;
     }
   }
-  if (body.allowedRosterColumns != null) {
-    if (!(body.allowedRosterColumns.length === 1 && body.allowedRosterColumns[0] === '*')) {
-      for (const column of body.allowedRosterColumns) {
-        if (!RosterColumnInfo.hasOwnProperty(column)) {
-          throw new BadRequestError(`Unknown roster column: ${column}`);
-        }
-      }
-    }
-    role.allowedRosterColumns = body.allowedRosterColumns;
-  }
-  if (body.allowedNotificationEvents != null) {
-    // TODO: Validate notification events
-    role.allowedNotificationEvents = body.allowedNotificationEvents;
-  }
   if (body.canManageGroup != null) {
     role.canManageGroup = body.canManageGroup;
   }
@@ -194,7 +181,24 @@ async function setRoleFromBody(orgId: number, role: Role, body: RoleBody) {
   if (body.canViewPII != null) {
     role.canViewPII = body.canViewPII;
   }
-
+  if (body.canViewPHI != null) {
+    role.canViewPHI = body.canViewPHI;
+  }
+  if (body.allowedRosterColumns != null) {
+    if (!(body.allowedRosterColumns.length === 1 && body.allowedRosterColumns[0] === '*')) {
+      const orgRosterColumns = await getRosterColumns(orgId);
+      for (const column of body.allowedRosterColumns) {
+        if (!orgRosterColumns.some(rosterColumn => rosterColumn.name === column)) {
+          throw new BadRequestError(`Unknown roster column: ${column}`);
+        }
+      }
+    }
+    role.allowedRosterColumns = body.allowedRosterColumns;
+  }
+  if (body.allowedNotificationEvents != null) {
+    // TODO: Validate notification events
+    role.allowedNotificationEvents = body.allowedNotificationEvents;
+  }
 }
 
 type RoleBody = {
@@ -210,6 +214,7 @@ type RoleBody = {
   canViewRoster?: boolean
   canViewMuster?: boolean
   canViewPII?: boolean
+  canViewPHI?: boolean
 };
 
 export default new RoleController();

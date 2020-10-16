@@ -110,152 +110,193 @@ export class Roster extends BaseEntity {
   })
   lastReported?: Date;
 
+  @Column('json', {
+    nullable: false,
+    default: '{}',
+  })
+  customColumns: any;
 }
 
-enum ColumnType {
+export enum RosterColumnType {
   String = 'string',
   Boolean = 'boolean',
   Date = 'date',
   Number = 'number',
 }
 
-interface ColumnInfo {
+export interface RosterColumnInfo {
+  name: string,
   displayName: string,
-  type: ColumnType,
+  type: RosterColumnType,
   pii: boolean,
   phi: boolean,
+  custom: boolean,
   required: boolean,
+  updatable: boolean,
 }
 
-interface ColumnInfoDictionary {
-  [Key: string]: ColumnInfo;
-}
-
-export const RosterColumnInfo: ColumnInfoDictionary = {
-  edipi: {
+export const BaseRosterColumns: RosterColumnInfo[] = [
+  {
+    name: 'edipi',
     displayName: 'EDIPI',
-    type: ColumnType.String,
+    type: RosterColumnType.String,
     pii: false,
     phi: false,
+    custom: false,
     required: true,
-  },
-  firstName: {
+    updatable: false,
+  }, {
+    name: 'firstName',
     displayName: 'First Name',
-    type: ColumnType.String,
+    type: RosterColumnType.String,
     pii: true,
     phi: false,
+    custom: false,
     required: true,
-  },
-  lastName: {
+    updatable: true,
+  }, {
+    name: 'lastName',
     displayName: 'Last Name',
-    type: ColumnType.String,
+    type: RosterColumnType.String,
     pii: true,
     phi: false,
+    custom: false,
     required: true,
-  },
-  unit: {
+    updatable: true,
+  }, {
+    name: 'unit',
     displayName: 'Unit',
-    type: ColumnType.String,
+    type: RosterColumnType.String,
     pii: false,
     phi: false,
+    custom: false,
     required: true,
-  },
-  billetWorkcenter: {
+    updatable: true,
+  }, {
+    name: 'billetWorkcenter',
     displayName: 'Billet Workcenter',
-    type: ColumnType.String,
+    type: RosterColumnType.String,
     pii: false,
     phi: false,
+    custom: false,
     required: true,
-  },
-  contractNumber: {
+    updatable: true,
+  }, {
+    name: 'contractNumber',
     displayName: 'Contract Number',
-    type: ColumnType.String,
+    type: RosterColumnType.String,
     pii: false,
     phi: false,
+    custom: false,
     required: true,
-  },
-  rateRank: {
+    updatable: true,
+  }, {
+    name: 'rateRank',
     displayName: 'Rate/Rank',
-    type: ColumnType.String,
+    type: RosterColumnType.String,
     pii: false,
     phi: false,
+    custom: false,
     required: false,
-  },
-  pilot: {
+    updatable: true,
+  }, {
+    name: 'pilot',
     displayName: 'Pilot',
-    type: ColumnType.Boolean,
+    type: RosterColumnType.Boolean,
     pii: false,
     phi: false,
+    custom: false,
     required: false,
-  },
-  aircrew: {
+    updatable: true,
+  }, {
+    name: 'aircrew',
     displayName: 'Aircrew',
-    type: ColumnType.Boolean,
+    type: RosterColumnType.Boolean,
     pii: false,
     phi: false,
+    custom: false,
     required: false,
-  },
-  cdi: {
+    updatable: true,
+  }, {
+    name: 'cdi',
     displayName: 'CDI',
-    type: ColumnType.Boolean,
+    type: RosterColumnType.Boolean,
     pii: false,
     phi: false,
+    custom: false,
     required: false,
-  },
-  cdqar: {
+    updatable: true,
+  }, {
+    name: 'cdqar',
     displayName: 'CDQAR',
-    type: ColumnType.Boolean,
+    type: RosterColumnType.Boolean,
     pii: false,
     phi: false,
+    custom: false,
     required: false,
-  },
-  dscacrew: {
+    updatable: true,
+  }, {
+    name: 'dscacrew',
     displayName: 'DSCA Crew',
-    type: ColumnType.Boolean,
+    type: RosterColumnType.Boolean,
     pii: false,
     phi: false,
+    custom: false,
     required: false,
-  },
-  advancedParty: {
+    updatable: true,
+  }, {
+    name: 'advancedParty',
     displayName: 'Advanced Party',
-    type: ColumnType.Boolean,
+    type: RosterColumnType.Boolean,
     pii: false,
     phi: false,
+    custom: false,
     required: false,
-  },
-  pui: {
+    updatable: true,
+  }, {
+    name: 'pui',
     displayName: 'PUI',
-    type: ColumnType.Boolean,
+    type: RosterColumnType.Boolean,
     pii: false,
     phi: false,
+    custom: false,
     required: false,
-  },
-  covid19TestReturnDate: {
+    updatable: true,
+  }, {
+    name: 'covid19TestReturnDate',
     displayName: 'COVID 19 Test Return Date',
-    type: ColumnType.Date,
+    type: RosterColumnType.Date,
     pii: false,
     phi: false,
+    custom: false,
     required: false,
-  },
-  rom: {
+    updatable: true,
+  }, {
+    name: 'rom',
     displayName: 'ROM',
-    type: ColumnType.String,
+    type: RosterColumnType.String,
     pii: false,
     phi: false,
+    custom: false,
     required: false,
-  },
-  romRelease: {
+    updatable: true,
+  }, {
+    name: 'romRelease',
     displayName: 'ROM Release',
-    type: ColumnType.String,
+    type: RosterColumnType.String,
     pii: false,
     phi: false,
+    custom: false,
     required: false,
-  },
-  lastReported: {
+    updatable: true,
+  }, {
+    name: 'lastReported',
     displayName: 'Last Reported',
-    type: ColumnType.Date,
+    type: RosterColumnType.Date,
     pii: false,
     phi: false,
+    custom: false,
     required: false,
+    updatable: true,
   },
-};
+];

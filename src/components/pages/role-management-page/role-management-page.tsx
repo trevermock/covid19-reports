@@ -20,18 +20,19 @@ import CheckIcon from '@material-ui/icons/Check';
 import useStyles from './role-management-page.styles';
 import { UserState } from '../../../reducers/user.reducer';
 import { AppState } from '../../../store';
-import { ApiRole, ApiWorkspace } from '../../../models/api-response';
-import { AllowedNotificationEvents, NotificationEventDisplayName } from '../../../models/notification-events';
+import { ApiRole, ApiWorkspace, ApiRosterColumnInfo } from '../../../models/api-response';
+import {
+  AllNotificationEvents,
+} from '../../../models/notification-events';
 import { AlertDialog, AlertDialogProps } from '../../alert-dialog/alert-dialog';
-import { RosterColumnDisplayName, AllowedRosterColumns } from '../../../models/roster-columns';
 import { EditRoleDialog, EditRoleDialogProps } from './edit-role-dialog';
-import { parsePermissions } from '../../../utility/permission-set';
+import { parsePermissions, RolePermissions } from '../../../utility/permission-set';
 import { AppFrame } from '../../../actions/app-frame.actions';
 import { ButtonWithSpinner } from '../../buttons/button-with-spinner';
 
 interface ParsedRoleData {
-  allowedRosterColumns: AllowedRosterColumns,
-  allowedNotificationEvents: AllowedNotificationEvents,
+  allowedRosterColumns: RolePermissions,
+  allowedNotificationEvents: RolePermissions,
 }
 
 
@@ -42,6 +43,7 @@ export const RoleManagementPage = () => {
   const [selectedRoleIndex, setSelectedRoleIndex] = useState(-1);
   const [roles, setRoles] = useState<ApiRole[]>([]);
   const [roleData, setRoleData] = useState<ParsedRoleData[]>([]);
+  const [rosterColumns, setRosterColumns] = useState<ApiRosterColumnInfo[]>([]);
   const [workspaces, setWorkspaces] = useState<ApiWorkspace[]>([]);
   const [deleteRoleDialogOpen, setDeleteRoleDialogOpen] = useState(false);
   const [alertDialogProps, setAlertDialogProps] = useState<AlertDialogProps>({ open: false });
@@ -54,14 +56,16 @@ export const RoleManagementPage = () => {
     dispatch(AppFrame.setPageLoading(true));
     const orgRoles = (await axios.get(`api/role/${orgId}`)).data as ApiRole[];
     const orgWorkspaces = (await axios.get(`api/workspace/${orgId}`)).data as ApiWorkspace[];
+    const orgRosterColumns = (await axios.get(`api/roster/${orgId}/fullinfo`)).data as ApiRosterColumnInfo[];
     const parsedRoleData = orgRoles.map(role => {
       return {
-        allowedRosterColumns: parsePermissions(new AllowedRosterColumns(), role.allowedRosterColumns),
-        allowedNotificationEvents: parsePermissions(new AllowedNotificationEvents(), role.allowedNotificationEvents),
+        allowedRosterColumns: parsePermissions(orgRosterColumns, role.allowedRosterColumns),
+        allowedNotificationEvents: parsePermissions(AllNotificationEvents, role.allowedNotificationEvents),
       };
     });
     setRoleData(parsedRoleData);
     setWorkspaces(orgWorkspaces);
+    setRosterColumns(orgRosterColumns);
     setRoles(orgRoles);
     dispatch(AppFrame.setPageLoading(false));
   }, [orgId]);
@@ -140,13 +144,13 @@ export const RoleManagementPage = () => {
       return <></>;
     }
     const viewableColumns = roleData[index].allowedRosterColumns;
-    return Object.keys(viewableColumns).map(column => (
-      <TableRow key={column}>
+    return rosterColumns.map(column => (
+      <TableRow key={column.name}>
         <TableCell className={classes.textCell}>
-          {Reflect.get(RosterColumnDisplayName, column) || 'Unknown'}
+          {column.displayName}
         </TableCell>
         <TableCell className={classes.iconCell}>
-          {Reflect.get(viewableColumns, column) && (
+          {viewableColumns[column.name] && (
             <CheckIcon />
           )}
         </TableCell>
@@ -159,13 +163,13 @@ export const RoleManagementPage = () => {
       return <></>;
     }
     const allowedEvents = roleData[index].allowedNotificationEvents;
-    return Object.keys(allowedEvents).map(event => (
-      <TableRow key={event}>
+    return AllNotificationEvents.map(event => (
+      <TableRow key={event.name}>
         <TableCell className={classes.textCell}>
-          {Reflect.get(NotificationEventDisplayName, event) || 'Unknown'}
+          {event.displayName}
         </TableCell>
         <TableCell className={classes.iconCell}>
-          {Reflect.get(allowedEvents, event) && (
+          {allowedEvents[event.name] && (
             <CheckIcon />
           )}
         </TableCell>
@@ -292,6 +296,14 @@ export const RoleManagementPage = () => {
                             )}
                           </TableCell>
                         </TableRow>
+                        <TableRow>
+                          <TableCell className={classes.textCell}>View PII</TableCell>
+                          <TableCell className={classes.iconCell}>
+                            {row.canViewPHI && (
+                              <CheckIcon />
+                            )}
+                          </TableCell>
+                        </TableRow>
                       </TableBody>
                     </Table>
                   </div>
@@ -344,10 +356,23 @@ export const RoleManagementPage = () => {
         </Dialog>
       )}
       {editRoleDialogProps.open && (
-        <EditRoleDialog open={editRoleDialogProps.open} orgId={editRoleDialogProps.orgId} role={editRoleDialogProps.role} workspaces={workspaces} onClose={editRoleDialogProps.onClose} onError={editRoleDialogProps.onError} />
+        <EditRoleDialog
+          open={editRoleDialogProps.open}
+          orgId={editRoleDialogProps.orgId}
+          role={editRoleDialogProps.role}
+          workspaces={workspaces}
+          rosterColumns={rosterColumns}
+          onClose={editRoleDialogProps.onClose}
+          onError={editRoleDialogProps.onError}
+        />
       )}
       {alertDialogProps.open && (
-        <AlertDialog open={alertDialogProps.open} title={alertDialogProps.title} message={alertDialogProps.message} onClose={alertDialogProps.onClose} />
+        <AlertDialog
+          open={alertDialogProps.open}
+          title={alertDialogProps.title}
+          message={alertDialogProps.message}
+          onClose={alertDialogProps.onClose}
+        />
       )}
     </main>
   );

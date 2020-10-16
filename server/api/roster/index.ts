@@ -33,6 +33,13 @@ router.get(
 );
 
 router.get(
+  '/:orgId/fullinfo',
+  requireOrgAccess,
+  requireRolePermission(role => role.canManageGroup),
+  controller.getFullRosterInfo,
+);
+
+router.get(
   '/:orgId/info',
   requireOrgAccess,
   requireRolePermission(role => role.canManageRoster),
