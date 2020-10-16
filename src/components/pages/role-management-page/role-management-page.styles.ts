@@ -54,7 +54,7 @@ export default makeStyles((theme: Theme) => createStyles({
     color: '#A9AEB1',
   },
   tableScroll: {
-    maxHeight: '193px',
+    maxHeight: '225px',
     overflowY: 'auto',
   },
   roleTable: {

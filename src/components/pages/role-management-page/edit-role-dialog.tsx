@@ -6,7 +6,7 @@ import {
   DialogContent,
   DialogTitle,
   Grid, Select,
-  Table, TableBody, TableCell,
+  TableCell,
   TableRow, TextField, Typography,
 } from '@material-ui/core';
 import axios from 'axios';
@@ -19,6 +19,7 @@ import {
   RolePermissions, parsePermissions, permissionsToArray,
 } from '../../../utility/permission-set';
 import { ButtonWithSpinner } from '../../buttons/button-with-spinner';
+import { EditableBooleanTable } from '../../tables/editable-boolean-table';
 
 export interface EditRoleDialogProps {
   open: boolean,
@@ -174,10 +175,10 @@ export const EditRoleDialog = (props: EditRoleDialogProps) => {
     const columns = rosterColumns?.filter(column => column.name !== 'lastReported');
     return columns?.map(column => (
       <TableRow key={column.name}>
-        <TableCell className={classes.textCell}>
+        <TableCell>
           {column.displayName}
         </TableCell>
-        <TableCell className={classes.iconCell}>
+        <TableCell>
           <Checkbox
             color="primary"
             disabled={formDisabled || !columnAllowed(column) || workspaceId >= 0}
@@ -192,10 +193,10 @@ export const EditRoleDialog = (props: EditRoleDialogProps) => {
   const buildNotificationEventRows = () => {
     return AllNotificationEvents.map(event => (
       <TableRow key={event.name}>
-        <TableCell className={classes.textCell}>
+        <TableCell>
           {event.displayName}
         </TableCell>
-        <TableCell className={classes.iconCell}>
+        <TableCell>
           <Checkbox
             color="primary"
             disabled={formDisabled}
@@ -240,7 +241,6 @@ export const EditRoleDialog = (props: EditRoleDialogProps) => {
               className={classes.workspaceSelect}
               native
               disabled={formDisabled}
-              autoFocus
               value={workspaceId}
               onChange={onWorkspaceChanged}
               inputProps={{
@@ -271,117 +271,105 @@ export const EditRoleDialog = (props: EditRoleDialogProps) => {
           </Grid>
           <Grid item xs={6}>
             <Typography className={classes.roleHeader}>Allowed Notifications:</Typography>
-            <div className={classes.tableScroll}>
-              <Table aria-label="Notifications" className={classes.roleTable}>
-                <TableBody>
-                  {buildNotificationEventRows()}
-                </TableBody>
-              </Table>
-            </div>
+            <EditableBooleanTable aria-label="Notifications">
+              {buildNotificationEventRows()}
+            </EditableBooleanTable>
           </Grid>
           <Grid item xs={6}>
             <Typography className={classes.roleHeader}>
               {`Viewable Roster Columns: ${workspaceId >= 0 ? '(Set by Workspace)' : ''}`}
             </Typography>
-            <div className={classes.tableScroll}>
-              <Table aria-label="Roster Columns" className={classes.roleTable}>
-                <TableBody>
-                  {buildRosterColumnRows()}
-                </TableBody>
-              </Table>
-            </div>
+            <EditableBooleanTable aria-label="Roster Columns">
+              {buildRosterColumnRows()}
+            </EditableBooleanTable>
           </Grid>
           <Grid item xs={6}>
             <Typography className={classes.roleHeader}>Permissions:</Typography>
-            <div className={classes.tableScroll}>
-              <Table aria-label="Permissions" className={classes.roleTable}>
-                <TableBody>
-                  <TableRow>
-                    <TableCell className={classes.textCell}>Manage Group</TableCell>
-                    <TableCell className={classes.iconCell}>
-                      <Checkbox
-                        color="primary"
-                        disabled={formDisabled}
-                        checked={canManageGroup}
-                        onChange={onPermissionChanged(setCanManageGroup)}
-                      />
-                    </TableCell>
-                  </TableRow>
-                  <TableRow>
-                    <TableCell className={classes.textCell}>Manage Roster</TableCell>
-                    <TableCell className={classes.iconCell}>
-                      <Checkbox
-                        color="primary"
-                        disabled={formDisabled || canManageGroup}
-                        checked={canManageGroup || canManageRoster}
-                        onChange={onPermissionChanged(setCanManageRoster)}
-                      />
-                    </TableCell>
-                  </TableRow>
-                  <TableRow>
-                    <TableCell className={classes.textCell}>Manage Workspace</TableCell>
-                    <TableCell className={classes.iconCell}>
-                      <Checkbox
-                        color="primary"
-                        disabled={formDisabled || canManageGroup}
-                        checked={canManageGroup || canManageWorkspace}
-                        onChange={onPermissionChanged(setCanManageWorkspace)}
-                      />
-                    </TableCell>
-                  </TableRow>
-                  <TableRow>
-                    <TableCell className={classes.textCell}>View Roster</TableCell>
-                    <TableCell className={classes.iconCell}>
-                      <Checkbox
-                        color="primary"
-                        disabled={formDisabled || canManageGroup || canManageRoster}
-                        checked={canManageGroup || canManageRoster || canViewRoster}
-                        onChange={onPermissionChanged(setCanViewRoster)}
-                      />
-                    </TableCell>
-                  </TableRow>
-                  <TableRow>
-                    <TableCell className={classes.textCell}>View Muster Reports</TableCell>
-                    <TableCell className={classes.iconCell}>
-                      <Checkbox
-                        color="primary"
-                        disabled={formDisabled || canManageGroup}
-                        checked={canManageGroup || canViewMuster}
-                        onChange={onPermissionChanged(setCanViewMuster)}
-                      />
-                    </TableCell>
-                  </TableRow>
+            <EditableBooleanTable aria-label="Permissions">
+              <TableRow>
+                <TableCell>Manage Group</TableCell>
+                <TableCell>
+                  <Checkbox
+                    color="primary"
+                    disabled={formDisabled}
+                    checked={canManageGroup}
+                    onChange={onPermissionChanged(setCanManageGroup)}
+                  />
+                </TableCell>
+              </TableRow>
+              <TableRow>
+                <TableCell>Manage Roster</TableCell>
+                <TableCell>
+                  <Checkbox
+                    color="primary"
+                    disabled={formDisabled || canManageGroup}
+                    checked={canManageGroup || canManageRoster}
+                    onChange={onPermissionChanged(setCanManageRoster)}
+                  />
+                </TableCell>
+              </TableRow>
+              <TableRow>
+                <TableCell>Manage Workspace</TableCell>
+                <TableCell>
+                  <Checkbox
+                    color="primary"
+                    disabled={formDisabled || canManageGroup}
+                    checked={canManageGroup || canManageWorkspace}
+                    onChange={onPermissionChanged(setCanManageWorkspace)}
+                  />
+                </TableCell>
+              </TableRow>
+              <TableRow>
+                <TableCell>View Roster</TableCell>
+                <TableCell>
+                  <Checkbox
+                    color="primary"
+                    disabled={formDisabled || canManageGroup || canManageRoster}
+                    checked={canManageGroup || canManageRoster || canViewRoster}
+                    onChange={onPermissionChanged(setCanViewRoster)}
+                  />
+                </TableCell>
+              </TableRow>
+              <TableRow>
+                <TableCell>View Muster Reports</TableCell>
+                <TableCell>
+                  <Checkbox
+                    color="primary"
+                    disabled={formDisabled || canManageGroup}
+                    checked={canManageGroup || canViewMuster}
+                    onChange={onPermissionChanged(setCanViewMuster)}
+                  />
+                </TableCell>
+              </TableRow>
 
-                  <TableRow>
-                    <TableCell className={classes.textCell}>
-                      {`View PII ${workspaceId >= 0 ? '(Set by Workspace)' : ''}`}
-                    </TableCell>
-                    <TableCell className={classes.iconCell}>
-                      <Checkbox
-                        color="primary"
-                        disabled={formDisabled || workspaceId >= 0 || canViewPHI}
-                        checked={canViewPII || canViewPHI}
-                        onChange={onPermissionChanged(setCanViewPII)}
-                      />
-                    </TableCell>
-                  </TableRow>
+              <TableRow>
+                <TableCell>
+                  {`View PII ${workspaceId >= 0 ? '(Set by Workspace)' : ''}`}
+                </TableCell>
+                <TableCell>
+                  <Checkbox
+                    color="primary"
+                    disabled={formDisabled || workspaceId >= 0 || canViewPHI}
+                    checked={canViewPII || canViewPHI}
+                    onChange={onPermissionChanged(setCanViewPII)}
+                  />
+                </TableCell>
+              </TableRow>
 
-                  <TableRow>
-                    <TableCell className={classes.textCell}>
-                      {`View PHI ${workspaceId >= 0 ? '(Set by Workspace)' : ''}`}
-                    </TableCell>
-                    <TableCell className={classes.iconCell}>
-                      <Checkbox
-                        color="primary"
-                        disabled={formDisabled || workspaceId >= 0}
-                        checked={canViewPHI}
-                        onChange={onPermissionChanged(setCanViewPHI)}
-                      />
-                    </TableCell>
-                  </TableRow>
-                </TableBody>
-              </Table>
-            </div>
+              <TableRow>
+                <TableCell>
+                  {`View PHI ${workspaceId >= 0 ? '(Set by Workspace)' : ''}`}
+                </TableCell>
+                <TableCell>
+                  <Checkbox
+                    color="primary"
+                    disabled={formDisabled || workspaceId >= 0}
+                    checked={canViewPHI}
+                    onChange={onPermissionChanged(setCanViewPHI)}
+                  />
+                </TableCell>
+              </TableRow>
+            </EditableBooleanTable>
           </Grid>
         </Grid>
       </DialogContent>

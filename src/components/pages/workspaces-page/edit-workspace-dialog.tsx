@@ -114,7 +114,7 @@ export const EditWorkspaceDialog = (props: EditWorkspaceDialogProps) => {
       <DialogContent>
         <Grid container spacing={3}>
           <Grid item xs={6}>
-            <Typography className={classes.workspaceHeader}>Workspace Name:</Typography>
+            <Typography className={classes.headerLabel}>Workspace Name:</Typography>
             <TextField
               className={classes.textField}
               id="workspace-name"
@@ -124,7 +124,7 @@ export const EditWorkspaceDialog = (props: EditWorkspaceDialogProps) => {
             />
           </Grid>
           <Grid item xs={6}>
-            <Typography className={classes.workspaceHeader}>Workspace Description:</Typography>
+            <Typography className={classes.headerLabel}>Workspace Description:</Typography>
             <TextField
               className={classes.textField}
               id="workspace-description"
@@ -136,7 +136,7 @@ export const EditWorkspaceDialog = (props: EditWorkspaceDialogProps) => {
             />
           </Grid>
           <Grid item xs={6}>
-            <Typography className={classes.workspaceHeader}>Template:</Typography>
+            <Typography className={classes.headerLabel}>Template:</Typography>
             {existingWorkspace && (
               <Typography className={classes.templateText}>
                 {getTemplateName()}
@@ -147,7 +147,6 @@ export const EditWorkspaceDialog = (props: EditWorkspaceDialogProps) => {
                 className={classes.templateSelect}
                 native
                 disabled={formDisabled || existingWorkspace}
-                autoFocus
                 value={templateId}
                 onChange={onWorkspaceTemplateChanged}
                 inputProps={{
@@ -162,13 +161,13 @@ export const EditWorkspaceDialog = (props: EditWorkspaceDialogProps) => {
             )}
           </Grid>
           <Grid item xs={6}>
-            <Typography className={classes.workspaceHeader}>Template Description:</Typography>
+            <Typography className={classes.headerLabel}>Template Description:</Typography>
             <Typography className={classes.templateText}>
               {getTemplateDescription()}
             </Typography>
           </Grid>
           <Grid item xs={6}>
-            <Typography className={classes.workspaceHeader}>Template Data:</Typography>
+            <Typography className={classes.headerLabel}>Template Data:</Typography>
             <Table aria-label="Permissions" className={classes.templateDataTable}>
               <TableBody>
                 <TableRow>

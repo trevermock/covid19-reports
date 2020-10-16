@@ -17,24 +17,30 @@ export default makeStyles(() => createStyles({
       },
     },
   },
-  roleHeader: {
+  typeText: {
+    textTransform: 'capitalize',
+  },
+  headerLabel: {
     textTransform: 'uppercase',
     fontWeight: 'bold',
     fontSize: '13px',
     lineHeight: '24px',
     color: '#A9AEB1',
   },
-  workspaceSelect: {
+  flagTableBorder: {
+    border: '1px solid #71767a',
+    borderRadius: '4px',
+  },
+  typeSelect: {
     width: '100%',
     '&:before': {
       border: 'none',
     },
+    '& option, & select': {
+      textTransform: 'capitalize',
+    },
   },
-  workspaceDescription: {
-    width: '100%',
-    margin: 0,
-  },
-  roleDialogActions: {
+  dialogActions: {
     justifyContent: 'center',
     backgroundColor: '#F0F1F1',
     padding: '15px 35px',

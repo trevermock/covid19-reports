@@ -21,7 +21,7 @@ export default makeStyles((theme: Theme) => createStyles({
     width: '100%',
     margin: 0,
   },
-  workspaceHeader: {
+  headerLabel: {
     textTransform: 'uppercase',
     fontWeight: 'bold',
     fontSize: '13px',
