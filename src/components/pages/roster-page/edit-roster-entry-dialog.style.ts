@@ -18,12 +18,40 @@ export default makeStyles((theme: Theme) => createStyles({
       },
     },
   },
-  editRosterEntryHeader: {
-    textTransform: 'uppercase',
+  textCell: {
+    width: '70%',
+    backgroundColor: '#F0F1F1',
+  },
+  iconCell: {
+    textAlign: 'center',
+    backgroundColor: '#EAEAEA',
+    '& .MuiCheckbox-root': {
+      position: 'relative',
+      padding: '0px',
+      '&:hover': {
+        backgroundColor: 'rgb(115 179 231 / 27%)',
+      },
+      '& svg': {
+        top: '0px',
+      },
+    },
+  },
+  booleanTable: {
+    '&  .MuiTableCell-root': {
+      border: '1px solid #E0E0E0',
+      padding: '0px 16px',
+      height: '32px',
+      width: '100%',
+    },
+  },
+  booleanTableLabel: {
     fontWeight: 'bold',
-    fontSize: '13px',
-    lineHeight: '24px',
-    color: '#A9AEB1',
+  },
+  tableScroll: {
+    maxHeight: '193px',
+    overflowY: 'auto',
+    borderStyle: 'solid',
+    border: '1 px',
   },
   editRosterEntryDialogActions: {
     justifyContent: 'center',

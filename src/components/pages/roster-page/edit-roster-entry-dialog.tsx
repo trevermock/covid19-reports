@@ -8,7 +8,10 @@ import {
   Grid,
   TextField,
   Checkbox,
-  Typography,
+  TableRow,
+  TableCell,
+  Table,
+  TableBody,
 } from '@material-ui/core';
 import axios from 'axios';
 import useStyles from './edit-roster-entry-dialog.style';
@@ -91,51 +94,42 @@ export const EditRosterEntryDialog = (props: EditRosterEntryDialogProps) => {
     return true;
   };
 
-  const buildFieldForColumnType = (columnInfo: ApiRosterColumnInfo) => {
-    switch (columnInfo.type) {
-      case 'string':
-        return (
-          // TODO - set an indication for if the field is required or not
-          <TextField
-            className={classes.textField}
-            id={columnInfo.name}
-            // TODO - disabled also if updatable is false
-            disabled={formDisabled}
-            value={rosterEntry[columnInfo.name]}
-            onChange={onTextFieldChanged}
-          />
-        );
-      case 'boolean':
-        return (
-          // TODO - set an indication for if the field is required or not
+
+  const buildCheckboxFields = () => {
+    const columns = rosterColumnInfos?.filter(column => column.type === 'boolean');
+    return columns!.map(columnInfo => (
+      <TableRow key={columnInfo.name}>
+        <TableCell className={classes.textCell}>
+          {columnInfo.required ? `${columnInfo.displayName} *` : `${columnInfo.displayName}`}
+        </TableCell>
+        <TableCell className={classes.iconCell}>
           <Checkbox
-            id={columnInfo.name}
             color="primary"
-            // TODO - disable also if updatable is false
-            disabled={formDisabled}
+            disabled={formDisabled || !columnInfo.updatable}
             checked={rosterEntry[columnInfo.name]}
             onChange={onCheckboxChanged}
           />
-        );
-      case 'date':
-        return (
-          // TODO - set an indication for if the field is required or not
-          <TextField
-            id={columnInfo.name}
-            type="date"
-            value={rosterEntry[columnInfo.name]}
-            // TODO - disable also if updatable is false
-            disabled={formDisabled}
-            className={classes.textField}
-            InputLabelProps={{
-              shrink: true,
-            }}
-            onChange={onTextFieldChanged}
-          />
-        );
-      default:
-        return '';
-    }
+        </TableCell>
+      </TableRow>
+    ));
+  };
+
+  const buildTextFields = () => {
+    const columns = rosterColumnInfos?.filter(column => column.type === 'string' || 'date');
+    return columns!.map(columnInfo => (
+      <Grid key={columnInfo.name} item xs={6}>
+        <TextField
+          className={classes.textField}
+          id={columnInfo.name}
+          label={columnInfo.displayName}
+          disabled={formDisabled || !columnInfo.updatable}
+          required={columnInfo.required}
+          value={rosterEntry[columnInfo.name]}
+          onChange={onTextFieldChanged}
+          type={columnInfo.type === 'date' ? 'date' : 'text'}
+        />
+      </Grid>
+    ));
   };
 
   return (
@@ -143,13 +137,16 @@ export const EditRosterEntryDialog = (props: EditRosterEntryDialogProps) => {
       <DialogTitle id="alert-dialog-title">{existingRosterEntry ? 'Edit Roster Entry' : 'New Roster Entry'}</DialogTitle>
       <DialogContent>
         <Grid container spacing={3}>
-          {rosterColumnInfos!.map(columnInfo => (
-            <Grid key={columnInfo.name} item xs={6}>
-              <Typography className={classes.editRosterEntryHeader}>{columnInfo.displayName}</Typography>
-              {buildFieldForColumnType(columnInfo)}
-            </Grid>
-          ))}
+          {buildTextFields()}
         </Grid>
+        <label className={classes.booleanTableLabel}>Other:</label>
+        <div className={classes.tableScroll}>
+          <Table className={classes.booleanTable}>
+            <TableBody>
+              {buildCheckboxFields()}
+            </TableBody>
+          </Table>
+        </div>
       </DialogContent>
       <DialogActions className={classes.editRosterEntryDialogActions}>
         <Button disabled={formDisabled} variant="outlined" onClick={onClose} color="primary">
