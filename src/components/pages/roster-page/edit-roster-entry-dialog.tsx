@@ -88,7 +88,6 @@ export const EditRosterEntryDialog = (props: EditRosterEntryDialogProps) => {
     }
   };
 
-  // TODO - clean this method up
   const canSave = () => {
     if (formDisabled) {
       return false;
