@@ -88,19 +88,35 @@ export const EditRosterEntryDialog = (props: EditRosterEntryDialogProps) => {
     }
   };
 
+  // TODO - clean this method up
   const canSave = () => {
-    // TODO - check if we can save (all required fields have to be filled in)
-    // return !formDisabled && firstName.length > 0 && lastName.length > 0;
-    return true;
+    if (formDisabled) {
+      return false;
+    }
+
+    let result = true;
+
+    const requiredColumns = rosterColumnInfos?.filter(columnInfo => columnInfo.required);
+    if (requiredColumns) {
+      for (let i = 0; i < requiredColumns?.length; i++) {
+        const value = rosterEntry[requiredColumns[i].name];
+        if (!value || value.length === 0) {
+          result = false;
+          break;
+        }
+      }
+    }
+
+    return result;
   };
 
 
   const buildCheckboxFields = () => {
-    const columns = rosterColumnInfos?.filter(column => column.type === 'boolean');
-    return columns!.map(columnInfo => (
+    const columns = rosterColumnInfos?.filter(columnInfo => columnInfo.type === 'boolean');
+    return columns?.map(columnInfo => (
       <TableRow key={columnInfo.name}>
         <TableCell className={classes.textCell}>
-          {columnInfo.required ? `${columnInfo.displayName} *` : `${columnInfo.displayName}`}
+          {columnInfo.displayName}
         </TableCell>
         <TableCell className={classes.iconCell}>
           <Checkbox
@@ -115,8 +131,8 @@ export const EditRosterEntryDialog = (props: EditRosterEntryDialogProps) => {
   };
 
   const buildTextFields = () => {
-    const columns = rosterColumnInfos?.filter(column => column.type === 'string' || 'date');
-    return columns!.map(columnInfo => (
+    const columns = rosterColumnInfos?.filter(columnInfo => columnInfo.type === 'string' || 'date');
+    return columns?.map(columnInfo => (
       <Grid key={columnInfo.name} item xs={6}>
         <TextField
           className={classes.textField}
