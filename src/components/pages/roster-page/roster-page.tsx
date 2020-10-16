@@ -93,6 +93,8 @@ export const RosterPage = () => {
   const dispatch = useDispatch();
   const fileInputRef = React.createRef<HTMLInputElement>();
 
+  const maxNumColumnsToShow = 5;
+
   const [rows, setRows] = useState<ApiRosterEntry[]>([]);
   const [page, setPage] = useState(0);
   const [rosterSize, setRosterSize] = useState(0);
@@ -259,6 +261,48 @@ export const RosterPage = () => {
 
   useEffect(() => { initializeTable().then(); }, [initializeTable]);
 
+  const buildColumnHeaders = () => {
+    const columns = rosterColumnInfos?.slice(0, maxNumColumnsToShow);
+    return columns?.map(columnInfo => (
+      <TableCell>{columnInfo.displayName}</TableCell>
+    ));
+  };
+
+  const buildTableRows = () => {
+    const columns = rosterColumnInfos?.slice(0, maxNumColumnsToShow);
+
+    return rows.map(row => (
+
+      // TODO - what if we don't have edipi? What should we make this key?
+      <TableRow key={row.edipi}>
+
+        {columns.map(columnInfo => (
+          <TableCell>
+            {row[columnInfo.name]}
+          </TableCell>
+        ))}
+
+        <TableCell className={classes.tableButtons}>
+          <Button
+            className={classes.editRosterEntryButton}
+            variant="outlined"
+            onClick={() => editButtonClicked(row)}
+          >
+            <EditIcon />
+          </Button>
+          <Button
+            className={classes.deleteRosterEntryButton}
+            variant="outlined"
+            onClick={() => deleteButtonClicked(row)}
+          >
+            <DeleteIcon />
+          </Button>
+        </TableCell>
+      </TableRow>
+
+    ));
+  };
+
   return (
     <main className={classes.root}>
       <Container maxWidth="md">
@@ -318,42 +362,12 @@ export const RosterPage = () => {
           <Table aria-label="simple table">
             <TableHead>
               <TableRow>
-                <TableCell>EDIPI</TableCell>
-                <TableCell>Rate/Rank</TableCell>
-                <TableCell>First Name</TableCell>
-                <TableCell>Last Name</TableCell>
-                <TableCell>Unit</TableCell>
+                {buildColumnHeaders()}
                 <TableCell />
               </TableRow>
             </TableHead>
             <TableBody>
-              {rows.map(row => (
-                <TableRow key={row.edipi}>
-                  <TableCell component="th" scope="row">
-                    {row.edipi}
-                  </TableCell>
-                  <TableCell>{row.rateRank}</TableCell>
-                  <TableCell>{row.firstName}</TableCell>
-                  <TableCell>{row.lastName}</TableCell>
-                  <TableCell>{row.unit}</TableCell>
-                  <TableCell className={classes.tableButtons}>
-                    <Button
-                      className={classes.editRosterEntryButton}
-                      variant="outlined"
-                      onClick={() => editButtonClicked(row)}
-                    >
-                      <EditIcon />
-                    </Button>
-                    <Button
-                      className={classes.deleteRosterEntryButton}
-                      variant="outlined"
-                      onClick={() => deleteButtonClicked(row)}
-                    >
-                      <DeleteIcon />
-                    </Button>
-                  </TableCell>
-                </TableRow>
-              ))}
+              {buildTableRows()}
             </TableBody>
             <TableFooter>
               <TableRow>
