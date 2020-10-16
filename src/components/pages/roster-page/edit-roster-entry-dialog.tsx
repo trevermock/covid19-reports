@@ -12,14 +12,14 @@ import {
 } from '@material-ui/core';
 import axios from 'axios';
 import useStyles from './edit-roster-entry-dialog.style';
-import { ApiRosterColumnInfo } from '../../../models/api-response';
+import { ApiRosterColumnInfo, ApiRosterEntry } from '../../../models/api-response';
 import { ButtonWithSpinner } from '../../buttons/button-with-spinner';
 
 export interface EditRosterEntryDialogProps {
   open: boolean,
   orgId?: number,
   rosterColumnInfos?: ApiRosterColumnInfo[],
-  rosterEntry?: {[rosterEntryProperty: string]: any},
+  rosterEntry?: ApiRosterEntry,
   onClose?: () => void,
   onError?: (error: string) => void,
 }
@@ -34,7 +34,7 @@ export const EditRosterEntryDialog = (props: EditRosterEntryDialogProps) => {
   const [saveRosterEntryLoading, setSaveRosterEntryLoading] = useState(false);
 
   const existingRosterEntry: boolean = !!props.rosterEntry;
-  const [rosterEntry, setRosterEntryProperties] = useState(existingRosterEntry ? props.rosterEntry as {[rosterEntryProperty: string]: any} : {} as {[rosterEntryProperty: string]: any});
+  const [rosterEntry, setRosterEntryProperties] = useState(existingRosterEntry ? props.rosterEntry as ApiRosterEntry : {} as ApiRosterEntry);
 
   if (!open) {
     return <></>;

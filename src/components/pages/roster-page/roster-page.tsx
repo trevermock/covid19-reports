@@ -129,7 +129,7 @@ export const RosterPage = () => {
 
   async function initializeRosterColumnInfo() {
     try {
-      const infos = (await axios.get(`api/roster/${orgId}/info`)).data.columns as ApiRosterColumnInfo[];
+      const infos = (await axios.get(`api/roster/${orgId}/info`)).data as ApiRosterColumnInfo[];
       setRosterColumnInfos(infos);
     } catch (error) {
       let message = 'Internal Server Error';
