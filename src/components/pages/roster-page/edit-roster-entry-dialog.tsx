@@ -12,14 +12,14 @@ import {
 } from '@material-ui/core';
 import axios from 'axios';
 import useStyles from './edit-roster-entry-dialog.style';
-import { ApiRosterEntry, ApiRosterColumnInfo } from '../../../models/api-response';
+import { ApiRosterColumnInfo } from '../../../models/api-response';
 import { ButtonWithSpinner } from '../../buttons/button-with-spinner';
 
 export interface EditRosterEntryDialogProps {
   open: boolean,
   orgId?: number,
   rosterColumnInfos?: ApiRosterColumnInfo[],
-  rosterEntry?: ApiRosterEntry,
+  rosterEntry?: {[rosterEntryProperty: string]: any},
   onClose?: () => void,
   onError?: (error: string) => void,
 }
@@ -28,28 +28,37 @@ export const EditRosterEntryDialog = (props: EditRosterEntryDialogProps) => {
   const classes = useStyles();
   const [formDisabled, setFormDisabled] = useState(false);
   const {
-    open, orgId, rosterColumnInfos, rosterEntry, onClose, onError,
+    open, orgId, rosterColumnInfos, onClose, onError,
   } = props;
 
   const [saveRosterEntryLoading, setSaveRosterEntryLoading] = useState(false);
 
-  const existingRosterEntry: boolean = !!rosterEntry;
-  const [firstName, setFirstName] = useState(rosterEntry?.firstName || '');
-  const [lastName, setLastName] = useState(rosterEntry?.lastName || '');
+  const existingRosterEntry: boolean = !!props.rosterEntry;
+  const [rosterEntry, setRosterEntryProperties] = useState(existingRosterEntry ? props.rosterEntry as {[rosterEntryProperty: string]: any} : {} as {[rosterEntryProperty: string]: any});
 
   if (!open) {
     return <></>;
   }
 
-  const onInputChanged = (func: (f: string) => any) => (event: React.ChangeEvent<HTMLInputElement>) => {
-    func(event.target.value);
+  function updateRosterEntryProperty(property: string, value: any) {
+    setRosterEntryProperties({
+      ...rosterEntry,
+      [property]: value,
+    });
+  }
+
+  const onTextFieldChanged = (event: React.ChangeEvent<HTMLInputElement>) => {
+    updateRosterEntryProperty(event.target.id, event.target.value);
+  };
+
+  const onCheckboxChanged = (event: React.ChangeEvent<HTMLInputElement>, checked: boolean) => {
+    updateRosterEntryProperty(event.target.id, checked);
   };
 
   const onSave = async () => {
     setFormDisabled(true);
     const body = {
-      firstName,
-      lastName,
+      rosterEntry,
     };
     try {
       setSaveRosterEntryLoading(true);
@@ -77,38 +86,51 @@ export const EditRosterEntryDialog = (props: EditRosterEntryDialogProps) => {
   };
 
   const canSave = () => {
-    return !formDisabled && firstName.length > 0 && lastName.length > 0;
+    // TODO - check if we can save (all required fields have to be filled in)
+    // return !formDisabled && firstName.length > 0 && lastName.length > 0;
+    return true;
   };
 
-  const getFieldForColumnType = (columnInfo: ApiRosterColumnInfo) => {
+  const buildFieldForColumnType = (columnInfo: ApiRosterColumnInfo) => {
     switch (columnInfo.type) {
       case 'string':
         return (
+          // TODO - set an indication for if the field is required or not
           <TextField
             className={classes.textField}
             id={columnInfo.name}
             // TODO - disabled also if updatable is false
             disabled={formDisabled}
-            value={lastName}
-            onChange={onInputChanged(setLastName)}
+            value={rosterEntry[columnInfo.name]}
+            onChange={onTextFieldChanged}
           />
         );
       case 'boolean':
         return (
+          // TODO - set an indication for if the field is required or not
           <Checkbox
-            defaultChecked={false}
+            id={columnInfo.name}
+            color="primary"
+            // TODO - disable also if updatable is false
+            disabled={formDisabled}
+            checked={rosterEntry[columnInfo.name]}
+            onChange={onCheckboxChanged}
           />
         );
       case 'date':
         return (
+          // TODO - set an indication for if the field is required or not
           <TextField
             id={columnInfo.name}
             type="date"
-            value="2017-05-24"
+            value={rosterEntry[columnInfo.name]}
+            // TODO - disable also if updatable is false
+            disabled={formDisabled}
             className={classes.textField}
             InputLabelProps={{
               shrink: true,
             }}
+            onChange={onTextFieldChanged}
           />
         );
       default:
@@ -120,14 +142,11 @@ export const EditRosterEntryDialog = (props: EditRosterEntryDialogProps) => {
     <Dialog className={classes.root} maxWidth="md" onClose={onClose} open={open}>
       <DialogTitle id="alert-dialog-title">{existingRosterEntry ? 'Edit Roster Entry' : 'New Roster Entry'}</DialogTitle>
       <DialogContent>
-        <div>
-          {existingRosterEntry ? `EDIPI: ${rosterEntry?.edipi}` : ''}
-        </div>
         <Grid container spacing={3}>
           {rosterColumnInfos!.map(columnInfo => (
-            <Grid key={columnInfo.displayName} item xs={6}>
+            <Grid key={columnInfo.name} item xs={6}>
               <Typography className={classes.editRosterEntryHeader}>{columnInfo.displayName}</Typography>
-              {getFieldForColumnType(columnInfo)}
+              {buildFieldForColumnType(columnInfo)}
             </Grid>
           ))}
         </Grid>
