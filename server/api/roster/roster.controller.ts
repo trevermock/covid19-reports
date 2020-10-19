@@ -3,7 +3,7 @@ import csv from 'csvtojson';
 import fs from 'fs';
 import { snakeCase } from 'typeorm/util/StringUtils';
 import {
-  ApiRequest, EdipiParam, OrgEdipiParams, OrgParam,
+  ApiRequest, EdipiParam, OrgColumnNameParams, OrgEdipiParams, OrgParam,
 } from '../index';
 import {
   BaseRosterColumns, Roster, RosterColumnInfo, RosterColumnType,
@@ -15,6 +15,76 @@ import { CustomRosterColumn } from './custom-roster-column.model';
 import { Role } from '../role/role.model';
 
 class RosterController {
+
+  async addCustomColumn(req: ApiRequest<OrgParam, CustomColumnData>, res: Response) {
+    if (!req.body.name) {
+      throw new BadRequestError('A name must be supplied when adding a new column.');
+    }
+    if (!req.body.displayName) {
+      throw new BadRequestError('A display name must be supplied when adding a new column.');
+    }
+    if (!req.body.type) {
+      throw new BadRequestError('A type must be supplied when adding a new column.');
+    }
+    const columnName = req.body.name as string;
+    const existingColumn = await CustomRosterColumn.findOne({
+      where: {
+        name: columnName,
+        org: req.appOrg!.id,
+      },
+    });
+
+    if (existingColumn) {
+      throw new BadRequestError('There is already a column with that name.');
+    }
+
+    const column = new CustomRosterColumn();
+    column.org = req.appOrg;
+    setCustomColumnFromBody(column, req.body);
+
+    const newColumn = await column.save();
+    res.status(201).json(newColumn);
+  }
+
+  async updateCustomColumn(req: ApiRequest<OrgColumnNameParams, CustomColumnData>, res: Response) {
+    const existingColumn = await CustomRosterColumn.findOne({
+      relations: ['org'],
+      where: {
+        name: req.params.columnName,
+        org: req.appOrg!.id,
+      },
+    });
+
+    if (!existingColumn) {
+      throw new NotFoundError('The roster column could not be found.');
+    }
+
+    if (req.body.name && req.body.name !== req.params.columnName) {
+      throw new BadRequestError('Unable to change the field name of a custom column.');
+    }
+
+    setCustomColumnFromBody(existingColumn, req.body);
+    const updatedColumn = await existingColumn.save();
+
+    res.json(updatedColumn);
+  }
+
+  async deleteCustomColumn(req: ApiRequest<OrgColumnNameParams, CustomColumnData>, res: Response) {
+    const existingColumn = await CustomRosterColumn.findOne({
+      relations: ['org'],
+      where: {
+        name: req.params.columnName,
+        org: req.appOrg!.id,
+      },
+    });
+
+    if (!existingColumn) {
+      throw new NotFoundError('The roster column could not be found.');
+    }
+
+    const deletedColumn = await existingColumn.remove();
+    res.json(deletedColumn);
+  }
 
   async getRosterTemplate(req: ApiRequest, res: Response) {
     const columns = await getAllowedRosterColumns(req.appOrg!, req.appRole!);
@@ -322,6 +392,27 @@ export async function getRosterColumns(orgId: number) {
   return [...BaseRosterColumns, ...customColumns];
 }
 
+function setCustomColumnFromBody(column: CustomRosterColumn, body: CustomColumnData) {
+  if (body.name) {
+    column.name = body.name;
+  }
+  if (body.displayName) {
+    column.display = body.displayName;
+  }
+  if (body.type) {
+    column.type = body.type;
+  }
+  if (body.pii != null) {
+    column.pii = body.pii;
+  }
+  if (body.phi != null) {
+    column.phi = body.phi;
+  }
+  if (body.required != null) {
+    column.required = body.required;
+  }
+}
+
 function setRosterParamsFromBody(entry: Roster, body: RosterEntryData, columns: RosterColumnInfo[], newEntry: boolean = false) {
   columns.forEach(column => {
     if (newEntry || column.updatable) {
@@ -404,6 +495,15 @@ type RosterFileRow = {
 
 type RosterEntryData = {
   [Key: string]: any
+};
+
+type CustomColumnData = {
+  name?: string,
+  displayName?: string,
+  type?: RosterColumnType,
+  pii?: boolean,
+  phi?: boolean,
+  required?: boolean,
 };
 
 export default new RosterController();

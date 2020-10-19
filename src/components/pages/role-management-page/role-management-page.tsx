@@ -56,7 +56,7 @@ export const RoleManagementPage = () => {
     dispatch(AppFrame.setPageLoading(true));
     const orgRoles = (await axios.get(`api/role/${orgId}`)).data as ApiRole[];
     const orgWorkspaces = (await axios.get(`api/workspace/${orgId}`)).data as ApiWorkspace[];
-    const orgRosterColumns = (await axios.get(`api/roster/${orgId}/fullinfo`)).data as ApiRosterColumnInfo[];
+    const orgRosterColumns = (await axios.get(`api/roster/column/${orgId}`)).data as ApiRosterColumnInfo[];
     const parsedRoleData = orgRoles.map(role => {
       return {
         allowedRosterColumns: parsePermissions(orgRosterColumns, role.allowedRosterColumns),
@@ -139,6 +139,12 @@ export const RoleManagementPage = () => {
     setSelectedRoleIndex(isExpanded ? index : -1);
   };
 
+  const columnAllowed = (column: ApiRosterColumnInfo, permissions: RolePermissions, role: ApiRole) => {
+    return permissions[column.name]
+      && (!column.pii || role.canViewPII || role.canViewPHI)
+      && (!column.phi || role.canViewPHI);
+  };
+
   const buildRosterColumnRows = (index: number) => {
     if (index >= roleData.length) {
       return <></>;
@@ -150,7 +156,7 @@ export const RoleManagementPage = () => {
           {column.displayName}
         </TableCell>
         <TableCell className={classes.iconCell}>
-          {viewableColumns[column.name] && (
+          {columnAllowed(column, viewableColumns, roles[index]) && (
             <CheckIcon />
           )}
         </TableCell>
@@ -297,7 +303,7 @@ export const RoleManagementPage = () => {
                           </TableCell>
                         </TableRow>
                         <TableRow>
-                          <TableCell className={classes.textCell}>View PII</TableCell>
+                          <TableCell className={classes.textCell}>View PHI</TableCell>
                           <TableCell className={classes.iconCell}>
                             {row.canViewPHI && (
                               <CheckIcon />

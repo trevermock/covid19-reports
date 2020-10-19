@@ -44,8 +44,13 @@ export type WorkspaceParam = {
   workspaceId: string
 };
 
+export type ColumnNameParam = {
+  columnName: string
+};
+
 export type OrgRoleParams = OrgParam & RoleParam;
 export type OrgEdipiParams = OrgParam & EdipiParam;
 export type OrgWorkspaceParams = OrgParam & WorkspaceParam;
+export type OrgColumnNameParams = OrgParam & ColumnNameParam;
 
 export default router;
