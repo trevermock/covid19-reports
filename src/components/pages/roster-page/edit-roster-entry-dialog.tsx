@@ -59,6 +59,8 @@ export const EditRosterEntryDialog = (props: EditRosterEntryDialogProps) => {
   };
 
   const onSave = async () => {
+    // remove any values that are still null before we save
+    Object.keys(rosterEntry).forEach((key: string) => (rosterEntry[key] == null) && delete rosterEntry[key]);
     setFormDisabled(true);
     try {
       setSaveRosterEntryLoading(true);
@@ -137,9 +139,9 @@ export const EditRosterEntryDialog = (props: EditRosterEntryDialogProps) => {
           label={columnInfo.displayName}
           disabled={existingRosterEntry ? formDisabled || !columnInfo.updatable : false}
           required={columnInfo.required}
-          value={rosterEntry[columnInfo.name]}
           onChange={onTextFieldChanged}
-          type={columnInfo.type === 'date' ? 'date' : 'text'}
+          value={columnInfo.type === 'string' ? rosterEntry[columnInfo.name] : rosterEntry[columnInfo.name].split('T')[0]}
+          type={columnInfo.type === 'string' ? 'text' : 'date'}
         />
       </Grid>
     ));
