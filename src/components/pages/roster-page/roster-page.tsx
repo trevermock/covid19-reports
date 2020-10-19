@@ -264,7 +264,7 @@ export const RosterPage = () => {
   const buildColumnHeaders = () => {
     const columns = rosterColumnInfos?.slice(0, maxNumColumnsToShow);
     return columns?.map(columnInfo => (
-      <TableCell>{columnInfo.displayName}</TableCell>
+      <TableCell key={columnInfo.name}>{columnInfo.displayName}</TableCell>
     ));
   };
 
@@ -277,7 +277,7 @@ export const RosterPage = () => {
       <TableRow key={row.edipi}>
 
         {columns.map(columnInfo => (
-          <TableCell>
+          <TableCell key={`${columnInfo.name}-${row.edipi}`}>
             {row[columnInfo.name]}
           </TableCell>
         ))}
