@@ -60,15 +60,12 @@ export const EditRosterEntryDialog = (props: EditRosterEntryDialogProps) => {
 
   const onSave = async () => {
     setFormDisabled(true);
-    const body = {
-      rosterEntry,
-    };
     try {
       setSaveRosterEntryLoading(true);
       if (existingRosterEntry) {
-        await axios.put(`api/roster/${orgId}/${rosterEntry!.edipi}`, body);
+        await axios.put(`api/roster/${orgId}/${rosterEntry!.edipi}`, rosterEntry);
       } else {
-        await axios.post(`api/roster/${orgId}`, body);
+        await axios.post(`api/roster/${orgId}`, rosterEntry);
       }
     } catch (error) {
       if (onError) {
@@ -120,6 +117,7 @@ export const EditRosterEntryDialog = (props: EditRosterEntryDialogProps) => {
         <TableCell className={classes.iconCell}>
           <Checkbox
             color="primary"
+            id={columnInfo.name}
             disabled={formDisabled || !columnInfo.updatable}
             checked={rosterEntry[columnInfo.name]}
             onChange={onCheckboxChanged}
@@ -130,7 +128,7 @@ export const EditRosterEntryDialog = (props: EditRosterEntryDialogProps) => {
   };
 
   const buildTextFields = () => {
-    const columns = rosterColumnInfos?.filter(columnInfo => columnInfo.type === 'string' || 'date');
+    const columns = rosterColumnInfos?.filter(columnInfo => columnInfo.type === 'string' || columnInfo.type === 'date');
     return columns?.map(columnInfo => (
       <Grid key={columnInfo.name} item xs={6}>
         <TextField
