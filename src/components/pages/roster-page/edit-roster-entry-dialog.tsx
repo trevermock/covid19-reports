@@ -59,8 +59,6 @@ export const EditRosterEntryDialog = (props: EditRosterEntryDialogProps) => {
   };
 
   const onSave = async () => {
-    // remove any values that are still null before we save
-    Object.keys(rosterEntry).forEach((key: string) => (rosterEntry[key] == null) && delete rosterEntry[key]);
     setFormDisabled(true);
     try {
       setSaveRosterEntryLoading(true);
@@ -121,7 +119,7 @@ export const EditRosterEntryDialog = (props: EditRosterEntryDialogProps) => {
             color="primary"
             id={columnInfo.name}
             disabled={existingRosterEntry ? formDisabled || !columnInfo.updatable : false}
-            checked={rosterEntry[columnInfo.name]}
+            checked={rosterEntry[columnInfo.name] || false}
             onChange={onCheckboxChanged}
           />
         </TableCell>
@@ -130,7 +128,7 @@ export const EditRosterEntryDialog = (props: EditRosterEntryDialogProps) => {
   };
 
   const buildTextFields = () => {
-    const columns = rosterColumnInfos?.filter(columnInfo => columnInfo.type === 'string' || columnInfo.type === 'date');
+    const columns = rosterColumnInfos?.filter(columnInfo => columnInfo.type !== 'boolean');
     return columns?.map(columnInfo => (
       <Grid key={columnInfo.name} item xs={6}>
         <TextField
@@ -140,8 +138,8 @@ export const EditRosterEntryDialog = (props: EditRosterEntryDialogProps) => {
           disabled={existingRosterEntry ? formDisabled || !columnInfo.updatable : false}
           required={columnInfo.required}
           onChange={onTextFieldChanged}
-          value={columnInfo.type === 'string' ? rosterEntry[columnInfo.name] : rosterEntry[columnInfo.name].split('T')[0]}
-          type={columnInfo.type === 'string' ? 'text' : 'date'}
+          value={columnInfo.type === 'date' && rosterEntry[columnInfo.name] ? rosterEntry[columnInfo.name].split('T')[0] || '' : rosterEntry[columnInfo.name] || ''}
+          type={columnInfo.type === 'date' ? 'date' : 'text'}
         />
       </Grid>
     ));
