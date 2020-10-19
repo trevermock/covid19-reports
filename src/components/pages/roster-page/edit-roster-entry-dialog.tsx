@@ -118,7 +118,7 @@ export const EditRosterEntryDialog = (props: EditRosterEntryDialogProps) => {
           <Checkbox
             color="primary"
             id={columnInfo.name}
-            disabled={formDisabled || !columnInfo.updatable}
+            disabled={existingRosterEntry ? formDisabled || !columnInfo.updatable : false}
             checked={rosterEntry[columnInfo.name]}
             onChange={onCheckboxChanged}
           />
@@ -135,7 +135,7 @@ export const EditRosterEntryDialog = (props: EditRosterEntryDialogProps) => {
           className={classes.textField}
           id={columnInfo.name}
           label={columnInfo.displayName}
-          disabled={formDisabled || !columnInfo.updatable}
+          disabled={existingRosterEntry ? formDisabled || !columnInfo.updatable : false}
           required={columnInfo.required}
           value={rosterEntry[columnInfo.name]}
           onChange={onTextFieldChanged}
