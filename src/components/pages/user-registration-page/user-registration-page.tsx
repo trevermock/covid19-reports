@@ -48,8 +48,8 @@ export const UserRegistrationPage = () => {
       }
       setAlertDialogProps({
         open: true,
-        title: 'Roster Initialization',
-        message: `Failed to initialize roster page: ${message}`,
+        title: 'Register User',
+        message: `Failed to register user: ${message}`,
         onClose: () => { setAlertDialogProps({ open: false }); },
       });
     } finally {
