@@ -127,20 +127,44 @@ export const EditRosterEntryDialog = (props: EditRosterEntryDialogProps) => {
     ));
   };
 
-  const buildTextFields = () => {
+  const buildTextInput = (columnInfo: ApiRosterColumnInfo) => {
+    return (
+      <TextField
+        className={classes.textField}
+        id={columnInfo.name}
+        label={columnInfo.displayName}
+        disabled={existingRosterEntry ? formDisabled || !columnInfo.updatable : false}
+        required={columnInfo.required}
+        onChange={onTextFieldChanged}
+        value={rosterEntry[columnInfo.name] || ''}
+        type="text"
+      />
+    );
+  };
+
+  const buildDateInput = (columnInfo: ApiRosterColumnInfo) => {
+    return (
+      <TextField
+        className={classes.textField}
+        id={columnInfo.name}
+        label={columnInfo.displayName}
+        disabled={existingRosterEntry ? formDisabled || !columnInfo.updatable : false}
+        required={columnInfo.required}
+        onChange={onTextFieldChanged}
+        value={rosterEntry[columnInfo.name] ? rosterEntry[columnInfo.name].split('T')[0] || '' : ''}
+        type="date"
+        InputLabelProps={{
+          shrink: true,
+        }}
+      />
+    );
+  };
+
+  const buildInputFields = () => {
     const columns = rosterColumnInfos?.filter(columnInfo => columnInfo.type !== 'boolean');
     return columns?.map(columnInfo => (
       <Grid key={columnInfo.name} item xs={6}>
-        <TextField
-          className={classes.textField}
-          id={columnInfo.name}
-          label={columnInfo.displayName}
-          disabled={existingRosterEntry ? formDisabled || !columnInfo.updatable : false}
-          required={columnInfo.required}
-          onChange={onTextFieldChanged}
-          value={columnInfo.type === 'date' && rosterEntry[columnInfo.name] ? rosterEntry[columnInfo.name].split('T')[0] || '' : rosterEntry[columnInfo.name] || ''}
-          type={columnInfo.type === 'date' ? 'date' : 'text'}
-        />
+        {columnInfo.type === 'date' ? buildDateInput(columnInfo) : buildTextInput(columnInfo)}
       </Grid>
     ));
   };
@@ -150,7 +174,7 @@ export const EditRosterEntryDialog = (props: EditRosterEntryDialogProps) => {
       <DialogTitle id="alert-dialog-title">{existingRosterEntry ? 'Edit Roster Entry' : 'New Roster Entry'}</DialogTitle>
       <DialogContent>
         <Grid container spacing={3}>
-          {buildTextFields()}
+          {buildInputFields()}
         </Grid>
         <label className={classes.booleanTableLabel}>Other:</label>
         <div className={classes.tableScroll}>
