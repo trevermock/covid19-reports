@@ -262,6 +262,39 @@ export const RosterPage = () => {
     setSelectedRosterEntry(undefined);
   };
 
+  const downloadCSVExport = async () => {
+    axios({
+      url: `api/roster/${orgId}/export`,
+      method: 'GET',
+      responseType: 'blob',
+    }).then(response => {
+      const url = window.URL.createObjectURL(new Blob([response.data]));
+      const link = document.createElement('a');
+      link.href = url;
+      const date = new Date().toISOString();
+      const filename = `org_${orgId}_roster_export_${date}.csv`;
+      link.setAttribute('download', filename);
+      document.body.appendChild(link);
+      link.click();
+    });
+  };
+
+  const downloadCSVTemplate = async () => {
+    axios({
+      url: `api/roster/${orgId}/template`,
+      method: 'GET',
+      responseType: 'blob',
+    }).then(response => {
+      const url = window.URL.createObjectURL(new Blob([response.data]));
+      const link = document.createElement('a');
+      link.href = url;
+      const filename = `roster-template.csv`;
+      link.setAttribute('download', filename);
+      document.body.appendChild(link);
+      link.click();
+    });
+  };
+
   useEffect(() => { initializeTable().then(); }, [initializeTable]);
 
   const buildColumnHeaders = () => {
@@ -276,7 +309,6 @@ export const RosterPage = () => {
 
     return rows.map(row => (
 
-      // TODO - what if we don't have edipi? What should we make this key?
       <TableRow key={row.edipi}>
 
         {columns.map(columnInfo => (
@@ -333,24 +365,21 @@ export const RosterPage = () => {
             type="button"
             size="large"
             startIcon={<GetAppIcon />}
-            href={`api/roster/${orgId}/template`}
+            onClick={() => downloadCSVTemplate()}
           >
             Download CSV Template
           </Button>
 
-          <a href={`api/roster/${orgId}/export`} download>
-            <Button
-              type="button"
-              size="large"
-              startIcon={<GetAppIcon />}
-              className={classes.fillWidth}
-            >
-              Export to CSV
-            </Button>
-          </a>
+          <Button
+            type="button"
+            size="large"
+            startIcon={<GetAppIcon />}
+            onClick={() => downloadCSVExport()}
+          >
+            Export to CSV
+          </Button>
 
           <Button
-            className={classes.addRosterEntryButton}
             color="primary"
             size="large"
             startIcon={<AddCircleOutlineIcon />}
