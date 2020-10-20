@@ -10,7 +10,6 @@ import {
   TableRow,
   DialogActions,
   Dialog,
-  DialogTitle,
   DialogContent,
   DialogContentText,
   IconButton, FormControl, InputLabel, Select,
@@ -26,6 +25,7 @@ import { AppState } from '../../../store';
 import { ApiRole, ApiUser, ApiAccessRequest } from '../../../models/api-response';
 import { AppFrame } from '../../../actions/app-frame.actions';
 import { ButtonWithSpinner } from '../../buttons/button-with-spinner';
+import { AlertDialog, AlertDialogProps } from '../../alert-dialog/alert-dialog';
 
 interface AccessRequestRow extends ApiAccessRequest {
   waiting?: boolean,
@@ -43,19 +43,35 @@ export const UsersPage = () => {
   const [accessRequests, setAccessRequests] = useState<AccessRequestRow[]>([]);
   const [finalizeApprovalLoading, setFinalizeApprovalLoading] = useState(false);
   const [denyRequestsLoading, setDenyRequestsLoading] = useState({} as ({[rowId: number]: boolean}));
-  const [alert, setAlert] = useState({ open: false, message: '', title: '' });
+  const [alertDialogProps, setAlertDialogProps] = useState<AlertDialogProps>({ open: false });
 
   const orgId = useSelector<AppState, UserState>(state => state.user).activeRole?.org?.id;
 
   const initializeTable = React.useCallback(async () => {
-    dispatch(AppFrame.setPageLoading(true));
-    const users = (await axios.get(`api/user/${orgId}`)).data as ApiUser[];
-    const requests = (await axios.get(`api/access-request/${orgId}`)).data as AccessRequestRow[];
-    const roles = (await axios.get(`api/role/${orgId}`)).data as ApiRole[];
-    setUserRows(users);
-    setAccessRequests(requests);
-    setAvailableRoles(roles);
-    dispatch(AppFrame.setPageLoading(false));
+    try {
+      dispatch(AppFrame.setPageLoading(true));
+      const users = (await axios.get(`api/user/${orgId}`)).data as ApiUser[];
+      const requests = (await axios.get(`api/access-request/${orgId}`)).data as AccessRequestRow[];
+      const roles = (await axios.get(`api/role/${orgId}`)).data as ApiRole[];
+      setUserRows(users);
+      setAccessRequests(requests);
+      setAvailableRoles(roles);
+    } catch (error) {
+      let message = 'Internal Server Error';
+      if (error.response?.data?.errors && error.response.data.errors.length > 0) {
+        message = error.response.data.errors[0].message;
+      } else {
+        console.log(error);
+      }
+      setAlertDialogProps({
+        open: true,
+        title: 'Initialize Users Page',
+        message: `Failed to initialize the users page: ${message}`,
+        onClose: () => { setAlertDialogProps({ open: false }); },
+      });
+    } finally {
+      dispatch(AppFrame.setPageLoading(false));
+    }
   }, [orgId]);
 
   function updateDenyRequestLoading(rowId: number, isLoading: boolean) {
@@ -69,42 +85,60 @@ export const UsersPage = () => {
     setSelectedRole(event.target.value as number);
   }
 
-  function cancelRoleSelection() {
+  function updateAccessRequestWaiting(id: number, isWaiting: boolean) {
     setAccessRequests(requests => {
       return requests.map(request => {
-        if (request.id === activeAccessRequest?.id) {
-          request.waiting = false;
+        if (request.id === id) {
+          request.waiting = isWaiting;
         }
         return request;
       });
     });
+  }
+
+  function cancelRoleSelection() {
+    if (activeAccessRequest && activeAccessRequest.id) {
+      updateAccessRequestWaiting(activeAccessRequest?.id, false);
+    }
     setActiveAccessRequest(undefined);
   }
 
   async function acceptRoleSelection() {
-    setFinalizeApprovalLoading(true);
-    setFormDisabled(true);
-    if (activeAccessRequest) {
-      await axios.post(`api/access-request/${orgId}/approve`, {
-        requestId: activeAccessRequest.id,
-        roleId: availableRoles[selectedRole].id,
+    try {
+      setFinalizeApprovalLoading(true);
+      setFormDisabled(true);
+      if (activeAccessRequest) {
+        await axios.post(`api/access-request/${orgId}/approve`, {
+          requestId: activeAccessRequest.id,
+          roleId: availableRoles[selectedRole].id,
+        });
+      }
+      await initializeTable();
+    } catch (error) {
+      let message = 'Internal Server Error';
+      if (error.response?.data?.errors && error.response.data.errors.length > 0) {
+        message = error.response.data.errors[0].message;
+      } else {
+        console.log(error);
+      }
+      setAlertDialogProps({
+        open: true,
+        title: 'Accept Request',
+        message: `Failed to approve request: ${message}`,
+        onClose: () => { setAlertDialogProps({ open: false }); },
       });
+    } finally {
+      setFinalizeApprovalLoading(false);
+      setFormDisabled(false);
+      if (activeAccessRequest && activeAccessRequest.id) {
+        updateAccessRequestWaiting(activeAccessRequest.id, false);
+      }
+      setActiveAccessRequest(undefined);
     }
-    await initializeTable();
-    setFinalizeApprovalLoading(false);
-    setFormDisabled(false);
-    setActiveAccessRequest(undefined);
   }
 
   function acceptRequest(id: number) {
-    setAccessRequests(requests => {
-      return requests.map(request => {
-        if (request.id === id) {
-          request.waiting = true;
-        }
-        return request;
-      });
-    });
+    updateAccessRequestWaiting(id, true);
     const request = accessRequests.find(req => req.id === id);
     if (request) {
       setActiveAccessRequest(request);
@@ -112,25 +146,31 @@ export const UsersPage = () => {
   }
 
   async function denyRequest(id: number) {
-    updateDenyRequestLoading(id, true);
-    setAccessRequests(requests => {
-      return requests.map(request => {
-        if (request.id === id) {
-          request.waiting = true;
-        }
-        return request;
+    try {
+      updateDenyRequestLoading(id, true);
+      updateAccessRequestWaiting(id, true);
+      await axios.post(`api/access-request/${orgId}/deny`, {
+        requestId: id,
       });
-    });
-    await axios.post(`api/access-request/${orgId}/deny`, {
-      requestId: id,
-    });
-    updateDenyRequestLoading(id, false);
-    await initializeTable();
+      await initializeTable();
+    } catch (error) {
+      let message = 'Internal Server Error';
+      if (error.response?.data?.errors && error.response.data.errors.length > 0) {
+        message = error.response.data.errors[0].message;
+      } else {
+        console.log(error);
+      }
+      setAlertDialogProps({
+        open: true,
+        title: 'Deny Request',
+        message: `Failed to deny request: ${message}`,
+        onClose: () => { setAlertDialogProps({ open: false }); },
+      });
+    } finally {
+      updateAccessRequestWaiting(id, false);
+      updateDenyRequestLoading(id, false);
+    }
   }
-
-  const handleAlertClose = () => {
-    setAlert({ open: false, message: '', title: '' });
-  };
 
   useEffect(() => { initializeTable().then(); }, [initializeTable]);
 
@@ -337,24 +377,9 @@ export const UsersPage = () => {
           </ButtonWithSpinner>
         </DialogActions>
       </Dialog>
-      <Dialog
-        open={alert.open}
-        onClose={handleAlertClose}
-        aria-labelledby="alert-dialog-title"
-        aria-describedby="alert-dialog-description"
-      >
-        <DialogTitle id="alert-dialog-title">{alert.title}</DialogTitle>
-        <DialogContent>
-          <DialogContentText id="alert-dialog-description">
-            {alert.message}
-          </DialogContentText>
-        </DialogContent>
-        <DialogActions>
-          <Button onClick={handleAlertClose} autoFocus>
-            OK
-          </Button>
-        </DialogActions>
-      </Dialog>
+      {alertDialogProps.open && (
+        <AlertDialog open={alertDialogProps.open} title={alertDialogProps.title} message={alertDialogProps.message} onClose={alertDialogProps.onClose} />
+      )}
     </main>
   );
 };
