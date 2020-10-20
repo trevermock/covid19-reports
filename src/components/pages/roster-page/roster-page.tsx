@@ -118,36 +118,35 @@ export const RosterPage = () => {
   };
 
   const initializeTable = React.useCallback(async () => {
-
-    dispatch(AppFrame.setPageLoading(true));
-
-    initializeRosterColumnInfo();
-
-    const countData = (await axios.get(`api/roster/${orgId}/count`)).data as CountResponse;
-    setRosterSize(countData.count);
-    await handleChangePage(null, 0);
-
-    dispatch(AppFrame.setPageLoading(false));
-
-  }, [orgId]);
-
-  async function initializeRosterColumnInfo() {
     try {
+
+      dispatch(AppFrame.setPageLoading(true));
+
       const infos = (await axios.get(`api/roster/${orgId}/info`)).data as ApiRosterColumnInfo[];
       setRosterColumnInfos(infos);
+
+      const countData = (await axios.get(`api/roster/${orgId}/count`)).data as CountResponse;
+      setRosterSize(countData.count);
+
+      await handleChangePage(null, 0);
+
     } catch (error) {
       let message = 'Internal Server Error';
       if (error.response?.data?.errors && error.response.data.errors.length > 0) {
         message = error.response.data.errors[0].message;
+      } else {
+        console.log(error);
       }
       setAlertDialogProps({
         open: true,
-        title: 'Get Roster Column Info',
-        message: `Failed to get roster column info: ${message}`,
+        title: 'Roster Initialization',
+        message: `Failed to initialize roster page: ${message}`,
         onClose: () => { setAlertDialogProps({ open: false }); },
       });
+    } finally {
+      dispatch(AppFrame.setPageLoading(false));
     }
-  }
+  }, [orgId]);
 
   function handleFileInputChange(e: ChangeEvent<HTMLInputElement>) {
     if (!e.target.files || e.target.files[0] == null) {
