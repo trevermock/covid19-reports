@@ -12,12 +12,14 @@ import { AppState } from '../../../store';
 import useStyles from './user-registration-page.styles';
 import services from '../../../data/services';
 import { ButtonWithSpinner } from '../../buttons/button-with-spinner';
+import { AlertDialog, AlertDialogProps } from '../../alert-dialog/alert-dialog';
 
 export const UserRegistrationPage = () => {
   const classes = useStyles();
   const dispatch = useDispatch();
   const user = useSelector<AppState, UserState>(state => state.user);
   const [registerUserLoading, setRegisterUserLoading] = useState(false);
+  const [alertDialogProps, setAlertDialogProps] = useState<AlertDialogProps>({ open: false });
   const [inputData, setInputData] = useState<UserRegisterData>({
     firstName: '',
     lastName: '',
@@ -34,9 +36,25 @@ export const UserRegistrationPage = () => {
   }
 
   async function handleCreateAccountClick() {
-    setRegisterUserLoading(true);
-    await dispatch(User.register(inputData));
-    setRegisterUserLoading(false);
+    try {
+      setRegisterUserLoading(true);
+      await dispatch(User.register(inputData));
+    } catch (error) {
+      let message = 'Internal Server Error';
+      if (error.response?.data?.errors && error.response.data.errors.length > 0) {
+        message = error.response.data.errors[0].message;
+      } else {
+        console.log(error);
+      }
+      setAlertDialogProps({
+        open: true,
+        title: 'Roster Initialization',
+        message: `Failed to initialize roster page: ${message}`,
+        onClose: () => { setAlertDialogProps({ open: false }); },
+      });
+    } finally {
+      setRegisterUserLoading(false);
+    }
   }
 
   function isCreateAccountButtonDisabled() {
@@ -152,6 +170,9 @@ export const UserRegistrationPage = () => {
           </ButtonWithSpinner>
         </div>
       </Paper>
+      {alertDialogProps.open && (
+        <AlertDialog open={alertDialogProps.open} title={alertDialogProps.title} message={alertDialogProps.message} onClose={alertDialogProps.onClose} />
+      )}
     </main>
   );
 };
