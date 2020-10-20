@@ -104,6 +104,8 @@ export const RosterPage = () => {
   const [deleteRosterEntryDialogOpen, setDeleteRosterEntryDialogOpen] = useState(false);
   const [editRosterEntryDialogProps, setEditRosterEntryDialogProps] = useState<EditRosterEntryDialogProps>({ open: false });
   const [deleteRosterEntryLoading, setDeleteRosterEntryLoading] = useState(false);
+  const [downloadTemplateLoading, setDownloadTemplateLoading] = useState(false);
+  const [exportRosterLoading, setExportRosterLoading] = useState(false);
   const [rosterColumnInfos, setRosterColumnInfos] = useState<ApiRosterColumnInfo[]>([]);
 
   const orgId = useSelector<AppState, UserState>(state => state.user).activeRole?.org?.id;
@@ -263,36 +265,68 @@ export const RosterPage = () => {
   };
 
   const downloadCSVExport = async () => {
-    axios({
-      url: `api/roster/${orgId}/export`,
-      method: 'GET',
-      responseType: 'blob',
-    }).then(response => {
-      const url = window.URL.createObjectURL(new Blob([response.data]));
-      const link = document.createElement('a');
-      link.href = url;
-      const date = new Date().toISOString();
-      const filename = `org_${orgId}_roster_export_${date}.csv`;
-      link.setAttribute('download', filename);
-      document.body.appendChild(link);
-      link.click();
-    });
+    try {
+      setExportRosterLoading(true);
+      await axios({
+        url: `api/roster/${orgId}/export`,
+        method: 'GET',
+        responseType: 'blob',
+      }).then(response => {
+        const url = window.URL.createObjectURL(new Blob([response.data]));
+        const link = document.createElement('a');
+        link.href = url;
+        const date = new Date().toISOString();
+        const filename = `org_${orgId}_roster_export_${date}.csv`;
+        link.setAttribute('download', filename);
+        document.body.appendChild(link);
+        link.click();
+      });
+    } catch (error) {
+      let message = 'Internal Server Error';
+      if (error.response?.data?.errors && error.response.data.errors.length > 0) {
+        message = error.response.data.errors[0].message;
+      }
+      setAlertDialogProps({
+        open: true,
+        title: 'Roster CSV Export',
+        message: `Unable to export roster to CSV: ${message}`,
+        onClose: () => { setAlertDialogProps({ open: false }); },
+      });
+    } finally {
+      setExportRosterLoading(false);
+    }
   };
 
   const downloadCSVTemplate = async () => {
-    axios({
-      url: `api/roster/${orgId}/template`,
-      method: 'GET',
-      responseType: 'blob',
-    }).then(response => {
-      const url = window.URL.createObjectURL(new Blob([response.data]));
-      const link = document.createElement('a');
-      link.href = url;
-      const filename = `roster-template.csv`;
-      link.setAttribute('download', filename);
-      document.body.appendChild(link);
-      link.click();
-    });
+    try {
+      setDownloadTemplateLoading(true);
+      await axios({
+        url: `api/roster/${orgId}/template`,
+        method: 'GET',
+        responseType: 'blob',
+      }).then(response => {
+        const url = window.URL.createObjectURL(new Blob([response.data]));
+        const link = document.createElement('a');
+        link.href = url;
+        const filename = `roster-template.csv`;
+        link.setAttribute('download', filename);
+        document.body.appendChild(link);
+        link.click();
+      });
+    } catch (error) {
+      let message = 'Internal Server Error';
+      if (error.response?.data?.errors && error.response.data.errors.length > 0) {
+        message = error.response.data.errors[0].message;
+      }
+      setAlertDialogProps({
+        open: true,
+        title: 'CSV Template Download',
+        message: `Unable to download CSV template: ${message}`,
+        onClose: () => { setAlertDialogProps({ open: false }); },
+      });
+    } finally {
+      setDownloadTemplateLoading(false);
+    }
   };
 
   useEffect(() => { initializeTable().then(); }, [initializeTable]);
@@ -361,23 +395,25 @@ export const RosterPage = () => {
             </Button>
           </label>
 
-          <Button
+          <ButtonWithSpinner
             type="button"
             size="large"
             startIcon={<GetAppIcon />}
             onClick={() => downloadCSVTemplate()}
+            loading={downloadTemplateLoading}
           >
             Download CSV Template
-          </Button>
+          </ButtonWithSpinner>
 
-          <Button
+          <ButtonWithSpinner
             type="button"
             size="large"
             startIcon={<GetAppIcon />}
             onClick={() => downloadCSVExport()}
+            loading={exportRosterLoading}
           >
             Export to CSV
-          </Button>
+          </ButtonWithSpinner>
 
           <Button
             color="primary"
