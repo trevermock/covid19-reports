@@ -10,7 +10,7 @@ import {
   TableRow,
 } from '@material-ui/core';
 import React, { useEffect, useState } from 'react';
-import { useSelector } from 'react-redux';
+import { useSelector, useDispatch } from 'react-redux';
 import axios from 'axios';
 import AddCircleOutlineIcon from '@material-ui/icons/AddCircleOutline';
 import MoreVertIcon from '@material-ui/icons/MoreVert';
@@ -20,6 +20,7 @@ import { AppState } from '../../../store';
 import { ApiRosterColumnInfo } from '../../../models/api-response';
 import { AlertDialog, AlertDialogProps } from '../../alert-dialog/alert-dialog';
 import { EditColumnDialog, EditColumnDialogProps } from './edit-column-dialog';
+import { AppFrame } from '../../../actions/app-frame.actions';
 
 interface ColumnMenuState {
   anchor: HTMLElement | null,
@@ -28,6 +29,7 @@ interface ColumnMenuState {
 
 export const RosterColumnsPage = () => {
   const classes = useStyles();
+  const dispatch = useDispatch();
   const [columns, setColumns] = useState<ApiRosterColumnInfo[]>([]);
   const [columnToDelete, setColumnToDelete] = useState<null | ApiRosterColumnInfo>(null);
   const [alertDialogProps, setAlertDialogProps] = useState<AlertDialogProps>({ open: false });
@@ -37,9 +39,27 @@ export const RosterColumnsPage = () => {
   const orgId = useSelector<AppState, UserState>(state => state.user).activeRole?.org?.id;
 
   const initializeTable = React.useCallback(async () => {
-    const allColumns = (await axios.get(`api/roster/column/${orgId}`)).data as ApiRosterColumnInfo[];
-    const customColumns = allColumns.filter(column => column.custom);
-    setColumns(customColumns);
+    try {
+      dispatch(AppFrame.setPageLoading(true));
+      const allColumns = (await axios.get(`api/roster/column/${orgId}`)).data as ApiRosterColumnInfo[];
+      const customColumns = allColumns.filter(column => column.custom);
+      setColumns(customColumns);
+    } catch (error) {
+      let message = 'Internal Server Error';
+      if (error.response?.data?.errors && error.response.data.errors.length > 0) {
+        message = error.response.data.errors[0].message;
+      } else {
+        console.log(error);
+      }
+      setAlertDialogProps({
+        open: true,
+        title: 'Initialize Custom Columns Page',
+        message: `Failed to initialize the custom columns page: ${message}`,
+        onClose: () => { setAlertDialogProps({ open: false }); },
+      });
+    } finally {
+      dispatch(AppFrame.setPageLoading(false));
+    }
   }, [orgId]);
 
   const newColumn = async () => {
@@ -103,6 +123,8 @@ export const RosterColumnsPage = () => {
       let message = 'Internal Server Error';
       if (error.response?.data?.errors && error.response.data.errors.length > 0) {
         message = error.response.data.errors[0].message;
+      } else {
+        console.log(error);
       }
       setAlertDialogProps({
         open: true,
