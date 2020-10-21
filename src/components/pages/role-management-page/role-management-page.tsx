@@ -53,21 +53,37 @@ export const RoleManagementPage = () => {
   const orgId = useSelector<AppState, UserState>(state => state.user).activeRole?.org?.id;
 
   const initializeTable = React.useCallback(async () => {
-    dispatch(AppFrame.setPageLoading(true));
-    const orgRoles = (await axios.get(`api/role/${orgId}`)).data as ApiRole[];
-    const orgWorkspaces = (await axios.get(`api/workspace/${orgId}`)).data as ApiWorkspace[];
-    const orgRosterColumns = (await axios.get(`api/roster/column/${orgId}`)).data as ApiRosterColumnInfo[];
-    const parsedRoleData = orgRoles.map(role => {
-      return {
-        allowedRosterColumns: parsePermissions(orgRosterColumns, role.allowedRosterColumns),
-        allowedNotificationEvents: parsePermissions(AllNotificationEvents, role.allowedNotificationEvents),
-      };
-    });
-    setRoleData(parsedRoleData);
-    setWorkspaces(orgWorkspaces);
-    setRosterColumns(orgRosterColumns);
-    setRoles(orgRoles);
-    dispatch(AppFrame.setPageLoading(false));
+    try {
+      dispatch(AppFrame.setPageLoading(true));
+      const orgRoles = (await axios.get(`api/role/${orgId}`)).data as ApiRole[];
+      const orgWorkspaces = (await axios.get(`api/workspace/${orgId}`)).data as ApiWorkspace[];
+      const orgRosterColumns = (await axios.get(`api/roster/column/${orgId}`)).data as ApiRosterColumnInfo[];
+      const parsedRoleData = orgRoles.map(role => {
+        return {
+          allowedRosterColumns: parsePermissions(orgRosterColumns, role.allowedRosterColumns),
+          allowedNotificationEvents: parsePermissions(AllNotificationEvents, role.allowedNotificationEvents),
+        };
+      });
+      setRoleData(parsedRoleData);
+      setWorkspaces(orgWorkspaces);
+      setRosterColumns(orgRosterColumns);
+      setRoles(orgRoles);
+    } catch (error) {
+      let message = 'Internal Server Error';
+      if (error.response?.data?.errors && error.response.data.errors.length > 0) {
+        message = error.response.data.errors[0].message;
+      } else {
+        console.log(error);
+      }
+      setAlertDialogProps({
+        open: true,
+        title: 'Initialize Role Management Page',
+        message: `Failed to initialize the role management page: ${message}`,
+        onClose: () => { setAlertDialogProps({ open: false }); },
+      });
+    } finally {
+      dispatch(AppFrame.setPageLoading(false));
+    }
   }, [orgId]);
 
   const cancelDeleteRoleDialog = () => {
