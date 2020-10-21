@@ -6,6 +6,11 @@ import FirstPageIcon from '@material-ui/icons/FirstPage';
 import KeyboardArrowLeft from '@material-ui/icons/KeyboardArrowLeft';
 import KeyboardArrowRight from '@material-ui/icons/KeyboardArrowRight';
 import LastPageIcon from '@material-ui/icons/LastPage';
+import EditIcon from '@material-ui/icons/Edit';
+import DeleteIcon from '@material-ui/icons/Delete';
+import AddCircleOutlineIcon from '@material-ui/icons/AddCircleOutline';
+import PublishIcon from '@material-ui/icons/Publish';
+import GetAppIcon from '@material-ui/icons/GetApp';
 import React, { ChangeEvent, useEffect, useState } from 'react';
 import axios from 'axios';
 import { useDispatch, useSelector } from 'react-redux';
@@ -14,7 +19,10 @@ import { Roster } from '../../../actions/roster.actions';
 import useStyles from './roster-page.styles';
 import { UserState } from '../../../reducers/user.reducer';
 import { AppState } from '../../../store';
-import { ApiRosterEntry } from '../../../models/api-response';
+import { ApiRosterEntry, ApiRosterColumnInfo } from '../../../models/api-response';
+import { AlertDialog, AlertDialogProps } from '../../alert-dialog/alert-dialog';
+import { EditRosterEntryDialog, EditRosterEntryDialogProps } from './edit-roster-entry-dialog';
+import { ButtonWithSpinner } from '../../buttons/button-with-spinner';
 
 interface CountResponse {
   count: number
@@ -85,11 +93,20 @@ export const RosterPage = () => {
   const dispatch = useDispatch();
   const fileInputRef = React.createRef<HTMLInputElement>();
 
+  const maxNumColumnsToShow = 5;
+
   const [rows, setRows] = useState<ApiRosterEntry[]>([]);
   const [page, setPage] = useState(0);
   const [rosterSize, setRosterSize] = useState(0);
   const [rowsPerPage, setRowsPerPage] = useState(10);
-  const [alert, setAlert] = useState({ open: false, message: '', title: '' });
+  const [selectedRosterEntry, setSelectedRosterEntry] = useState<ApiRosterEntry>();
+  const [alertDialogProps, setAlertDialogProps] = useState<AlertDialogProps>({ open: false });
+  const [deleteRosterEntryDialogOpen, setDeleteRosterEntryDialogOpen] = useState(false);
+  const [editRosterEntryDialogProps, setEditRosterEntryDialogProps] = useState<EditRosterEntryDialogProps>({ open: false });
+  const [deleteRosterEntryLoading, setDeleteRosterEntryLoading] = useState(false);
+  const [downloadTemplateLoading, setDownloadTemplateLoading] = useState(false);
+  const [exportRosterLoading, setExportRosterLoading] = useState(false);
+  const [rosterColumnInfos, setRosterColumnInfos] = useState<ApiRosterColumnInfo[]>([]);
 
   const orgId = useSelector<AppState, UserState>(state => state.user).activeRole?.org?.id;
 
@@ -100,9 +117,11 @@ export const RosterPage = () => {
     setRows(rosterResponse);
   };
 
-  async function initializeTable() {
+  const initializeTable = React.useCallback(async () => {
 
     dispatch(AppFrame.setPageLoading(true));
+
+    initializeRosterColumnInfo();
 
     const countData = (await axios.get(`api/roster/${orgId}/count`)).data as CountResponse;
     setRosterSize(countData.count);
@@ -110,6 +129,24 @@ export const RosterPage = () => {
 
     dispatch(AppFrame.setPageLoading(false));
 
+  }, [orgId]);
+
+  async function initializeRosterColumnInfo() {
+    try {
+      const infos = (await axios.get(`api/roster/${orgId}/info`)).data as ApiRosterColumnInfo[];
+      setRosterColumnInfos(infos);
+    } catch (error) {
+      let message = 'Internal Server Error';
+      if (error.response?.data?.errors && error.response.data.errors.length > 0) {
+        message = error.response.data.errors[0].message;
+      }
+      setAlertDialogProps({
+        open: true,
+        title: 'Get Roster Column Info',
+        message: `Failed to get roster column info: ${message}`,
+        onClose: () => { setAlertDialogProps({ open: false }); },
+      });
+    }
   }
 
   function handleFileInputChange(e: ChangeEvent<HTMLInputElement>) {
@@ -119,13 +156,19 @@ export const RosterPage = () => {
 
     dispatch(Roster.upload(e.target.files[0], async count => {
       if (count < 0) {
-        setAlert({
+        setAlertDialogProps({
           open: true,
-          message: 'An error occurred while uploading roster. Please verify the roster data.',
           title: 'Upload Error',
+          message: 'An error occurred while uploading roster. Please verify the roster data.',
+          onClose: () => { setAlertDialogProps({ open: false }); },
         });
       } else {
-        setAlert({ open: true, message: `Successfully uploaded ${count} roster entries.`, title: 'Upload Successful' });
+        setAlertDialogProps({
+          open: true,
+          title: 'Upload Successful',
+          message: `Successfully uploaded ${count} roster entries.`,
+          onClose: () => { setAlertDialogProps({ open: false }); },
+        });
         initializeTable();
       }
     }));
@@ -142,16 +185,198 @@ export const RosterPage = () => {
     setRowsPerPage(newRowsPerPage);
   };
 
-  const handleAlertClose = () => {
-    setAlert({ open: false, message: '', title: '' });
+  const editButtonClicked = async (rosterEntry: ApiRosterEntry) => {
+    // remove any properties that came back as null before sending it to the dialog
+    Object.keys(rosterEntry).forEach((key: string) => (rosterEntry[key] == null) && delete rosterEntry[key]);
+    setSelectedRosterEntry(rosterEntry);
+    setEditRosterEntryDialogProps({
+      open: true,
+      orgId,
+      rosterColumnInfos,
+      rosterEntry,
+      onClose: async () => {
+        setEditRosterEntryDialogProps({ open: false });
+        setSelectedRosterEntry(undefined);
+        await initializeTable();
+      },
+      onError: (message: string) => {
+        setAlertDialogProps({
+          open: true,
+          title: 'Edit Roster Entry',
+          message: `Unable to edit roster entry: ${message}`,
+          onClose: () => { setAlertDialogProps({ open: false }); },
+        });
+      },
+    });
   };
 
-  useEffect(() => { initializeTable().then(); }, []);
+  const addButtonClicked = async () => {
+    setEditRosterEntryDialogProps({
+      open: true,
+      orgId,
+      rosterColumnInfos,
+      onClose: async () => {
+        setEditRosterEntryDialogProps({ open: false });
+        setSelectedRosterEntry(undefined);
+        await initializeTable();
+      },
+      onError: (message: string) => {
+        setAlertDialogProps({
+          open: true,
+          title: 'Add Roster Entry',
+          message: `Unable to add roster entry: ${message}`,
+          onClose: () => { setAlertDialogProps({ open: false }); },
+        });
+      },
+    });
+  };
+
+  function deleteButtonClicked(rosterEntry: ApiRosterEntry) {
+    setSelectedRosterEntry(rosterEntry);
+    setDeleteRosterEntryDialogOpen(true);
+  }
+
+  const deleteRosterEntry = async () => {
+    try {
+      setDeleteRosterEntryLoading(true);
+      await axios.delete(`api/roster/${orgId}/${selectedRosterEntry!.edipi}`);
+    } catch (error) {
+      let message = 'Internal Server Error';
+      if (error.response?.data?.errors && error.response.data.errors.length > 0) {
+        message = error.response.data.errors[0].message;
+      }
+      setAlertDialogProps({
+        open: true,
+        title: 'Delete Roster Entry',
+        message: `Unable to delete roster entry: ${message}`,
+        onClose: () => { setAlertDialogProps({ open: false }); },
+      });
+    } finally {
+      setDeleteRosterEntryLoading(false);
+      setDeleteRosterEntryDialogOpen(false);
+      setSelectedRosterEntry(undefined);
+      await initializeTable();
+    }
+  };
+
+  const cancelDeleteRosterEntryDialog = () => {
+    setDeleteRosterEntryDialogOpen(false);
+    setSelectedRosterEntry(undefined);
+  };
+
+  const downloadCSVExport = async () => {
+    try {
+      setExportRosterLoading(true);
+      await axios({
+        url: `api/roster/${orgId}/export`,
+        method: 'GET',
+        responseType: 'blob',
+      }).then(response => {
+        const url = window.URL.createObjectURL(new Blob([response.data]));
+        const link = document.createElement('a');
+        link.href = url;
+        const date = new Date().toISOString();
+        const filename = `org_${orgId}_roster_export_${date}.csv`;
+        link.setAttribute('download', filename);
+        document.body.appendChild(link);
+        link.click();
+      });
+    } catch (error) {
+      let message = 'Internal Server Error';
+      if (error.response?.data?.errors && error.response.data.errors.length > 0) {
+        message = error.response.data.errors[0].message;
+      }
+      setAlertDialogProps({
+        open: true,
+        title: 'Roster CSV Export',
+        message: `Unable to export roster to CSV: ${message}`,
+        onClose: () => { setAlertDialogProps({ open: false }); },
+      });
+    } finally {
+      setExportRosterLoading(false);
+    }
+  };
+
+  const downloadCSVTemplate = async () => {
+    try {
+      setDownloadTemplateLoading(true);
+      await axios({
+        url: `api/roster/${orgId}/template`,
+        method: 'GET',
+        responseType: 'blob',
+      }).then(response => {
+        const url = window.URL.createObjectURL(new Blob([response.data]));
+        const link = document.createElement('a');
+        link.href = url;
+        const filename = `roster-template.csv`;
+        link.setAttribute('download', filename);
+        document.body.appendChild(link);
+        link.click();
+      });
+    } catch (error) {
+      let message = 'Internal Server Error';
+      if (error.response?.data?.errors && error.response.data.errors.length > 0) {
+        message = error.response.data.errors[0].message;
+      }
+      setAlertDialogProps({
+        open: true,
+        title: 'CSV Template Download',
+        message: `Unable to download CSV template: ${message}`,
+        onClose: () => { setAlertDialogProps({ open: false }); },
+      });
+    } finally {
+      setDownloadTemplateLoading(false);
+    }
+  };
+
+  useEffect(() => { initializeTable().then(); }, [initializeTable]);
+
+  const buildColumnHeaders = () => {
+    const columns = rosterColumnInfos?.slice(0, maxNumColumnsToShow);
+    return columns?.map(columnInfo => (
+      <TableCell key={columnInfo.name}>{columnInfo.displayName}</TableCell>
+    ));
+  };
+
+  const buildTableRows = () => {
+    const columns = rosterColumnInfos?.slice(0, maxNumColumnsToShow);
+
+    return rows.map(row => (
+
+      <TableRow key={row.edipi as string}>
+
+        {columns.map(columnInfo => (
+          <TableCell key={`${columnInfo.name}-${row.edipi}`}>
+            {row[columnInfo.name]}
+          </TableCell>
+        ))}
+
+        <TableCell className={classes.tableButtons}>
+          <Button
+            className={classes.editRosterEntryButton}
+            variant="outlined"
+            onClick={() => editButtonClicked(row)}
+          >
+            <EditIcon />
+          </Button>
+          <Button
+            className={classes.deleteRosterEntryButton}
+            variant="outlined"
+            onClick={() => deleteButtonClicked(row)}
+          >
+            <DeleteIcon />
+          </Button>
+        </TableCell>
+      </TableRow>
+
+    ));
+  };
 
   return (
     <main className={classes.root}>
       <Container maxWidth="md">
         <div className={classes.buttons}>
+
           <input
             accept="text/csv"
             id="raised-button-file"
@@ -163,44 +388,54 @@ export const RosterPage = () => {
           <label htmlFor="raised-button-file">
             <Button
               size="large"
+              startIcon={<PublishIcon />}
               component="span"
             >
               Upload CSV
             </Button>
           </label>
 
-          <Button
+          <ButtonWithSpinner
             type="button"
             size="large"
-            href={`api/roster/${orgId}/template`}
+            startIcon={<GetAppIcon />}
+            onClick={() => downloadCSVTemplate()}
+            loading={downloadTemplateLoading}
           >
             Download CSV Template
+          </ButtonWithSpinner>
+
+          <ButtonWithSpinner
+            type="button"
+            size="large"
+            startIcon={<GetAppIcon />}
+            onClick={() => downloadCSVExport()}
+            loading={exportRosterLoading}
+          >
+            Export to CSV
+          </ButtonWithSpinner>
+
+          <Button
+            color="primary"
+            size="large"
+            startIcon={<AddCircleOutlineIcon />}
+            onClick={addButtonClicked}
+          >
+            Add
           </Button>
+
         </div>
 
         <TableContainer component={Paper}>
           <Table aria-label="simple table">
             <TableHead>
               <TableRow>
-                <TableCell>EDIPI</TableCell>
-                <TableCell>Rate/Rank</TableCell>
-                <TableCell>First Name</TableCell>
-                <TableCell>Last Name</TableCell>
-                <TableCell>Unit</TableCell>
+                {buildColumnHeaders()}
+                <TableCell />
               </TableRow>
             </TableHead>
             <TableBody>
-              {rows.map(row => (
-                <TableRow key={row.edipi as string}>
-                  <TableCell component="th" scope="row">
-                    {row.edipi}
-                  </TableCell>
-                  <TableCell>{row.rateRank}</TableCell>
-                  <TableCell>{row.firstName}</TableCell>
-                  <TableCell>{row.lastName}</TableCell>
-                  <TableCell>{row.unit}</TableCell>
-                </TableRow>
-              ))}
+              {buildTableRows()}
             </TableBody>
             <TableFooter>
               <TableRow>
@@ -223,24 +458,35 @@ export const RosterPage = () => {
           </Table>
         </TableContainer>
       </Container>
-      <Dialog
-        open={alert.open}
-        onClose={handleAlertClose}
-        aria-labelledby="alert-dialog-title"
-        aria-describedby="alert-dialog-description"
-      >
-        <DialogTitle id="alert-dialog-title">{alert.title}</DialogTitle>
-        <DialogContent>
-          <DialogContentText id="alert-dialog-description">
-            {alert.message}
-          </DialogContentText>
-        </DialogContent>
-        <DialogActions>
-          <Button onClick={handleAlertClose} autoFocus>
-            OK
-          </Button>
-        </DialogActions>
-      </Dialog>
+      {deleteRosterEntryDialogOpen && (
+        <Dialog
+          open={deleteRosterEntryDialogOpen}
+          onClose={cancelDeleteRosterEntryDialog}
+          aria-labelledby="alert-dialog-title"
+          aria-describedby="alert-dialog-description"
+        >
+          <DialogTitle id="alert-dialog-title">Remove User</DialogTitle>
+          <DialogContent>
+            <DialogContentText id="alert-dialog-description">
+              {`Are you sure you want to remove EPIDI '${selectedRosterEntry?.edipi}' from this roster?`}
+            </DialogContentText>
+          </DialogContent>
+          <DialogActions>
+            <ButtonWithSpinner onClick={deleteRosterEntry} loading={deleteRosterEntryLoading}>
+              Yes
+            </ButtonWithSpinner>
+            <Button onClick={cancelDeleteRosterEntryDialog}>
+              No
+            </Button>
+          </DialogActions>
+        </Dialog>
+      )}
+      {editRosterEntryDialogProps.open && (
+        <EditRosterEntryDialog open={editRosterEntryDialogProps.open} orgId={editRosterEntryDialogProps.orgId} rosterColumnInfos={rosterColumnInfos} rosterEntry={selectedRosterEntry} onClose={editRosterEntryDialogProps.onClose} onError={editRosterEntryDialogProps.onError} />
+      )}
+      {alertDialogProps.open && (
+        <AlertDialog open={alertDialogProps.open} title={alertDialogProps.title} message={alertDialogProps.message} onClose={alertDialogProps.onClose} />
+      )}
     </main>
   );
 };

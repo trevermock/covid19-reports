@@ -8,7 +8,7 @@ import {
 import {
   baseRosterColumns, CustomColumnValue, Roster, RosterColumnInfo, RosterColumnType,
 } from './roster.model';
-import { BadRequestError, NotFoundError, UnprocessableEntity } from '../../util/error-types';
+import { BadRequestError, InternalServerError, NotFoundError, UnprocessableEntity } from '../../util/error-types';
 import { getOptionalParam, getRequiredParam } from '../../util/util';
 import { Org } from '../org/org.model';
 import { CustomRosterColumn } from './custom-roster-column.model';
@@ -85,6 +85,42 @@ class RosterController {
 
     const deletedColumn = await existingColumn.remove();
     res.json(deletedColumn);
+  }
+
+  async exportRosterToCSV(req: ApiRequest, res: Response) {
+    if (!req.appOrg) {
+      throw new NotFoundError('Organization was not found.');
+    }
+
+    const orgId = req.appOrg.id;
+
+    // get all roster data
+    const rosterData = await Roster.find({
+      where: {
+        org: orgId,
+      },
+      order: {
+        edipi: 'ASC',
+      },
+    });
+
+    // convert data to csv format and download
+    const jsonToCsvConverter = require('json-2-csv');
+    jsonToCsvConverter.json2csv(rosterData, (err: Error, csvString: String) => {
+      // on failure
+      if (err) {
+          console.error("Failed to convert roster json data to CSV string.");
+          throw new InternalServerError('Failed to export Roster data to CSV.');
+      } else {
+        // on success
+        const date = new Date().toISOString();
+        const filename = 'org_' + orgId + '_roster_export_' + date + '.csv'
+        res.setHeader('Content-type', "application/octet-stream");
+        res.setHeader('Content-disposition', 'attachment; filename=' + filename);
+        res.send(csvString);
+      }
+    });
+
   }
 
   async getRosterTemplate(req: ApiRequest, res: Response) {
@@ -259,6 +295,7 @@ class RosterController {
     const userEDIPI = req.params.edipi;
 
     const rosterEntry = await Roster.findOne({
+      relations: ["org"],
       where: {
         edipi: userEDIPI,
         org: req.appOrg!.id,
