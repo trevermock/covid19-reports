@@ -10,7 +10,7 @@ const baseConfig = {
 
   kibana: {
     // App basepath: make sure your kibana.yml file isn't using the app root or it will mess up the proxy.
-    appPath: process.env.KIBANA_BASEPATH || '/_plugin/kibana',
+    basePath: process.env.KIBANA_BASEPATH || '/_plugin/kibana',
     uri: process.env.KIBANA_URI || 'http://localhost:5601',
   },
 };

@@ -54,7 +54,7 @@ app.use(
 );
 
 app.use(
-  config.kibana.appPath,
+  config.kibana.basePath,
   requireOrgAccess,
   requireWorkspaceAccess,
   kibanaProxy,

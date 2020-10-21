@@ -6,8 +6,13 @@ import config from '../config';
 const kibanaProxyConfig: Config = {
   target: config.kibana.uri,
   changeOrigin: true,
-  logLevel: 'debug',
+  logLevel: 'warn',
   secure: false,
+
+  // Strip out the appPath, so kibana sees requested path
+  pathRewrite: (path: string) => {
+    return path.replace(`${config.kibana.basePath}`, '');
+  },
 
   // add custom headers to request
   onProxyReq: (proxyReq: ClientRequest, req: ProxyRequest) => {
