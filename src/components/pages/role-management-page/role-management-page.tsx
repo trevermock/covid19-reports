@@ -131,9 +131,10 @@ export const RoleManagementPage = () => {
   };
 
   const deleteRole = async () => {
-    setDeleteRoleLoading(true);
     try {
+      setDeleteRoleLoading(true);
       await axios.delete(`api/role/${orgId}/${roles[selectedRoleIndex].id}`);
+      await initializeTable();
     } catch (error) {
       let message = 'Internal Server Error';
       if (error.response?.data?.errors && error.response.data.errors.length > 0) {
@@ -145,10 +146,10 @@ export const RoleManagementPage = () => {
         message: `Unable to delete role: ${message}`,
         onClose: () => { setAlertDialogProps({ open: false }); },
       });
+    } finally {
+      setDeleteRoleLoading(false);
+      setDeleteRoleDialogOpen(false);
     }
-    setDeleteRoleLoading(false);
-    setDeleteRoleDialogOpen(false);
-    await initializeTable();
   };
 
   const handleRoleChange = (index: number) => (event: React.ChangeEvent<{}>, isExpanded: boolean) => {
