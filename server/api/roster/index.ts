@@ -1,6 +1,7 @@
 import express from 'express';
 import multer from 'multer';
 import path from 'path';
+import bodyParser from 'body-parser';
 import controller from './roster.controller';
 import { requireInternalUser, requireOrgAccess, requireRolePermission } from '../../auth';
 
@@ -18,6 +19,36 @@ const rosterUpload = multer({
 });
 
 const router = express.Router() as any;
+
+router.get(
+  '/:orgId/column',
+  requireOrgAccess,
+  requireRolePermission(role => role.canManageGroup),
+  controller.getFullRosterInfo,
+);
+
+router.post(
+  '/:orgId/column',
+  requireOrgAccess,
+  requireRolePermission(role => role.canManageGroup),
+  bodyParser.json(),
+  controller.addCustomColumn,
+);
+
+router.put(
+  '/:orgId/column/:columnName',
+  requireOrgAccess,
+  requireRolePermission(role => role.canManageGroup),
+  bodyParser.json(),
+  controller.updateCustomColumn,
+);
+
+router.delete(
+  '/:orgId/column/:columnName',
+  requireOrgAccess,
+  requireRolePermission(role => role.canManageGroup),
+  controller.deleteCustomColumn,
+);
 
 router.get(
   '/info/:edipi',
@@ -50,6 +81,7 @@ router.get(
   '/:orgId/count',
   requireOrgAccess,
   requireRolePermission(role => role.canManageRoster),
+  bodyParser.json(),
   controller.getRosterCount,
 );
 
@@ -57,6 +89,7 @@ router.post(
   '/:orgId',
   requireOrgAccess,
   requireRolePermission(role => role.canManageRoster),
+  bodyParser.json(),
   controller.addRosterEntry,
 );
 
@@ -86,6 +119,7 @@ router.put(
   '/:orgId/:edipi',
   requireOrgAccess,
   requireRolePermission(role => role.canManageRoster),
+  bodyParser.json(),
   controller.updateRosterEntry,
 );
 

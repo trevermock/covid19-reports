@@ -56,7 +56,7 @@ export const UsersPage = () => {
     setAccessRequests(requests);
     setAvailableRoles(roles);
     dispatch(AppFrame.setPageLoading(false));
-  }, [orgId]);
+  }, [orgId, dispatch]);
 
   function updateDenyRequestLoading(rowId: number, isLoading: boolean) {
     setDenyRequestsLoading({

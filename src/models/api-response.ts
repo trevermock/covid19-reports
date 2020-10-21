@@ -21,6 +21,7 @@ export interface ApiRole {
   canViewRoster: boolean,
   canViewMuster: boolean,
   canViewPII: boolean,
+  canViewPHI: boolean,
 }
 
 export interface ApiUser {
@@ -43,25 +44,26 @@ export interface ApiAccessRequest {
   status: 'approved' | 'pending' | 'denied',
 }
 
+export enum ApiRosterColumnType {
+  String = 'string',
+  Boolean = 'boolean',
+  Date = 'date',
+  Number = 'number',
+}
+
+export interface ApiRosterColumnInfo {
+  name: string,
+  displayName: string,
+  type: ApiRosterColumnType,
+  pii: boolean,
+  phi: boolean,
+  custom: boolean,
+  required: boolean,
+  updatable: boolean,
+}
+
 export interface ApiRosterEntry {
-  edipi: string,
-  rateRank: string,
-  firstName: string,
-  lastName: string,
-  unit: string,
-  billetWorkcenter: string,
-  contractNumber: string,
-  pilot?: boolean,
-  aircrew?: boolean,
-  cdi?: boolean,
-  cdqar?: boolean,
-  dscacrew?: boolean,
-  advancedParty?: boolean,
-  pui?: boolean,
-  covid19TestReturnDate?: Date,
-  rom?: string,
-  romRelease?: string
-  lastReported?: Date,
+  [key: string]: string | boolean | number | null,
 }
 
 export interface ApiWorkspaceTemplate {

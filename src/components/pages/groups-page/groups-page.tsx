@@ -159,7 +159,7 @@ export const GroupsPage = () => {
     }
 
     fetchData().then();
-  }, []);
+  }, [dispatch]);
 
   useEffect(() => {
     // Build a filtered list of orgs the user can request access to.

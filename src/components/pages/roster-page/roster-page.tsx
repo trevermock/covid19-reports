@@ -191,7 +191,7 @@ export const RosterPage = () => {
             </TableHead>
             <TableBody>
               {rows.map(row => (
-                <TableRow key={row.edipi}>
+                <TableRow key={row.edipi as string}>
                   <TableCell component="th" scope="row">
                     {row.edipi}
                   </TableCell>
