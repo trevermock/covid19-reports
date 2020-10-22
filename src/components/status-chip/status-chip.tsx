@@ -1,23 +1,24 @@
-import { Chip } from '@material-ui/core';
+import { Chip, ChipProps } from '@material-ui/core';
 import clsx from 'clsx';
 import React from 'react';
+import { OverrideType } from '../../utility/typescript-utils';
 import useStyles from './status-chip.styles';
 
-interface StatusChipProps {
-  avatar?: React.ReactElement
-  children?: null
-  clickable?: boolean
+export type StatusChipProps = OverrideType<ChipProps, {
   color?: 'primary' | 'secondary' | 'success' | 'warning' | 'error';
-  deleteIcon?: React.ReactElement
-  disabled?: boolean
-  icon?: React.ReactElement
-  label?: React.ReactNode
-  onDelete?: React.EventHandler<any>
   size?: 'small' | 'medium'
-}
+}>;
 
 export const StatusChip = (props: StatusChipProps) => {
   const classes = useStyles();
+
+  function getChipProps(): ChipProps {
+    return {
+      ...props,
+      color: undefined,
+      size: undefined,
+    };
+  }
 
   return (
     <Chip
@@ -28,15 +29,8 @@ export const StatusChip = (props: StatusChipProps) => {
         [classes.colorWarning]: props.color === 'warning',
         [classes.colorError]: props.color === 'error',
       })}
-      avatar={props.avatar}
-      clickable={props.clickable}
-      deleteIcon={props.deleteIcon}
-      disabled={props.disabled}
-      icon={props.icon}
-      label={props.label}
-      onDelete={props.onDelete}
-      size={props.size}
       variant="outlined"
+      {...getChipProps()}
     >
       {props.children}
     </Chip>
