@@ -13,7 +13,6 @@ export const EditableBooleanTable = (props: TableProps) => {
     <div className={isScroll() ? classes.rootScroll : classes.rootNoScroll}>
       <div className={classes.booleanTable}>
         <Table
-          // eslint-disable-next-line react/jsx-props-no-spreading
           {...props}
         >
           <TableBody>

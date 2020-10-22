@@ -14,9 +14,7 @@ export const ButtonWithSpinner = (props: ButtonWithSpinnerProps) => {
     <div className={classes.root}>
       <div className={classes.wrapper}>
         <Button
-          // eslint-disable-next-line react/jsx-props-no-spreading
           {...props}
-          // eslint-disable-next-line react/jsx-props-no-spreading
           {...props.loading ? { disabled: true } : {}}
         >
           { props.children }
