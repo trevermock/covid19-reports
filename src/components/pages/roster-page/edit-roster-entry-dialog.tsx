@@ -11,6 +11,9 @@ import {
   TableRow,
   TableCell,
 } from '@material-ui/core';
+import { MuiPickersUtilsProvider, DateTimePicker } from '@material-ui/pickers';
+import { MaterialUiPickersDate } from '@material-ui/pickers/typings/date';
+import MomentUtils from '@date-io/moment';
 import axios from 'axios';
 import useStyles from './edit-roster-entry-dialog.style';
 import { ApiRosterColumnInfo, ApiRosterColumnType, ApiRosterEntry } from '../../../models/api-response';
@@ -55,6 +58,10 @@ export const EditRosterEntryDialog = (props: EditRosterEntryDialogProps) => {
 
   const onCheckboxChanged = (columnName: string) => (event: React.ChangeEvent<HTMLInputElement>, checked: boolean) => {
     updateRosterEntryProperty(columnName, checked);
+  };
+
+  const onDateTimeFieldChanged = (columnName: string) => (date: MaterialUiPickersDate) => {
+    updateRosterEntryProperty(columnName, date?.toISOString());
   };
 
   const onSave = async () => {
@@ -152,21 +159,20 @@ export const EditRosterEntryDialog = (props: EditRosterEntryDialogProps) => {
     );
   };
 
-  const buildDateInput = (columnInfo: ApiRosterColumnInfo) => {
+  const buildDateTimeInput = (columnInfo: ApiRosterColumnInfo) => {
     return (
-      <TextField
-        className={classes.textField}
-        id={columnInfo.name}
-        label={columnInfo.displayName}
-        disabled={formDisabled || (existingRosterEntry && !columnInfo.updatable)}
-        required={columnInfo.required}
-        onChange={onTextFieldChanged(columnInfo.name)}
-        value={rosterEntry[columnInfo.name] ? (rosterEntry[columnInfo.name] as string).split('T')[0] || '' : ''}
-        type="date"
-        InputLabelProps={{
-          shrink: true,
-        }}
-      />
+      <MuiPickersUtilsProvider utils={MomentUtils}>
+        <DateTimePicker
+          className={classes.textField}
+          id={columnInfo.name}
+          label={columnInfo.displayName}
+          disabled={formDisabled || (existingRosterEntry && !columnInfo.updatable)}
+          required={columnInfo.required}
+          placeholder="mm/dd/yy hh:mm:ss"
+          value={rosterEntry[columnInfo.name] as string}
+          onChange={onDateTimeFieldChanged(columnInfo.name)}
+        />
+      </MuiPickersUtilsProvider>
     );
   };
 
@@ -185,7 +191,7 @@ export const EditRosterEntryDialog = (props: EditRosterEntryDialogProps) => {
       case ApiRosterColumnType.Number:
         return buildTextInput(column);
       case ApiRosterColumnType.Date:
-        return buildDateInput(column);
+        return buildDateTimeInput(column);
       default:
         console.warn(`Unhandled column type found while creating input fields: ${column.type}`);
         return '';
