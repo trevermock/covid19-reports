@@ -88,21 +88,15 @@ class RosterController {
   }
 
   async exportRosterToCSV(req: ApiRequest, res: Response) {
-    if (!req.appOrg) {
-      throw new NotFoundError('Organization was not found.');
-    }
 
-    const orgId = req.appOrg.id;
+    const orgId = req.appOrg!.id;
 
-    // get all roster data
-    const rosterData = await Roster.find({
-      where: {
-        org: orgId,
-      },
-      order: {
+    const queryBuilder = await queryAllowedRoster(req.appOrg!, req.appRole!);
+    const rosterData = await queryBuilder
+      .orderBy({
         edipi: 'ASC',
-      },
-    });
+      })
+      .getRawMany<RosterEntryData>();
 
     // convert data to csv format and download
     const jsonToCsvConverter = require('json-2-csv');
@@ -115,8 +109,8 @@ class RosterController {
         // on success
         const date = new Date().toISOString();
         const filename = 'org_' + orgId + '_roster_export_' + date + '.csv'
-        res.setHeader('Content-type', "application/octet-stream");
-        res.setHeader('Content-disposition', 'attachment; filename=' + filename);
+        res.header('Content-Type', 'text/csv');
+        res.attachment(filename);
         res.send(csvString);
       }
     });

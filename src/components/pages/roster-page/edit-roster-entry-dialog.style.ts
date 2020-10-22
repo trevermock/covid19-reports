@@ -1,8 +1,7 @@
-import { createStyles, Theme } from '@material-ui/core';
+import { createStyles } from '@material-ui/core';
 import { makeStyles } from '@material-ui/styles';
 
-// eslint-disable-next-line @typescript-eslint/no-unused-vars
-export default makeStyles((theme: Theme) => createStyles({
+export default makeStyles(() => createStyles({
   root: {
     '& .MuiGrid-spacing-xs-3': {
       margin: '0px -12px',
@@ -18,24 +17,6 @@ export default makeStyles((theme: Theme) => createStyles({
       },
     },
   },
-  textCell: {
-    width: '70%',
-    backgroundColor: '#F0F1F1',
-  },
-  iconCell: {
-    textAlign: 'center',
-    backgroundColor: '#EAEAEA',
-    '& .MuiCheckbox-root': {
-      position: 'relative',
-      padding: '0px',
-      '&:hover': {
-        backgroundColor: 'rgb(115 179 231 / 27%)',
-      },
-      '& svg': {
-        top: '0px',
-      },
-    },
-  },
   booleanTable: {
     '&  .MuiTableCell-root': {
       border: '1px solid #E0E0E0',
@@ -46,12 +27,6 @@ export default makeStyles((theme: Theme) => createStyles({
   },
   booleanTableLabel: {
     fontWeight: 'bold',
-  },
-  tableScroll: {
-    maxHeight: '193px',
-    overflowY: 'auto',
-    borderStyle: 'solid',
-    border: '1 px',
   },
   editRosterEntryDialogActions: {
     justifyContent: 'center',
