@@ -72,7 +72,7 @@ export const UsersPage = () => {
     } finally {
       dispatch(AppFrame.setPageLoading(false));
     }
-  }, [orgId]);
+  }, [orgId, dispatch]);
 
   function updateDenyRequestLoading(rowId: number, isLoading: boolean) {
     setDenyRequestsLoading({

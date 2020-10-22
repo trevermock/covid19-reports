@@ -13,7 +13,7 @@ import axios from 'axios';
 import useStyles from './edit-role-dialog.styles';
 import { ApiRole, ApiRosterColumnInfo, ApiWorkspace } from '../../../models/api-response';
 import {
-  AllNotificationEvents,
+  allNotificationEvents,
 } from '../../../models/notification-events';
 import {
   RolePermissions, parsePermissions, permissionsToArray,
@@ -45,7 +45,7 @@ export const EditRoleDialog = (props: EditRoleDialogProps) => {
   const [indexPrefix, setIndexPrefix] = useState(role?.indexPrefix || '');
   const [workspaceId, setWorkspaceId] = useState(role?.workspace?.id || -1);
   const [allowedRosterColumns, setAllowedRosterColumns] = useState(parsePermissions(rosterColumns || [], role?.allowedRosterColumns));
-  const [allowedNotificationEvents, setAllowedNotificationEvents] = useState(parsePermissions(AllNotificationEvents, role?.allowedNotificationEvents));
+  const [allowedNotificationEvents, setAllowedNotificationEvents] = useState(parsePermissions(allNotificationEvents, role?.allowedNotificationEvents));
   const [canManageGroup, setCanManageGroup] = useState(role ? role.canManageGroup : false);
   const [canManageRoster, setCanManageRoster] = useState(role ? role.canManageRoster : false);
   const [canManageWorkspace, setCanManageWorkspace] = useState(role ? role.canManageWorkspace : false);
@@ -194,7 +194,7 @@ export const EditRoleDialog = (props: EditRoleDialogProps) => {
   };
 
   const buildNotificationEventRows = () => {
-    return AllNotificationEvents.map(event => (
+    return allNotificationEvents.map(event => (
       <TableRow key={event.name}>
         <TableCell>
           {event.displayName}

@@ -146,7 +146,7 @@ export const RosterPage = () => {
     } finally {
       dispatch(AppFrame.setPageLoading(false));
     }
-  }, [orgId]);
+  }, [orgId, dispatch]);
 
   function handleFileInputChange(e: ChangeEvent<HTMLInputElement>) {
     if (!e.target.files || e.target.files[0] == null) {
@@ -185,9 +185,6 @@ export const RosterPage = () => {
   };
 
   const editButtonClicked = async (rosterEntry: ApiRosterEntry) => {
-    // remove any properties that came back as null before sending it to the dialog
-    Object.keys(rosterEntry).forEach((key: string) => (rosterEntry[key] == null) && delete rosterEntry[key]);
-    setSelectedRosterEntry(rosterEntry);
     setEditRosterEntryDialogProps({
       open: true,
       orgId,
@@ -195,7 +192,6 @@ export const RosterPage = () => {
       rosterEntry,
       onClose: async () => {
         setEditRosterEntryDialogProps({ open: false });
-        setSelectedRosterEntry(undefined);
         await initializeTable();
       },
       onError: (message: string) => {
@@ -216,7 +212,6 @@ export const RosterPage = () => {
       rosterColumnInfos,
       onClose: async () => {
         setEditRosterEntryDialogProps({ open: false });
-        setSelectedRosterEntry(undefined);
         await initializeTable();
       },
       onError: (message: string) => {
@@ -342,7 +337,7 @@ export const RosterPage = () => {
 
     return rows.map(row => (
 
-      <TableRow key={row.edipi}>
+      <TableRow key={row.edipi as string}>
 
         {columns.map(columnInfo => (
           <TableCell key={`${columnInfo.name}-${row.edipi}`}>
@@ -464,7 +459,7 @@ export const RosterPage = () => {
           aria-labelledby="alert-dialog-title"
           aria-describedby="alert-dialog-description"
         >
-          <DialogTitle id="alert-dialog-title">Remove User</DialogTitle>
+          <DialogTitle id="alert-dialog-title">Remove Individual</DialogTitle>
           <DialogContent>
             <DialogContentText id="alert-dialog-description">
               {`Are you sure you want to remove EPIDI '${selectedRosterEntry?.edipi}' from this roster?`}
@@ -481,7 +476,7 @@ export const RosterPage = () => {
         </Dialog>
       )}
       {editRosterEntryDialogProps.open && (
-        <EditRosterEntryDialog open={editRosterEntryDialogProps.open} orgId={editRosterEntryDialogProps.orgId} rosterColumnInfos={rosterColumnInfos} rosterEntry={selectedRosterEntry} onClose={editRosterEntryDialogProps.onClose} onError={editRosterEntryDialogProps.onError} />
+        <EditRosterEntryDialog open={editRosterEntryDialogProps.open} orgId={editRosterEntryDialogProps.orgId} rosterColumnInfos={editRosterEntryDialogProps.rosterColumnInfos} rosterEntry={editRosterEntryDialogProps.rosterEntry} onClose={editRosterEntryDialogProps.onClose} onError={editRosterEntryDialogProps.onError} />
       )}
       {alertDialogProps.open && (
         <AlertDialog open={alertDialogProps.open} title={alertDialogProps.title} message={alertDialogProps.message} onClose={alertDialogProps.onClose} />

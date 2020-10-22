@@ -19,7 +19,7 @@ class ReadOnlyRestController {
 
     res.cookie('orgId', req.appOrg!.id, { httpOnly: true });
 
-    return res.redirect(`${config.kibana.appPath}/login?jwt=${rorJwt}`);
+    return res.redirect(`${config.kibana.basePath}/login?jwt=${rorJwt}`);
   }
 
   // Logs out of a Kibana session by clearing the rorCookie.

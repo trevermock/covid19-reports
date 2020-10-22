@@ -7,8 +7,6 @@ import {
   DialogTitle,
   Grid,
   Select,
-  Table,
-  TableBody,
   TableCell,
   TableRow,
   TextField,
@@ -70,9 +68,9 @@ export const EditColumnDialog = (props: EditColumnDialogProps) => {
     };
     try {
       if (existingColumn) {
-        await axios.put(`api/roster/column/${orgId}/${column!.name}`, body);
+        await axios.put(`api/roster/${orgId}/column/${column!.name}`, body);
       } else {
-        await axios.post(`api/roster/column/${orgId}`, body);
+        await axios.post(`api/roster/${orgId}/column`, body);
       }
     } catch (error) {
       if (onError) {

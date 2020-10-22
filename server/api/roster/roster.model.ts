@@ -114,8 +114,14 @@ export class Roster extends BaseEntity {
     nullable: false,
     default: '{}',
   })
-  customColumns: any;
+  customColumns: CustomColumns;
 }
+
+export interface CustomColumns {
+  [key: string]: CustomColumnValue
+}
+
+export type CustomColumnValue = string | boolean | number | null;
 
 export enum RosterColumnType {
   String = 'string',
@@ -135,7 +141,7 @@ export interface RosterColumnInfo {
   updatable: boolean,
 }
 
-export const BaseRosterColumns: RosterColumnInfo[] = [
+export const baseRosterColumns: RosterColumnInfo[] = [
   {
     name: 'edipi',
     displayName: 'EDIPI',

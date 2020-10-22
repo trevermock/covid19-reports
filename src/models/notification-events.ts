@@ -3,7 +3,7 @@ export interface NotificationEvent {
   displayName: string,
 }
 
-export const AllNotificationEvents: NotificationEvent[] = [
+export const allNotificationEvents: NotificationEvent[] = [
   {
     name: 'accessRequest',
     displayName: 'Access Requests',

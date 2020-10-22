@@ -6,9 +6,9 @@ import {
   ApiRequest, EdipiParam, OrgColumnNameParams, OrgEdipiParams, OrgParam,
 } from '../index';
 import {
-  BaseRosterColumns, Roster, RosterColumnInfo, RosterColumnType,
+  baseRosterColumns, CustomColumnValue, Roster, RosterColumnInfo, RosterColumnType,
 } from './roster.model';
-import { BadRequestError, NotFoundError, UnprocessableEntity, InternalServerError } from '../../util/error-types';
+import { BadRequestError, InternalServerError, NotFoundError, UnprocessableEntity } from '../../util/error-types';
 import { getOptionalParam, getRequiredParam } from '../../util/util';
 import { Org } from '../org/org.model';
 import { CustomRosterColumn } from './custom-roster-column.model';
@@ -26,7 +26,8 @@ class RosterController {
     if (!req.body.type) {
       throw new BadRequestError('A type must be supplied when adding a new column.');
     }
-    const columnName = req.body.name as string;
+
+    const columnName = req.body.name;
     const existingColumn = await CustomRosterColumn.findOne({
       where: {
         name: columnName,
@@ -34,7 +35,7 @@ class RosterController {
       },
     });
 
-    if (existingColumn) {
+    if (baseRosterColumns.find(column => column.name === columnName) || existingColumn) {
       throw new BadRequestError('There is already a column with that name.');
     }
 
@@ -86,6 +87,36 @@ class RosterController {
     res.json(deletedColumn);
   }
 
+  async exportRosterToCSV(req: ApiRequest, res: Response) {
+
+    const orgId = req.appOrg!.id;
+
+    const queryBuilder = await queryAllowedRoster(req.appOrg!, req.appRole!);
+    const rosterData = await queryBuilder
+      .orderBy({
+        edipi: 'ASC',
+      })
+      .getRawMany<RosterEntryData>();
+
+    // convert data to csv format and download
+    const jsonToCsvConverter = require('json-2-csv');
+    jsonToCsvConverter.json2csv(rosterData, (err: Error, csvString: String) => {
+      // on failure
+      if (err) {
+          console.error("Failed to convert roster json data to CSV string.");
+          throw new InternalServerError('Failed to export Roster data to CSV.');
+      } else {
+        // on success
+        const date = new Date().toISOString();
+        const filename = 'org_' + orgId + '_roster_export_' + date + '.csv'
+        res.header('Content-Type', 'text/csv');
+        res.attachment(filename);
+        res.send(csvString);
+      }
+    });
+
+  }
+
   async getRosterTemplate(req: ApiRequest, res: Response) {
     const columns = await getAllowedRosterColumns(req.appOrg!, req.appRole!);
     const headers: string[] = [];
@@ -119,42 +150,6 @@ class RosterController {
     res.attachment('roster-template.csv');
     res.send(csvContents);
   }
-  
-  async exportRosterToCSV(req: ApiRequest, res: Response) {
-    if (!req.appOrg) {
-      throw new NotFoundError('Organization was not found.');
-    }
-
-    const orgId = req.appOrg.id;
-
-    // get all roster data
-    const rosterData = await Roster.find({
-      where: {
-        org: orgId,
-      },
-      order: {
-        edipi: 'ASC',
-      },
-    });
-
-    // convert data to csv format and download
-    const jsonToCsvConverter = require('json-2-csv');
-    jsonToCsvConverter.json2csv(rosterData, (err: Error, csvString: String) => {
-      // on failure
-      if (err) {
-          console.error("Failed to convert roster json data to CSV string.");
-          throw new InternalServerError('Failed to export Roster data to CSV.');
-      } else {
-        // on success
-        const date = new Date().toISOString();
-        const filename = 'org_' + orgId + '_roster_export_' + date + '.csv'
-        res.setHeader('Content-type', "application/octet-stream");
-        res.setHeader('Content-disposition', 'attachment; filename=' + filename);
-        res.send(csvString);
-      }
-    });
-
-  }
 
   async getRoster(req: ApiRequest<OrgParam, any, GetRosterQuery>, res: Response) {
     const limit = (req.query.limit != null) ? parseInt(req.query.limit) : 100;
@@ -186,23 +181,25 @@ class RosterController {
     }
 
     const rosterEntries: Roster[] = [];
+    let roster: RosterFileRow[];
     try {
-      const roster = await csv().fromFile(req.file.path) as RosterFileRow[];
-      const columns = await getAllowedRosterColumns(req.appOrg!, req.appRole!);
-      roster.forEach(row => {
-        const entry = new Roster();
-        entry.org = org;
-        for (const column of columns) {
-          getColumnFromCSV(entry, row, column);
-        }
-        rosterEntries.push(entry);
-      });
-      await Roster.save(rosterEntries);
+      roster = await csv().fromFile(req.file.path) as RosterFileRow[];
     } catch (err) {
       throw new UnprocessableEntity('Roster file was unable to be processed. Check that it is formatted correctly.');
     } finally {
       fs.unlinkSync(req.file.path);
     }
+
+    const columns = await getAllowedRosterColumns(req.appOrg!, req.appRole!);
+    roster.forEach(row => {
+      const entry = new Roster();
+      entry.org = org;
+      for (const column of columns) {
+        getColumnFromCSV(entry, row, column);
+      }
+      rosterEntries.push(entry);
+    });
+    await Roster.save(rosterEntries);
 
     res.json({
       count: rosterEntries.length,
@@ -230,14 +227,14 @@ class RosterController {
     const responseData: RosterInfo[] = [];
     for (const roster of entries) {
       const columns = (await getRosterColumns(roster.org!.id)).map(column => {
-        const columnValue : RosterColumnWithValue = {
+        const columnValue: RosterColumnWithValue = {
           ...column,
           value: column.custom ? roster.customColumns[column.name] : Reflect.get(roster, column.name),
         };
         return columnValue;
       });
 
-      const rosterInfo :RosterInfo = {
+      const rosterInfo: RosterInfo = {
         org: roster.org!,
         columns,
       };
@@ -250,7 +247,6 @@ class RosterController {
   }
 
   async addRosterEntry(req: ApiRequest<OrgParam, RosterEntryData>, res: Response) {
-
     const edipi = req.body.edipi as string;
     const rosterEntry = await Roster.findOne({
       where: {
@@ -337,19 +333,19 @@ async function queryAllowedRoster(org: Org, role: Role) {
   const queryBuilder = Roster.createQueryBuilder().select([]);
   columns.forEach(column => {
     if (column.custom) {
-      let typeStr: string;
+      let selection: string;
       switch (column.type) {
         case RosterColumnType.Boolean:
-          typeStr = ' AS BOOLEAN';
+          selection = `(custom_columns ->> '${column.name}')::BOOLEAN`;
           break;
         case RosterColumnType.Number:
-          typeStr = ' AS INTEGER';
+          selection = `(custom_columns ->> '${column.name}')::DOUBLE PRECISION`;
           break;
         default:
-          typeStr = '';
+          selection = `custom_columns ->> '${column.name}'`;
           break;
       }
-      queryBuilder.addSelect(`custom_columns ->> '${column.name}' ${typeStr}`, column.name);
+      queryBuilder.addSelect(selection, column.name);
     } else {
       queryBuilder.addSelect(snakeCase(column.name), column.name);
     }
@@ -365,13 +361,15 @@ async function getAllowedRosterColumns(org: Org, role: Role) {
   const allColumns = await getRosterColumns(org.id);
   const fineGrained = !(role.allowedRosterColumns.length === 1 && role.allowedRosterColumns[0] === '*');
   return allColumns.filter(column => {
+    let allowed = true;
     if (fineGrained && role.allowedRosterColumns.indexOf(column.name) < 0) {
-      return false;
+      allowed = false;
+    } else if (!role.canViewPII && column.pii) {
+      allowed = false;
+    } else if (!role.canViewPHI && column.phi) {
+      allowed = false;
     }
-    if (!role.canViewPII && column.pii) {
-      return false;
-    }
-    return role.canViewPHI || !column.phi;
+    return allowed;
   });
 }
 
@@ -389,7 +387,7 @@ export async function getRosterColumns(orgId: number) {
     };
     return columnInfo;
   });
-  return [...BaseRosterColumns, ...customColumns];
+  return [...baseRosterColumns, ...customColumns];
 }
 
 function setCustomColumnFromBody(column: CustomRosterColumn, body: CustomColumnData) {
@@ -422,20 +420,23 @@ function setRosterParamsFromBody(entry: Roster, body: RosterEntryData, columns: 
 }
 
 function getColumnFromBody(roster: Roster, row: RosterEntryData, column: RosterColumnInfo, newEntry: boolean) {
-  let objectValue: any | undefined;
+  let objectValue: Date | CustomColumnValue | undefined;
   if (column.required && newEntry) {
     objectValue = getRequiredParam(column.name, row, column.type === RosterColumnType.Date ? 'string' : column.type);
   } else {
     objectValue = getOptionalParam(column.name, row, column.type === RosterColumnType.Date ? 'string' : column.type);
   }
   if (objectValue !== undefined) {
-    if (RosterColumnType.Date === column.type) {
-      objectValue = new Date(objectValue as string);
+    if (objectValue === null && column.required) {
+      throw new BadRequestError(`Required column '${column.name}' cannot be null.`);
     }
     if (column.custom) {
       roster.customColumns[column.name] = objectValue;
     } else {
-      Reflect.set(roster, column.name, objectValue);
+      if (objectValue !== null && column.type === RosterColumnType.Date) {
+        objectValue = new Date(objectValue as string);
+      }
+      Reflect.set(roster, column.name, objectValue !== null ? objectValue : undefined);
     }
   }
 }
@@ -454,10 +455,25 @@ function getColumnFromCSV(roster: Roster, row: RosterFileRow, column: RosterColu
         value = stringValue;
         break;
       case RosterColumnType.Number:
-        value = +stringValue;
+        if (stringValue.length > 0) {
+          value = +stringValue;
+        }
         break;
       case RosterColumnType.Date:
-        value = new Date(stringValue);
+        console.log(`Processing date: ${stringValue} for column ${column.name}`);
+        if (stringValue.length > 0) {
+          const numericDate = Number(stringValue);
+          let date: Date;
+          if (!Number.isNaN(numericDate)) {
+            date = new Date(numericDate);
+          } else {
+            date = new Date(stringValue);
+          }
+          if (Number.isNaN(date.getTime())) {
+            throw new BadRequestError(`Unable to parse date '${stringValue}' for column ${column.name}.  Valid dates are ISO formatted date strings and UNIX timestamps.`);
+          }
+          value = date;
+        }
         break;
       case RosterColumnType.Boolean:
         value = stringValue === 'true';
@@ -467,6 +483,9 @@ function getColumnFromCSV(roster: Roster, row: RosterFileRow, column: RosterColu
     }
     if (value !== undefined) {
       if (column.custom) {
+        if (!roster.customColumns) {
+          roster.customColumns = {};
+        }
         roster.customColumns[column.name] = value;
       } else {
         Reflect.set(roster, column.name, value);
@@ -490,11 +509,11 @@ type GetRosterQuery = {
 };
 
 type RosterFileRow = {
-  [Key: string]: string
+  [key: string]: string
 };
 
 type RosterEntryData = {
-  [Key: string]: any
+  [key: string]: CustomColumnValue
 };
 
 type CustomColumnData = {

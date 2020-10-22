@@ -12,7 +12,7 @@ export class CustomRosterColumn extends BaseEntity {
 
   @ManyToOne(() => Org, org => org.id, {
     primary: true,
-    cascade: true,
+    onDelete: 'CASCADE',
   })
   @JoinColumn({
     name: 'org_id',

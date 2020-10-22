@@ -63,7 +63,7 @@ export interface ApiRosterColumnInfo {
 }
 
 export interface ApiRosterEntry {
-  [Key: string]: any,
+  [key: string]: string | boolean | number | null,
 }
 
 export interface ApiWorkspaceTemplate {

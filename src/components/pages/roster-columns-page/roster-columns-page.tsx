@@ -10,7 +10,7 @@ import {
   TableRow,
 } from '@material-ui/core';
 import React, { useEffect, useState } from 'react';
-import { useSelector, useDispatch } from 'react-redux';
+import { useDispatch, useSelector } from 'react-redux';
 import axios from 'axios';
 import AddCircleOutlineIcon from '@material-ui/icons/AddCircleOutline';
 import MoreVertIcon from '@material-ui/icons/MoreVert';
@@ -41,7 +41,7 @@ export const RosterColumnsPage = () => {
   const initializeTable = React.useCallback(async () => {
     try {
       dispatch(AppFrame.setPageLoading(true));
-      const allColumns = (await axios.get(`api/roster/column/${orgId}`)).data as ApiRosterColumnInfo[];
+      const allColumns = (await axios.get(`api/roster/${orgId}/column`)).data as ApiRosterColumnInfo[];
       const customColumns = allColumns.filter(column => column.custom);
       setColumns(customColumns);
     } catch (error) {
@@ -60,7 +60,7 @@ export const RosterColumnsPage = () => {
     } finally {
       dispatch(AppFrame.setPageLoading(false));
     }
-  }, [orgId]);
+  }, [orgId, dispatch]);
 
   const newColumn = async () => {
     setEditColumnDialogProps({
@@ -118,7 +118,7 @@ export const RosterColumnsPage = () => {
       return;
     }
     try {
-      await axios.delete(`api/roster/column/${orgId}/${columnToDelete.name}`);
+      await axios.delete(`api/roster/${orgId}/column/${columnToDelete.name}`);
     } catch (error) {
       let message = 'Internal Server Error';
       if (error.response?.data?.errors && error.response.data.errors.length > 0) {

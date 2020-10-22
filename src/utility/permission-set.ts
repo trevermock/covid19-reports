@@ -1,6 +1,6 @@
 // Utility functions for permission objects (objects that consist of many boolean fields).
 export interface RolePermissions {
-  [Key: string]: boolean;
+  [key: string]: boolean;
 }
 
 export interface NamedPermission {

@@ -10,13 +10,15 @@ import {
   Checkbox,
   TableRow,
   TableCell,
-  Table,
-  TableBody,
 } from '@material-ui/core';
+import { MuiPickersUtilsProvider, DateTimePicker } from '@material-ui/pickers';
+import { MaterialUiPickersDate } from '@material-ui/pickers/typings/date';
+import MomentUtils from '@date-io/moment';
 import axios from 'axios';
 import useStyles from './edit-roster-entry-dialog.style';
-import { ApiRosterColumnInfo, ApiRosterEntry } from '../../../models/api-response';
+import { ApiRosterColumnInfo, ApiRosterColumnType, ApiRosterEntry } from '../../../models/api-response';
 import { ButtonWithSpinner } from '../../buttons/button-with-spinner';
+import { EditableBooleanTable } from '../../tables/editable-boolean-table';
 
 export interface EditRosterEntryDialogProps {
   open: boolean,
@@ -50,12 +52,16 @@ export const EditRosterEntryDialog = (props: EditRosterEntryDialogProps) => {
     });
   }
 
-  const onTextFieldChanged = (event: React.ChangeEvent<HTMLInputElement>) => {
-    updateRosterEntryProperty(event.target.id, event.target.value);
+  const onTextFieldChanged = (columnName: string) => (event: React.ChangeEvent<HTMLInputElement>) => {
+    updateRosterEntryProperty(columnName, event.target.value);
   };
 
-  const onCheckboxChanged = (event: React.ChangeEvent<HTMLInputElement>, checked: boolean) => {
-    updateRosterEntryProperty(event.target.id, checked);
+  const onCheckboxChanged = (columnName: string) => (event: React.ChangeEvent<HTMLInputElement>, checked: boolean) => {
+    updateRosterEntryProperty(columnName, checked);
+  };
+
+  const onDateTimeFieldChanged = (columnName: string) => (date: MaterialUiPickersDate) => {
+    updateRosterEntryProperty(columnName, date?.toISOString());
   };
 
   const onSave = async () => {
@@ -88,20 +94,31 @@ export const EditRosterEntryDialog = (props: EditRosterEntryDialogProps) => {
   };
 
   const canSave = () => {
-    if (formDisabled) {
+    if (formDisabled || !rosterColumnInfos) {
       return false;
     }
 
     let result = true;
 
-    const requiredColumns = rosterColumnInfos?.filter(columnInfo => columnInfo.required);
+    const requiredColumns = rosterColumnInfos.filter(columnInfo => columnInfo.required);
     if (requiredColumns) {
-      for (let i = 0; i < requiredColumns?.length; i++) {
-        const value = rosterEntry[requiredColumns[i].name];
-        if (!value || value.length === 0) {
-          result = false;
-          break;
+      for (const column of requiredColumns) {
+
+        if (rosterEntry[column.name] == null) {
+          return false;
         }
+
+        switch (column.type) {
+          case ApiRosterColumnType.String:
+          case ApiRosterColumnType.Date:
+            if ((rosterEntry[column.name] as string).length === 0) {
+              result = false;
+            }
+            break;
+          default:
+            break;
+        }
+
       }
     }
 
@@ -113,16 +130,16 @@ export const EditRosterEntryDialog = (props: EditRosterEntryDialogProps) => {
     const columns = rosterColumnInfos?.filter(columnInfo => columnInfo.type === 'boolean');
     return columns?.map(columnInfo => (
       <TableRow key={columnInfo.name}>
-        <TableCell className={classes.textCell}>
+        <TableCell>
           {columnInfo.displayName}
         </TableCell>
-        <TableCell className={classes.iconCell}>
+        <TableCell>
           <Checkbox
             color="primary"
             id={columnInfo.name}
-            disabled={existingRosterEntry ? formDisabled || !columnInfo.updatable : false}
-            checked={rosterEntry[columnInfo.name] || false}
-            onChange={onCheckboxChanged}
+            disabled={formDisabled || (existingRosterEntry && !columnInfo.updatable)}
+            checked={rosterEntry[columnInfo.name] as boolean || false}
+            onChange={onCheckboxChanged(columnInfo.name)}
           />
         </TableCell>
       </TableRow>
@@ -135,30 +152,29 @@ export const EditRosterEntryDialog = (props: EditRosterEntryDialogProps) => {
         className={classes.textField}
         id={columnInfo.name}
         label={columnInfo.displayName}
-        disabled={existingRosterEntry ? formDisabled || !columnInfo.updatable : false}
+        disabled={formDisabled || (existingRosterEntry && !columnInfo.updatable)}
         required={columnInfo.required}
-        onChange={onTextFieldChanged}
+        onChange={onTextFieldChanged(columnInfo.name)}
         value={rosterEntry[columnInfo.name] || ''}
         type="text"
       />
     );
   };
 
-  const buildDateInput = (columnInfo: ApiRosterColumnInfo) => {
+  const buildDateTimeInput = (columnInfo: ApiRosterColumnInfo) => {
     return (
-      <TextField
-        className={classes.textField}
-        id={columnInfo.name}
-        label={columnInfo.displayName}
-        disabled={existingRosterEntry ? formDisabled || !columnInfo.updatable : false}
-        required={columnInfo.required}
-        onChange={onTextFieldChanged}
-        value={rosterEntry[columnInfo.name] ? rosterEntry[columnInfo.name].split('T')[0] || '' : ''}
-        type="date"
-        InputLabelProps={{
-          shrink: true,
-        }}
-      />
+      <MuiPickersUtilsProvider utils={MomentUtils}>
+        <DateTimePicker
+          className={classes.textField}
+          id={columnInfo.name}
+          label={columnInfo.displayName}
+          disabled={formDisabled || (existingRosterEntry && !columnInfo.updatable)}
+          required={columnInfo.required}
+          placeholder="mm/dd/yy hh:mm:ss"
+          value={rosterEntry[columnInfo.name] as string}
+          onChange={onDateTimeFieldChanged(columnInfo.name)}
+        />
+      </MuiPickersUtilsProvider>
     );
   };
 
@@ -166,9 +182,22 @@ export const EditRosterEntryDialog = (props: EditRosterEntryDialogProps) => {
     const columns = rosterColumnInfos?.filter(columnInfo => columnInfo.type !== 'boolean');
     return columns?.map(columnInfo => (
       <Grid key={columnInfo.name} item xs={6}>
-        {columnInfo.type === 'date' ? buildDateInput(columnInfo) : buildTextInput(columnInfo)}
+        {buildInputFieldForColumnType(columnInfo)}
       </Grid>
     ));
+  };
+
+  const buildInputFieldForColumnType = (column: ApiRosterColumnInfo) => {
+    switch (column.type) {
+      case ApiRosterColumnType.String:
+      case ApiRosterColumnType.Number:
+        return buildTextInput(column);
+      case ApiRosterColumnType.Date:
+        return buildDateTimeInput(column);
+      default:
+        console.warn(`Unhandled column type found while creating input fields: ${column.type}`);
+        return '';
+    }
   };
 
   return (
@@ -179,13 +208,9 @@ export const EditRosterEntryDialog = (props: EditRosterEntryDialogProps) => {
           {buildInputFields()}
         </Grid>
         <label className={classes.booleanTableLabel}>Other:</label>
-        <div className={classes.tableScroll}>
-          <Table className={classes.booleanTable}>
-            <TableBody>
-              {buildCheckboxFields()}
-            </TableBody>
-          </Table>
-        </div>
+        <EditableBooleanTable aria-label="Other Fields">
+          {buildCheckboxFields()}
+        </EditableBooleanTable>
       </DialogContent>
       <DialogActions className={classes.editRosterEntryDialogActions}>
         <Button disabled={formDisabled} variant="outlined" onClick={onClose} color="primary">

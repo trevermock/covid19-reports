@@ -21,14 +21,14 @@ const rosterUpload = multer({
 const router = express.Router() as any;
 
 router.get(
-  '/column/:orgId',
+  '/:orgId/column',
   requireOrgAccess,
   requireRolePermission(role => role.canManageGroup),
   controller.getFullRosterInfo,
 );
 
 router.post(
-  '/column/:orgId',
+  '/:orgId/column',
   requireOrgAccess,
   requireRolePermission(role => role.canManageGroup),
   bodyParser.json(),
@@ -36,7 +36,7 @@ router.post(
 );
 
 router.put(
-  '/column/:orgId/:columnName',
+  '/:orgId/column/:columnName',
   requireOrgAccess,
   requireRolePermission(role => role.canManageGroup),
   bodyParser.json(),
@@ -44,7 +44,7 @@ router.put(
 );
 
 router.delete(
-  '/column/:orgId/:columnName',
+  '/:orgId/column/:columnName',
   requireOrgAccess,
   requireRolePermission(role => role.canManageGroup),
   controller.deleteCustomColumn,

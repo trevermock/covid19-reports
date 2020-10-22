@@ -22,7 +22,7 @@ import { UserState } from '../../../reducers/user.reducer';
 import { AppState } from '../../../store';
 import { ApiRole, ApiWorkspace, ApiRosterColumnInfo } from '../../../models/api-response';
 import {
-  AllNotificationEvents,
+  allNotificationEvents,
 } from '../../../models/notification-events';
 import { AlertDialog, AlertDialogProps } from '../../alert-dialog/alert-dialog';
 import { EditRoleDialog, EditRoleDialogProps } from './edit-role-dialog';
@@ -57,11 +57,11 @@ export const RoleManagementPage = () => {
       dispatch(AppFrame.setPageLoading(true));
       const orgRoles = (await axios.get(`api/role/${orgId}`)).data as ApiRole[];
       const orgWorkspaces = (await axios.get(`api/workspace/${orgId}`)).data as ApiWorkspace[];
-      const orgRosterColumns = (await axios.get(`api/roster/column/${orgId}`)).data as ApiRosterColumnInfo[];
+      const orgRosterColumns = (await axios.get(`api/roster/${orgId}/column`)).data as ApiRosterColumnInfo[];
       const parsedRoleData = orgRoles.map(role => {
         return {
           allowedRosterColumns: parsePermissions(orgRosterColumns, role.allowedRosterColumns),
-          allowedNotificationEvents: parsePermissions(AllNotificationEvents, role.allowedNotificationEvents),
+          allowedNotificationEvents: parsePermissions(allNotificationEvents, role.allowedNotificationEvents),
         };
       });
       setRoleData(parsedRoleData);
@@ -84,7 +84,7 @@ export const RoleManagementPage = () => {
     } finally {
       dispatch(AppFrame.setPageLoading(false));
     }
-  }, [orgId]);
+  }, [orgId, dispatch]);
 
   const cancelDeleteRoleDialog = () => {
     setDeleteRoleDialogOpen(false);
@@ -186,7 +186,7 @@ export const RoleManagementPage = () => {
       return <></>;
     }
     const allowedEvents = roleData[index].allowedNotificationEvents;
-    return AllNotificationEvents.map(event => (
+    return allNotificationEvents.map(event => (
       <TableRow key={event.name}>
         <TableCell className={classes.textCell}>
           {event.displayName}
