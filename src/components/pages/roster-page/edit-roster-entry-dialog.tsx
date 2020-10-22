@@ -156,7 +156,7 @@ export const EditRosterEntryDialog = (props: EditRosterEntryDialogProps) => {
         required={columnInfo.required}
         onChange={onTextFieldChanged(columnInfo.name)}
         value={rosterEntry[columnInfo.name] || ''}
-        type="text"
+        type={columnInfo.type === ApiRosterColumnType.Number ? 'number' : 'text'}
       />
     );
   };
