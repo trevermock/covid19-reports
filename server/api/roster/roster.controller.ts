@@ -161,7 +161,7 @@ class RosterController {
       sortProps = req.query.sort_by.split('.');
     }
 
-    // the below regular expression converts from pascalCase to under_score
+    // the below regular expression converts from PascalCase/camelCase to snake_case
     const sortColumn = sortProps[0].replace(/(?:^|\.?)([A-Z])/g, function (x,y){return "_" + y.toLowerCase()}).replace(/^_/, "");
     
     let sortOrder = SortDirection.ASC;
