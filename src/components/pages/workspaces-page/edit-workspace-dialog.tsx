@@ -66,14 +66,12 @@ export const EditWorkspaceDialog = (props: EditWorkspaceDialogProps) => {
     return selectedTemplate?.pii || false;
   };
 
-  /*
   const getTemplatePHI = () => {
     const selectedTemplate = templates?.find(template => {
-      return template.id === workspaceTemplate;
+      return template.id === templateId;
     });
     return selectedTemplate?.phi || false;
   };
-  */
 
   const onSave = async () => {
     setFormDisabled(true);
@@ -178,16 +176,14 @@ export const EditWorkspaceDialog = (props: EditWorkspaceDialogProps) => {
                     )}
                   </TableCell>
                 </TableRow>
-                {/* Re-add when PHI templates are available
                 <TableRow>
                   <TableCell className={classes.textCell}>Contains PHI</TableCell>
                   <TableCell className={classes.iconCell}>
-                    {getTemplatePHI && (
+                    {getTemplatePHI() && (
                       <CheckIcon />
                     )}
                   </TableCell>
                 </TableRow>
-                */}
               </TableBody>
             </Table>
           </Grid>

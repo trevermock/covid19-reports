@@ -156,6 +156,7 @@ export const WorkspacesPage = () => {
                 <TableCell>Name</TableCell>
                 <TableCell>Description</TableCell>
                 <TableCell className={classes.iconCell}>PII</TableCell>
+                <TableCell className={classes.iconCell}>PHI</TableCell>
                 <TableCell className={classes.iconCell} />
               </TableRow>
             </TableHead>
@@ -166,6 +167,11 @@ export const WorkspacesPage = () => {
                   <TableCell>{workspace.description}</TableCell>
                   <TableCell className={classes.iconCell}>
                     {workspace.pii && (
+                      <CheckIcon />
+                    )}
+                  </TableCell>
+                  <TableCell className={classes.iconCell}>
+                    {workspace.phi && (
                       <CheckIcon />
                     )}
                   </TableCell>
