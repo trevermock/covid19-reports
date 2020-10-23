@@ -39,7 +39,6 @@ router.delete(
   '/:orgId/:workspaceId',
   requireOrgAccess,
   requireRolePermission(role => role.canManageGroup),
-  KibanaApi.connect,
   controller.deleteWorkspace,
 );
 
