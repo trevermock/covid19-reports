@@ -1,6 +1,6 @@
 import {
   Button, Container, Paper, Table, TableBody, TableCell, TableContainer, TablePagination, TableHead, TableRow,
-  IconButton, TableFooter, DialogActions, Dialog, DialogTitle, DialogContent, DialogContentText,
+  IconButton, TableFooter, DialogActions, Dialog, DialogTitle, DialogContent, DialogContentText, TableSortLabel,
 } from '@material-ui/core';
 import FirstPageIcon from '@material-ui/icons/FirstPage';
 import KeyboardArrowLeft from '@material-ui/icons/KeyboardArrowLeft';
@@ -33,6 +33,11 @@ interface TablePaginationActionsProps {
   page: number;
   rowsPerPage: number;
   onChangePage: (event: React.MouseEvent<HTMLButtonElement>, newPage: number) => void;
+}
+
+interface SortProps {
+  columnName: string,
+  order: 'asc' | 'desc',
 }
 
 function TablePaginationActions(props: TablePaginationActionsProps) {
@@ -108,10 +113,12 @@ export const RosterPage = () => {
   const [exportRosterLoading, setExportRosterLoading] = useState(false);
   const [rosterColumnInfos, setRosterColumnInfos] = useState<ApiRosterColumnInfo[]>([]);
 
+  const [sortProps, setSortProps] = useState<SortProps>({ columnName: 'edipi', order: 'asc' });
+
   const orgId = useSelector<AppState, UserState>(state => state.user).activeRole?.org?.id;
 
   const handleChangePage = async (event: React.MouseEvent<HTMLButtonElement> | null, newPage: number) => {
-    const response = await fetch(`api/roster/${orgId}?limit=${rowsPerPage}&page=${newPage}`);
+    const response = await fetch(`api/roster/${orgId}?limit=${rowsPerPage}&page=${newPage}&sort_by=${sortProps.columnName}.${sortProps.order}`);
     const rosterResponse = (await response.json()) as ApiRosterEntry[];
     setPage(newPage);
     setRows(rosterResponse);
@@ -323,12 +330,29 @@ export const RosterPage = () => {
     }
   };
 
+  const sortColumnInfo = async (columnInfo: ApiRosterColumnInfo) => {
+    if (columnInfo.name === sortProps.columnName && sortProps.order === 'asc') {
+      setSortProps({ ...sortProps, columnName: columnInfo.name, order: 'desc' });
+    } else {
+      setSortProps({ ...sortProps, columnName: columnInfo.name, order: 'asc' });
+    }
+  };
+
   useEffect(() => { initializeTable().then(); }, [initializeTable]);
+
+  useEffect(() => { handleChangePage(null, page).then(); }, [sortProps]);
 
   const buildColumnHeaders = () => {
     const columns = rosterColumnInfos?.slice(0, maxNumColumnsToShow);
     return columns?.map(columnInfo => (
-      <TableCell key={columnInfo.name}>{columnInfo.displayName}</TableCell>
+      <TableCell key={columnInfo.name} onClick={() => sortColumnInfo(columnInfo)}>
+        <TableSortLabel
+          direction={columnInfo.name === sortProps.columnName ? sortProps.order : 'asc'}
+          active={columnInfo.name === sortProps.columnName}
+        >
+          {columnInfo.displayName}
+        </TableSortLabel>
+      </TableCell>
     ));
   };
 

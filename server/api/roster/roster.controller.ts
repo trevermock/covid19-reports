@@ -155,13 +155,25 @@ class RosterController {
     const limit = (req.query.limit != null) ? parseInt(req.query.limit) : 100;
     const page = (req.query.page != null) ? parseInt(req.query.page) : 0;
 
+    // parse optional params, default to edipi ascending
+    let sortProps = 'edipi.asc'.split('.');
+    if (req.query.sort_by != null) {
+      sortProps = req.query.sort_by.split('.');
+    }
+
+    // the below regular expression converts from pascalCase to under_score
+    const sortColumn = sortProps[0].replace(/(?:^|\.?)([A-Z])/g, function (x,y){return "_" + y.toLowerCase()}).replace(/^_/, "");
+    
+    let sortOrder = SortDirection.ASC;
+    if (sortProps[1].toUpperCase() === 'DESC') {
+      sortOrder = SortDirection.DESC
+    }
+
     const queryBuilder = await queryAllowedRoster(req.appOrg!, req.appRole!);
     const roster = await queryBuilder
       .skip(page * limit)
       .take(limit)
-      .orderBy({
-        edipi: 'ASC',
-      })
+      .orderBy(sortColumn, sortOrder)
       .getRawMany<RosterEntryData>();
 
     res.json(roster);
@@ -503,9 +515,16 @@ interface RosterInfo {
   columns: RosterColumnInfo[],
 }
 
+enum SortDirection {
+  ASC = 'ASC',
+  DESC = 'DESC',
+}
+
 type GetRosterQuery = {
   limit: string
   page: string
+  sort_by?: string
+  order_by?: string
 };
 
 type RosterFileRow = {
