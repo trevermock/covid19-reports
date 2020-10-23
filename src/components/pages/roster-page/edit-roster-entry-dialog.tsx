@@ -78,6 +78,8 @@ export const EditRosterEntryDialog = (props: EditRosterEntryDialogProps) => {
         let message = 'Internal Server Error';
         if (error.response?.data?.errors && error.response.data.errors.length > 0) {
           message = error.response.data.errors[0].message;
+        } else {
+          console.log(error);
         }
         onError(message);
       }

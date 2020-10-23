@@ -30,7 +30,6 @@ interface ColumnMenuState {
 export const RosterColumnsPage = () => {
   const classes = useStyles();
   const dispatch = useDispatch();
-
   const [columns, setColumns] = useState<ApiRosterColumnInfo[]>([]);
   const [columnToDelete, setColumnToDelete] = useState<null | ApiRosterColumnInfo>(null);
   const [alertDialogProps, setAlertDialogProps] = useState<AlertDialogProps>({ open: false });
@@ -40,11 +39,27 @@ export const RosterColumnsPage = () => {
   const orgId = useSelector<AppState, UserState>(state => state.user).activeRole?.org?.id;
 
   const initializeTable = React.useCallback(async () => {
-    dispatch(AppFrame.setPageLoading(true));
-    const allColumns = (await axios.get(`api/roster/${orgId}/column`)).data as ApiRosterColumnInfo[];
-    const customColumns = allColumns.filter(column => column.custom);
-    setColumns(customColumns);
-    dispatch(AppFrame.setPageLoading(false));
+    try {
+      dispatch(AppFrame.setPageLoading(true));
+      const allColumns = (await axios.get(`api/roster/${orgId}/column`)).data as ApiRosterColumnInfo[];
+      const customColumns = allColumns.filter(column => column.custom);
+      setColumns(customColumns);
+    } catch (error) {
+      let message = 'Internal Server Error';
+      if (error.response?.data?.errors && error.response.data.errors.length > 0) {
+        message = error.response.data.errors[0].message;
+      } else {
+        console.log(error);
+      }
+      setAlertDialogProps({
+        open: true,
+        title: 'Initialize Custom Columns Page',
+        message: `Failed to initialize the custom columns page: ${message}`,
+        onClose: () => { setAlertDialogProps({ open: false }); },
+      });
+    } finally {
+      dispatch(AppFrame.setPageLoading(false));
+    }
   }, [orgId, dispatch]);
 
   const newColumn = async () => {
@@ -108,6 +123,8 @@ export const RosterColumnsPage = () => {
       let message = 'Internal Server Error';
       if (error.response?.data?.errors && error.response.data.errors.length > 0) {
         message = error.response.data.errors[0].message;
+      } else {
+        console.log(error);
       }
       setAlertDialogProps({
         open: true,

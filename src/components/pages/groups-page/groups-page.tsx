@@ -13,6 +13,7 @@ import { StatusChip } from '../../status-chip/status-chip';
 import useStyles from './groups-page.styles';
 import { ApiAccessRequest, ApiOrg } from '../../../models/api-response';
 import { AppFrame } from '../../../actions/app-frame.actions';
+import { AlertDialog, AlertDialogProps } from '../../alert-dialog/alert-dialog';
 import { ButtonWithSpinner } from '../../buttons/button-with-spinner';
 
 export const GroupsPage = () => {
@@ -27,15 +28,26 @@ export const GroupsPage = () => {
   const [requestAccessOrgs, setRequestAccessOrgs] = useState([] as ApiOrg[]);
   const [myOrgMenuAnchor, setMyOrgMenuAnchor] = useState(null as HTMLElement | null);
   const [myOrgMenuOrg, setMyOrgMenuOrg] = useState(null as MyOrg | null);
+  const [alertDialogProps, setAlertDialogProps] = useState<AlertDialogProps>({ open: false });
 
   async function fetchAllOrgs() {
-    const response = await axios.get('api/org') as AxiosResponse<ApiOrg[]>;
-    setAllOrgs(response.data);
+    try {
+      const response = await axios.get('api/org') as AxiosResponse<ApiOrg[]>;
+      setAllOrgs(response.data);
+    } catch (error) {
+      // let the caller of this method handle the alert and error handling
+      throw error(error);
+    }
   }
 
   async function fetchAccessRequests() {
-    const response = await axios.get('api/user/access-requests') as AxiosResponse<ApiAccessRequest[]>;
-    setAccessRequests(response.data);
+    try {
+      const response = await axios.get('api/user/access-requests') as AxiosResponse<ApiAccessRequest[]>;
+      setAccessRequests(response.data);
+    } catch (error) {
+      // let the caller of this method handle the alert and error handling
+      throw error(error);
+    }
   }
 
   function handleRequestAccessClick(org: ApiOrg) {
@@ -50,30 +62,63 @@ export const GroupsPage = () => {
   }
 
   async function requestAccess(org: ApiOrg) {
-    updateAccessRequestsLoading(org, true);
-    const response = await axios.post(`api/access-request/${org.id}`) as AxiosResponse<ApiAccessRequest>;
-    const newRequest = response.data;
+    try {
 
-    // If we already have a request for this org, replace it. Otherwise, add the new request.
-    const existingIndex = accessRequests.findIndex(req => req.org.id === newRequest.org.id);
-    const accessRequestsUpdated = [...accessRequests];
-    if (existingIndex !== -1) {
-      accessRequestsUpdated[existingIndex] = newRequest;
-    } else {
-      accessRequestsUpdated.push(newRequest);
+      updateAccessRequestsLoading(org, true);
+      const response = await axios.post(`api/access-request/${org.id}`) as AxiosResponse<ApiAccessRequest>;
+      const newRequest = response.data;
+
+      // If we already have a request for this org, replace it. Otherwise, add the new request.
+      const existingIndex = accessRequests.findIndex(req => req.org.id === newRequest.org.id);
+      const accessRequestsUpdated = [...accessRequests];
+      if (existingIndex !== -1) {
+        accessRequestsUpdated[existingIndex] = newRequest;
+      } else {
+        accessRequestsUpdated.push(newRequest);
+      }
+
+      setAccessRequests(accessRequestsUpdated);
+
+    } catch (error) {
+      let message = 'Internal Server Error';
+      if (error.response?.data?.errors && error.response.data.errors.length > 0) {
+        message = error.response.data.errors[0].message;
+      } else {
+        console.log(error);
+      }
+      setAlertDialogProps({
+        open: true,
+        title: 'Request Access',
+        message: `Failed to request access: ${message}`,
+        onClose: () => { setAlertDialogProps({ open: false }); },
+      });
+    } finally {
+      updateAccessRequestsLoading(org, false);
     }
-
-    setAccessRequests(accessRequestsUpdated);
-    updateAccessRequestsLoading(org, false);
   }
 
   async function cancelRequest(org: MyOrg) {
-    await axios.post(`api/access-request/${org.id}/cancel`);
-    const accessRequestsUpdated = [...accessRequests];
-    const index = accessRequests.findIndex(req => req.org.id === org.id);
-    if (index !== -1) {
-      accessRequestsUpdated.splice(index, 1);
-      setAccessRequests(accessRequestsUpdated);
+    try {
+      await axios.post(`api/access-request/${org.id}/cancel`);
+      const accessRequestsUpdated = [...accessRequests];
+      const index = accessRequests.findIndex(req => req.org.id === org.id);
+      if (index !== -1) {
+        accessRequestsUpdated.splice(index, 1);
+        setAccessRequests(accessRequestsUpdated);
+      }
+    } catch (error) {
+      let message = 'Internal Server Error';
+      if (error.response?.data?.errors && error.response.data.errors.length > 0) {
+        message = error.response.data.errors[0].message;
+      } else {
+        console.log(error);
+      }
+      setAlertDialogProps({
+        open: true,
+        title: 'Cancel Request',
+        message: `Failed to cancel the request: ${message}`,
+        onClose: () => { setAlertDialogProps({ open: false }); },
+      });
     }
   }
 
@@ -144,18 +189,32 @@ export const GroupsPage = () => {
   }
 
   useEffect(() => {
-    // Initial load.
     async function fetchData() {
+      try {
 
-      dispatch(AppFrame.setPageLoading(true));
+        dispatch(AppFrame.setPageLoading(true));
 
-      await Promise.all([
-        fetchAllOrgs(),
-        fetchAccessRequests(),
-      ]);
+        await Promise.all([
+          fetchAllOrgs(),
+          fetchAccessRequests(),
+        ]);
 
-      // Finish loading.
-      dispatch(AppFrame.setPageLoading(false));
+      } catch (error) {
+        let message = 'Internal Server Error';
+        if (error.response?.data?.errors && error.response.data.errors.length > 0) {
+          message = error.response.data.errors[0].message;
+        } else {
+          console.log(error);
+        }
+        setAlertDialogProps({
+          open: true,
+          title: 'Initialize Groups Page',
+          message: `Failed to initialize the groups page: ${message}`,
+          onClose: () => { setAlertDialogProps({ open: false }); },
+        });
+      } finally {
+        dispatch(AppFrame.setPageLoading(false));
+      }
     }
 
     fetchData().then();
@@ -381,6 +440,10 @@ export const GroupsPage = () => {
           You have successfully registered and logged in!
         </Alert>
       </Snackbar>
+
+      {alertDialogProps.open && (
+        <AlertDialog open={alertDialogProps.open} title={alertDialogProps.title} message={alertDialogProps.message} onClose={alertDialogProps.onClose} />
+      )}
     </>
   );
 };

@@ -37,11 +37,11 @@ export namespace Roster {
       });
 
       onComplete(response.data.count);
+      console.log('upload complete!');
     } catch {
       onComplete(-1);
+      console.log('upload failed');
     }
-
-    console.log('upload complete!');
 
     dispatch({
       ...new Actions.Upload(),

@@ -10,7 +10,7 @@ import {
   TableRow,
 } from '@material-ui/core';
 import React, { useEffect, useState } from 'react';
-import { useSelector } from 'react-redux';
+import { useSelector, useDispatch } from 'react-redux';
 import axios from 'axios';
 import AddCircleOutlineIcon from '@material-ui/icons/AddCircleOutline';
 import CheckIcon from '@material-ui/icons/Check';
@@ -21,6 +21,7 @@ import { AppState } from '../../../store';
 import { ApiWorkspace, ApiWorkspaceTemplate } from '../../../models/api-response';
 import { EditWorkspaceDialog, EditWorkspaceDialogProps } from './edit-workspace-dialog';
 import { AlertDialog, AlertDialogProps } from '../../alert-dialog/alert-dialog';
+import { AppFrame } from '../../../actions/app-frame.actions';
 
 interface WorkspaceMenuState {
   anchor: HTMLElement | null,
@@ -29,6 +30,7 @@ interface WorkspaceMenuState {
 
 export const WorkspacesPage = () => {
   const classes = useStyles();
+  const dispatch = useDispatch();
   const [workspaces, setWorkspaces] = useState<ApiWorkspace[]>([]);
   const [workspaceTemplates, setWorkspaceTemplates] = useState<ApiWorkspaceTemplate[]>([]);
   const [workspaceToDelete, setWorkspaceToDelete] = useState<null | ApiWorkspace>(null);
@@ -39,10 +41,28 @@ export const WorkspacesPage = () => {
   const orgId = useSelector<AppState, UserState>(state => state.user).activeRole?.org?.id;
 
   const initializeTable = React.useCallback(async () => {
-    const ws = (await axios.get(`api/workspace/${orgId}`)).data as ApiWorkspace[];
-    const templates = (await axios.get(`api/workspace/${orgId}/templates`)).data as ApiWorkspaceTemplate[];
-    setWorkspaces(ws);
-    setWorkspaceTemplates(templates);
+    try {
+      dispatch(AppFrame.setPageLoading(true));
+      const ws = (await axios.get(`api/workspace/${orgId}`)).data as ApiWorkspace[];
+      const templates = (await axios.get(`api/workspace/${orgId}/templates`)).data as ApiWorkspaceTemplate[];
+      setWorkspaces(ws);
+      setWorkspaceTemplates(templates);
+    } catch (error) {
+      let message = 'Internal Server Error';
+      if (error.response?.data?.errors && error.response.data.errors.length > 0) {
+        message = error.response.data.errors[0].message;
+      } else {
+        console.log(error);
+      }
+      setAlertDialogProps({
+        open: true,
+        title: 'Initialize Workspace Page',
+        message: `Failed to initialize the workspace page: ${message}`,
+        onClose: () => { setAlertDialogProps({ open: false }); },
+      });
+    } finally {
+      dispatch(AppFrame.setPageLoading(false));
+    }
   }, [orgId]);
 
   const newWorkspace = async () => {
@@ -106,6 +126,8 @@ export const WorkspacesPage = () => {
       let message = 'Internal Server Error';
       if (error.response?.data?.errors && error.response.data.errors.length > 0) {
         message = error.response.data.errors[0].message;
+      } else {
+        console.log(error);
       }
       setAlertDialogProps({
         open: true,
