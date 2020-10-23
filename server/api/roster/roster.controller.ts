@@ -8,7 +8,7 @@ import {
 import {
   baseRosterColumns, CustomColumnValue, Roster, RosterColumnInfo, RosterColumnType,
 } from './roster.model';
-import { BadRequestError, NotFoundError, UnprocessableEntity } from '../../util/error-types';
+import { BadRequestError, InternalServerError, NotFoundError, UnprocessableEntity } from '../../util/error-types';
 import { getOptionalParam, getRequiredParam } from '../../util/util';
 import { Org } from '../org/org.model';
 import { CustomRosterColumn } from './custom-roster-column.model';
@@ -85,6 +85,36 @@ class RosterController {
 
     const deletedColumn = await existingColumn.remove();
     res.json(deletedColumn);
+  }
+
+  async exportRosterToCSV(req: ApiRequest, res: Response) {
+
+    const orgId = req.appOrg!.id;
+
+    const queryBuilder = await queryAllowedRoster(req.appOrg!, req.appRole!);
+    const rosterData = await queryBuilder
+      .orderBy({
+        edipi: 'ASC',
+      })
+      .getRawMany<RosterEntryData>();
+
+    // convert data to csv format and download
+    const jsonToCsvConverter = require('json-2-csv');
+    jsonToCsvConverter.json2csv(rosterData, (err: Error, csvString: String) => {
+      // on failure
+      if (err) {
+          console.error("Failed to convert roster json data to CSV string.");
+          throw new InternalServerError('Failed to export Roster data to CSV.');
+      } else {
+        // on success
+        const date = new Date().toISOString();
+        const filename = 'org_' + orgId + '_roster_export_' + date + '.csv'
+        res.header('Content-Type', 'text/csv');
+        res.attachment(filename);
+        res.send(csvString);
+      }
+    });
+
   }
 
   async getRosterTemplate(req: ApiRequest, res: Response) {
@@ -259,6 +289,7 @@ class RosterController {
     const userEDIPI = req.params.edipi;
 
     const rosterEntry = await Roster.findOne({
+      relations: ["org"],
       where: {
         edipi: userEDIPI,
         org: req.appOrg!.id,
